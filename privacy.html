@@ -2,420 +2,192 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Privacy Policy - Stardust X</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        * { scrollbar-width: thin; scrollbar-color: #2b7a4b #d1e0d1; }
-        *::-webkit-scrollbar { width: 5px; }
-        *::-webkit-scrollbar-track { background: #e5f0e5; border-radius: 10px; }
-        *::-webkit-scrollbar-thumb { background: #2b7a4b; border-radius: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #e5f0e5;
-            color: #1a2e1a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F9F7;
+            color: #1A2E24;
             min-height: 100vh;
+            padding: 20px;
         }
-        .glass-card {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.3);
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #D4E8DE;
+            padding: 32px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
         }
-        .section-divider {
-            background: linear-gradient(90deg, transparent, #2b7a4b, transparent);
-            height: 2px;
-            opacity: 0.2;
-        }
-        .policy-icon {
-            width: 56px;
-            height: 56px;
-            background: #e5f0e5;
-            border-radius: 50%;
+        .container .header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: #2b7a4b;
-            flex-shrink: 0;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #D4E8DE;
         }
-        .list-check {
-            list-style: none;
-            padding-left: 0;
-        }
-        .list-check li {
-            padding: 6px 0 6px 32px;
-            position: relative;
-        }
-        .list-check li::before {
-            content: "✅";
-            position: absolute;
-            left: 0;
-            top: 6px;
-        }
-        .table-wrap {
-            overflow-x: auto;
-            margin: 16px 0;
-            border-radius: 16px;
-            border: 1px solid rgba(43, 122, 75, 0.15);
-        }
-        .table-wrap table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        .table-wrap th {
-            background: #2b7a4b;
-            color: white;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-        }
-        .table-wrap td {
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(43, 122, 75, 0.08);
-        }
-        .table-wrap tr:nth-child(even) td {
-            background: rgba(43, 122, 75, 0.04);
-        }
-        .back-to-app {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            background: #2b7a4b;
-            color: white;
-            padding: 12px 28px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 14px;
+        .container .header .back-btn {
+            background: transparent;
             border: none;
+            color: #4A6A5A;
             cursor: pointer;
-            box-shadow: 0 8px 30px rgba(43, 122, 75, 0.4);
-            transition: all 0.3s ease;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.25s ease;
+        }
+        .container .header .back-btn:hover { background: #ECF5F0; }
+        .container .header .title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1A2E24;
+        }
+        .container .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 20px;
         }
-        .back-to-app:hover {
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 12px 40px rgba(43, 122, 75, 0.5);
-        }
-        .back-to-app:active {
-            transform: translateX(-50%) scale(0.95);
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .status-badge.green { background: #d1fae5; color: #065f46; }
-        .badge-icon {
-            display: inline-flex;
+        .container .logo .icon {
+            width: 40px;
+            height: 40px;
+            background: #00A86B;
+            border-radius: 10px;
+            display: flex;
             align-items: center;
-            gap: 4px;
-            background: rgba(43, 122, 75, 0.1);
-            padding: 2px 12px 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: #2b7a4b;
-            font-weight: 500;
+            justify-content: center;
         }
-        @media (max-width: 640px) {
-            .table-wrap table { font-size: 12px; }
-            .back-to-app { padding: 10px 20px; font-size: 12px; bottom: 16px; }
-            .policy-icon { width: 44px; height: 44px; }
+        .container .logo .icon svg { width: 26px; height: 26px; }
+        .container .logo .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A2E24;
+        }
+        .container .logo .brand .x { color: #00A86B; }
+        .container h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A2E24;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        .container p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #4A6A5A;
+            margin-bottom: 12px;
+        }
+        .container ul {
+            padding-left: 24px;
+            margin-bottom: 12px;
+        }
+        .container ul li {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #4A6A5A;
+            margin-bottom: 6px;
+        }
+        .container .last-updated {
+            font-size: 13px;
+            color: #8AAA9A;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #D4E8DE;
+            text-align: center;
+        }
+        @media (max-width: 430px) {
+            .container { padding: 20px 16px; }
+            .container .header .title { font-size: 18px; }
         }
     </style>
 </head>
 <body>
-
-    <div class="max-w-4xl mx-auto px-4 py-6 md:py-12 relative">
-
-        <!-- HEADER -->
-        <div class="text-center mb-8 md:mb-12">
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <div class="w-14 h-14 rounded-2xl bg-[#2b7a4b] flex items-center justify-center shadow-lg shadow-[#2b7a4b]/20">
-                    <span class="text-white text-2xl font-black">✦</span>
-                </div>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-black text-[#1a2e1a] tracking-tight">
-                STARDUST <span class="text-[#2b7a4b]">X</span>
-            </h1>
-            <p class="text-[#2b7a4b] opacity-60 text-sm mt-1 font-medium">Privacy Policy</p>
-            <div class="flex items-center justify-center gap-3 mt-3 text-xs flex-wrap">
-                <span class="badge-icon">🔒 End-to-End Encrypted</span>
-                <span class="badge-icon">⚡ Real-Time</span>
-                <span class="badge-icon">🌐 Secure</span>
-            </div>
-            <div class="section-divider mt-6 max-w-xs mx-auto"></div>
-            <p class="text-[#2b7a4b] opacity-50 text-xs mt-4">Last Updated: August 11, 2026</p>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <span class="title">Privacy Policy</span>
         </div>
 
-        <!-- MAIN CONTENT -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl border border-white/50">
-
-            <!-- Introduction -->
-            <div class="flex items-start gap-4 mb-8">
-                <div class="policy-icon">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-[#1a2e1a]">Privacy Policy</h2>
-                    <p class="text-[#2b7a4b] opacity-60 text-sm">How we protect your data</p>
-                </div>
+        <div class="logo">
+            <div class="icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <rect x="4" y="4" width="32" height="32" rx="8" fill="white" />
+                    <path d="M12 20 L18 26 L30 14" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 14 L28 14 L28 20" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
-
-            <!-- 1. Introduction -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">1.</span> Introduction
-                </h3>
-                <p class="text-sm text-[#1a2e1a]/80 leading-relaxed">
-                    Stardust X Messenger ("we," "our," or "us") is committed to protecting your privacy. 
-                    This Privacy Policy explains how we collect, use, and safeguard your personal information 
-                    when you use our messaging application.
-                </p>
-            </section>
-
-            <!-- 2. Information We Collect -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">2.</span> Information We Collect
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-[#f0f7f0] rounded-xl p-4">
-                        <h4 class="font-bold text-sm text-[#1a2e1a] mb-2">📋 Account Information</h4>
-                        <ul class="text-xs space-y-1 text-[#1a2e1a]/70">
-                            <li>• Email Address</li>
-                            <li>• Password (encrypted)</li>
-                            <li>• Full Name</li>
-                            <li>• Profile Picture</li>
-                            <li>• User ID (UID)</li>
-                        </ul>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-4">
-                        <h4 class="font-bold text-sm text-[#1a2e1a] mb-2">💬 User-Generated Content</h4>
-                        <ul class="text-xs space-y-1 text-[#1a2e1a]/70">
-                            <li>• Text &amp; Messages</li>
-                            <li>• Photos &amp; Images</li>
-                            <li>• Documents</li>
-                            <li>• Moments / Posts</li>
-                            <li>• Comments &amp; Reactions</li>
-                        </ul>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-4">
-                        <h4 class="font-bold text-sm text-[#1a2e1a] mb-2">📞 Communication Data</h4>
-                        <ul class="text-xs space-y-1 text-[#1a2e1a]/70">
-                            <li>• Contacts List</li>
-                            <li>• Group Information</li>
-                            <li>• Call History</li>
-                            <li>• Friend Requests</li>
-                        </ul>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-4">
-                        <h4 class="font-bold text-sm text-[#1a2e1a] mb-2">📱 Device Information</h4>
-                        <ul class="text-xs space-y-1 text-[#1a2e1a]/70">
-                            <li>• Device Type</li>
-                            <li>• IP Address</li>
-                            <li>• Connection Status</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. Data Storage -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">3.</span> How We Store Your Data
-                </h3>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr><th>Data Type</th><th>Storage Location</th><th>Purpose</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>User Accounts</td><td>Firebase Realtime DB</td><td>Authentication &amp; profile</td></tr>
-                            <tr><td>Messages &amp; Chats</td><td>Firebase Realtime DB</td><td>Real-time messaging</td></tr>
-                            <tr><td>Photos &amp; Profile Pictures</td><td>ImgBB API</td><td>Image hosting</td></tr>
-                            <tr><td>User Preferences</td><td>Firebase Realtime DB</td><td>Settings &amp; customization</td></tr>
-                            <tr><td>Call Data</td><td>Firebase Realtime DB</td><td>Call history &amp; logs</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- 4. How We Use Your Info -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">4.</span> How We Use Your Information
-                </h3>
-                <ul class="list-check text-sm text-[#1a2e1a]/80">
-                    <li>Provide messaging services</li>
-                    <li>Manage your account</li>
-                    <li>Improve our services</li>
-                    <li>Send notifications</li>
-                    <li>Ensure security</li>
-                    <li>Comply with legal obligations</li>
-                </ul>
-            </section>
-
-            <!-- 5. Third-Party Services -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">5.</span> Third-Party Services
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="bg-white/60 rounded-xl p-3 border border-[#b8d0b8]/30">
-                        <span class="font-bold text-sm text-[#2b7a4b]">🔥 Firebase</span>
-                        <p class="text-xs text-[#1a2e1a]/60">Auth, database, real-time sync</p>
-                    </div>
-                    <div class="bg-white/60 rounded-xl p-3 border border-[#b8d0b8]/30">
-                        <span class="font-bold text-sm text-[#2b7a4b]">🖼️ ImgBB</span>
-                        <p class="text-xs text-[#1a2e1a]/60">Image hosting</p>
-                    </div>
-                    <div class="bg-white/60 rounded-xl p-3 border border-[#b8d0b8]/30">
-                        <span class="font-bold text-sm text-[#2b7a4b]">📞 PeerJS</span>
-                        <p class="text-xs text-[#1a2e1a]/60">Real-time audio/video calls</p>
-                    </div>
-                    <div class="bg-white/60 rounded-xl p-3 border border-[#b8d0b8]/30">
-                        <span class="font-bold text-sm text-[#2b7a4b]">🔔 OneSignal</span>
-                        <p class="text-xs text-[#1a2e1a]/60">Push notifications</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. Data Security -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">6.</span> Data Security
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div class="bg-[#f0f7f0] rounded-xl p-3 flex items-center gap-3">
-                        <span class="text-2xl">🔒</span>
-                        <div><span class="font-bold text-sm block">End-to-End Encryption</span><span class="text-xs text-[#1a2e1a]/60">All messages are encrypted</span></div>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-3 flex items-center gap-3">
-                        <span class="text-2xl">🔐</span>
-                        <div><span class="font-bold text-sm block">Secure Authentication</span><span class="text-xs text-[#1a2e1a]/60">Firebase auth with email/password</span></div>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-3 flex items-center gap-3">
-                        <span class="text-2xl">🛡️</span>
-                        <div><span class="font-bold text-sm block">Access Control</span><span class="text-xs text-[#1a2e1a]/60">Only you can access your data</span></div>
-                    </div>
-                    <div class="bg-[#f0f7f0] rounded-xl p-3 flex items-center gap-3">
-                        <span class="text-2xl">🔄</span>
-                        <div><span class="font-bold text-sm block">Database Security</span><span class="text-xs text-[#1a2e1a]/60">Firebase security rules protect data</span></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 7. Data Retention -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">7.</span> Data Retention
-                </h3>
-                <p class="text-sm text-[#1a2e1a]/80 leading-relaxed">
-                    We retain your data for as long as your account is active. Upon account deletion:
-                </p>
-                <ul class="list-check text-sm text-[#1a2e1a]/80 mt-2">
-                    <li>All messages, posts, and personal data will be removed</li>
-                    <li>Images stored on ImgBB may be deleted as per their policy</li>
-                    <li>Some data may be retained for legal compliance</li>
-                </ul>
-            </section>
-
-            <!-- 8. Your Rights -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">8.</span> Your Rights
-                </h3>
-                <ul class="list-check text-sm text-[#1a2e1a]/80">
-                    <li>Access your personal data</li>
-                    <li>Correct inaccurate information</li>
-                    <li>Delete your account and associated data</li>
-                    <li>Export your data (upon request)</li>
-                    <li>Opt-out of promotional communications</li>
-                </ul>
-            </section>
-
-            <!-- 9. Children's Privacy -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">9.</span> Children's Privacy
-                </h3>
-                <p class="text-sm text-[#1a2e1a]/80 leading-relaxed">
-                    Stardust X Messenger is not intended for children under 13. 
-                    We do not knowingly collect personal information from children.
-                </p>
-            </section>
-
-            <!-- 10. Changes -->
-            <section class="mb-6">
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">10.</span> Changes to Privacy Policy
-                </h3>
-                <p class="text-sm text-[#1a2e1a]/80 leading-relaxed">
-                    We may update this policy from time to time. You will be notified of significant changes 
-                    through the app or email.
-                </p>
-            </section>
-
-            <!-- 11. Contact -->
-            <section>
-                <h3 class="text-lg font-bold text-[#1a2e1a] mb-2 flex items-center gap-2">
-                    <span class="text-[#2b7a4b]">11.</span> Contact Us
-                </h3>
-                <div class="bg-[#f0f7f0] rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div>
-                        <p class="text-sm text-[#1a2e1a]/80">📧 <span class="font-medium">support.stardustofficial@gmail.com</span></p>
-                    </div>
-                    <span class="status-badge green">✓ Always Available</span>
-                </div>
-            </section>
-
-            <div class="section-divider my-6"></div>
-            <p class="text-[9px] text-[#2b7a4b]/40 text-center">End-to-end encrypted • Your privacy matters</p>
+            <div class="brand">Stardust <span class="x">X</span></div>
         </div>
 
-        <!-- FOOTER -->
-        <div class="text-center mt-12 pb-20 md:pb-8">
-            <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-[#2b7a4b]/50">
-                <span>© 2026 Stardust X Messenger</span>
-                <span>•</span>
-                <span>🔒 End-to-End Encrypted</span>
-                <span>•</span>
-                <span><a href="terms.html" class="hover:text-[#2b7a4b] transition">Terms of Service</a></span>
-            </div>
-        </div>
+        <p><strong>Effective Date:</strong> January 1, 2024</p>
 
-        <!-- BACK TO APP BUTTON -->
-        <button class="back-to-app" onclick="goBackToApp()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to App
-        </button>
+        <h2>1. Introduction</h2>
+        <p>Welcome to Stardust X ("we," "our," "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our messaging application.</p>
 
+        <h2>2. Information We Collect</h2>
+        <p>We collect the following types of information:</p>
+        <ul>
+            <li><strong>Account Information:</strong> Name, email address, phone number, profile picture, and unique user ID.</li>
+            <li><strong>Communication Data:</strong> Messages, calls, and shared media content.</li>
+            <li><strong>Contact Information:</strong> Your contacts list and interactions with other users.</li>
+            <li><strong>Device Information:</strong> Device type, operating system, and app version.</li>
+        </ul>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use your information to:</p>
+        <ul>
+            <li>Provide and maintain our messaging services.</li>
+            <li>Facilitate communication between users.</li>
+            <li>Improve and personalize your experience.</li>
+            <li>Ensure the security and integrity of our platform.</li>
+            <li>Comply with legal obligations.</li>
+        </ul>
+
+        <h2>4. Data Storage and Security</h2>
+        <p>Your data is stored securely using Firebase Realtime Database and Firebase Storage. We implement industry-standard security measures to protect your information from unauthorized access, alteration, or disclosure.</p>
+
+        <h2>5. Data Sharing</h2>
+        <p>We do not sell, trade, or rent your personal information to third parties. We may share data with:</p>
+        <ul>
+            <li><strong>Service Providers:</strong> Firebase (Google) for hosting and data storage.</li>
+            <li><strong>Legal Authorities:</strong> When required by law or to protect our rights.</li>
+        </ul>
+
+        <h2>6. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Access, update, or delete your personal information.</li>
+            <li>Export your data.</li>
+            <li>Withdraw consent for data processing.</li>
+            <li>Request restriction of data processing.</li>
+        </ul>
+
+        <h2>7. Data Retention</h2>
+        <p>We retain your personal information for as long as your account is active. You may delete your account at any time, which will result in the deletion of your personal data.</p>
+
+        <h2>8. Children's Privacy</h2>
+        <p>Stardust X is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
+
+        <h2>9. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy, please contact us at:</p>
+        <p><strong>Email:</strong> support.stardustofficial@gmail.com</p>
+
+        <div class="last-updated">Last Updated: August 29, 2026</div>
     </div>
-
-    <script>
-        function goBackToApp() {
-            if (document.referrer) {
-                window.location.href = document.referrer;
-            } else if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                window.location.href = '/';
-            }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') goBackToApp();
-        });
-    </script>
-
 </body>
 </html>
