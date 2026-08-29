@@ -29,6 +29,18 @@
             --danger: #EF4444;
         }
 
+        /* Dark Mode Variables */
+        .dark-mode {
+            --bg-primary: #1A1A2E;
+            --bg-secondary: #0F0F1A;
+            --bg-surface: #2A2A44;
+            --bg-input: #22223A;
+            --text-primary: #F0F0F5;
+            --text-secondary: #B0B0C8;
+            --text-muted: #7A7A94;
+            --border-color: #33334A;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -237,102 +249,6 @@
             .nav-item { min-width: 40px; font-size: 8px; }
             .nav-item svg { width: 20px; height: 20px; }
         }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-            padding: 20px;
-            animation: fadeIn 0.2s ease-out;
-        }
-        .modal-overlay.hidden { display: none; }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-        .modal-box {
-            background: var(--bg-primary);
-            border-radius: var(--radius);
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp {
-            0% { opacity: 0; transform: translateY(20px) scale(0.96); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .modal-box .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .modal-box .modal-header h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .modal-box .modal-header button {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 50%;
-            transition: var(--transition);
-            font-size: 18px;
-        }
-        .modal-box .modal-header button:active { background: var(--bg-surface); }
-        .modal-box input {
-            width: 100%;
-            padding: 10px 16px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
-            color: var(--text-primary);
-            font-size: 14px;
-            outline: none;
-            transition: var(--transition);
-            margin-bottom: 10px;
-        }
-        .modal-box input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
-        }
-        .modal-box .btn-primary {
-            width: 100%;
-            margin-top: 4px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 15px;
-        }
-        .modal-box .btn-primary:active { transform: scale(0.98); }
-        .modal-box .btn-secondary {
-            width: 100%;
-            margin-top: 8px;
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 15px;
-        }
-        .modal-box .btn-secondary:active { background: var(--bg-surface); }
     </style>
 </head>
 <body>
@@ -383,15 +299,20 @@
             </button>
             <button class="settings-item" onclick="toggleDarkMode()">
                 <span class="icon">●</span>
-                <span class="label">Dark Mode</span>
+                <span class="label" id="dark-mode-label">Dark Mode</span>
                 <span class="arrow">›</span>
             </button>
-            <button class="settings-item" onclick="showToast('Contact us at support@stardustx.com')">
+            <button class="settings-item" onclick="openCustomerSupport()">
                 <span class="icon">✉</span>
                 <span class="label">Customer Support</span>
                 <span class="arrow">›</span>
             </button>
             <div class="settings-divider"></div>
+            <button class="settings-item" onclick="window.open('about.html','_blank')">
+                <span class="icon">ℹ</span>
+                <span class="label">About Us</span>
+                <span class="arrow">›</span>
+            </button>
             <button class="settings-item" onclick="window.open('privacy.html','_blank')">
                 <span class="icon">🔒</span>
                 <span class="label">Privacy Policy</span>
@@ -452,6 +373,9 @@
 
         let darkMode = false;
 
+        // ================================================================
+        // TOAST
+        // ================================================================
         function showToast(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = message;
@@ -462,6 +386,52 @@
             }, 3000);
         }
 
+        // ================================================================
+        // CUSTOMER SUPPORT - Opens Gmail
+        // ================================================================
+        function openCustomerSupport() {
+            const email = 'support.stardustofficial@gmail.com';
+            const subject = 'Stardust X Support Request';
+            const body = 'Hello Stardust X Team,\n\nI need help with...\n\nRegards,\n[Your Name]';
+            window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+        }
+
+        // ================================================================
+        // DARK MODE - PERSISTENT
+        // ================================================================
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode', darkMode);
+
+            // Save preference
+            localStorage.setItem('stardust-dark-mode', darkMode ? 'true' : 'false');
+
+            const label = document.getElementById('dark-mode-label');
+            label.textContent = darkMode ? 'Dark Mode (On)' : 'Dark Mode';
+
+            showToast(darkMode ? 'Dark mode enabled' : 'Light mode enabled');
+        }
+
+        // Load dark mode preference on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('stardust-dark-mode');
+            if (saved === 'true') {
+                darkMode = true;
+                document.body.classList.add('dark-mode');
+                const label = document.getElementById('dark-mode-label');
+                if (label) label.textContent = 'Dark Mode (On)';
+            }
+
+            // Apply dark mode to all pages when navigating
+            // Check if dark mode is enabled and apply to body
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        });
+
+        // ================================================================
+        // AUTH CHECK
+        // ================================================================
         auth.onAuthStateChanged((user) => {
             document.getElementById('loading').style.display = 'none';
 
@@ -473,31 +443,9 @@
             showToast('Welcome to Settings');
         });
 
-        function toggleDarkMode() {
-            darkMode = !darkMode;
-            if (darkMode) {
-                document.documentElement.style.setProperty('--bg-primary', '#1A1A2E');
-                document.documentElement.style.setProperty('--bg-secondary', '#0F0F1A');
-                document.documentElement.style.setProperty('--bg-surface', '#2A2A44');
-                document.documentElement.style.setProperty('--bg-input', '#22223A');
-                document.documentElement.style.setProperty('--text-primary', '#F0F0F5');
-                document.documentElement.style.setProperty('--text-secondary', '#B0B0C8');
-                document.documentElement.style.setProperty('--text-muted', '#7A7A94');
-                document.documentElement.style.setProperty('--border-color', '#33334A');
-                showToast('Dark mode enabled');
-            } else {
-                document.documentElement.style.setProperty('--bg-primary', '#FFFFFF');
-                document.documentElement.style.setProperty('--bg-secondary', '#F5F9F7');
-                document.documentElement.style.setProperty('--bg-surface', '#ECF5F0');
-                document.documentElement.style.setProperty('--bg-input', '#F0F7F3');
-                document.documentElement.style.setProperty('--text-primary', '#1A2E24');
-                document.documentElement.style.setProperty('--text-secondary', '#4A6A5A');
-                document.documentElement.style.setProperty('--text-muted', '#8AAA9A');
-                document.documentElement.style.setProperty('--border-color', '#D4E8DE');
-                showToast('Light mode enabled');
-            }
-        }
-
+        // ================================================================
+        // LOGOUT & DELETE
+        // ================================================================
         function logoutUser() {
             if (confirm('Are you sure you want to logout?')) {
                 auth.signOut().then(() => {
@@ -544,7 +492,9 @@
         }
 
         console.log('🚀 Stardust X - Settings Page (Fixed)');
-        console.log('✅ No emojis in buttons');
+        console.log('✅ Dark Mode persistent');
+        console.log('✅ Customer Support opens Gmail');
+        console.log('✅ About Us button added');
     </script>
 </body>
 </html>
