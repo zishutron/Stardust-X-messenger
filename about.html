@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>About Us - Stardust X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F9F7;
+            color: #1A2E24;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #D4E8DE;
+            padding: 32px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+        .container .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #D4E8DE;
+        }
+        .container .header .back-btn {
+            background: transparent;
+            border: none;
+            color: #4A6A5A;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: all 0.25s ease;
+        }
+        .container .header .back-btn:hover { background: #ECF5F0; }
+        .container .header .title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1A2E24;
+        }
+        .container .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .container .logo .icon {
+            width: 48px;
+            height: 48px;
+            background: #00A86B;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container .logo .icon svg { width: 30px; height: 30px; }
+        .container .logo .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1A2E24;
+        }
+        .container .logo .brand .x { color: #00A86B; }
+        .container .logo .tagline {
+            font-size: 14px;
+            color: #8AAA9A;
+            margin-top: -4px;
+        }
+
+        .container h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A2E24;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+        .container h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A2E24;
+            margin-top: 20px;
+            margin-bottom: 6px;
+        }
+        .container p {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #4A6A5A;
+            margin-bottom: 12px;
+        }
+        .container .highlight {
+            color: #00A86B;
+            font-weight: 600;
+        }
+        .container .divider {
+            height: 1px;
+            background: #D4E8DE;
+            margin: 24px 0;
+        }
+        .container .footer-text {
+            text-align: center;
+            font-size: 14px;
+            color: #8AAA9A;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #D4E8DE;
+        }
+        .container .footer-text .brand-name {
+            color: #00A86B;
+            font-weight: 600;
+        }
+
+        .container .values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .container .values .value-item {
+            background: #ECF5F0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            color: #1A2E24;
+            font-size: 14px;
+        }
+
+        @media (max-width: 430px) {
+            .container { padding: 20px 16px; }
+            .container .header .title { font-size: 18px; }
+            .container .values { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 380px) {
+            .container .values { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <span class="title">About Us</span>
+        </div>
+
+        <div class="logo">
+            <div class="icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <rect x="4" y="4" width="32" height="32" rx="8" fill="white" />
+                    <path d="M12 20 L18 26 L30 14" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 14 L28 14 L28 20" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div>
+                <div class="brand">Stardust <span class="x">X</span></div>
+                <div class="tagline">Connect. Communicate. Stay Together.</div>
+            </div>
+        </div>
+
+        <h2>Welcome to Stardust X</h2>
+        <p>
+            Stardust X Messenger is a modern communication platform created with a simple vision: to make staying connected simpler, faster, and better.
+        </p>
+        <p>
+            Stardust X is part of the growing <span class="highlight">ZISHU TRON</span> technology ecosystem — an independent technology brand focused on building modern software, AI products, digital tools, applications, and future-oriented technology experiences.
+        </p>
+
+        <div class="divider"></div>
+
+        <h2>The Story Behind Stardust X</h2>
+        <p>
+            Stardust X started with a simple idea: why not build our own communication platform?
+        </p>
+        <p>
+            Behind this project is an independent software developer with a passion for technology and a strong desire to turn ideas into real products.
+        </p>
+        <p>
+            The journey wasn't started with a large development team or a huge setup. Much of the development journey has been driven through a smartphone — learning, writing code, designing interfaces, solving problems, testing ideas, and continuously improving projects.
+        </p>
+        <p>
+            From small experiments to larger software projects, every project has been another step toward a bigger vision.
+        </p>
+        <p>
+            <span class="highlight">Stardust X is one of those steps.</span>
+        </p>
+
+        <div class="divider"></div>
+
+        <h2>About ZISHU TRON</h2>
+        <p>
+            ZISHU TRON is the technology brand behind this growing ecosystem.
+        </p>
+        <p>
+            Our vision is to create useful and innovative digital products that combine technology, creativity, artificial intelligence, software, and modern user experiences.
+        </p>
+        <p>
+            We are exploring and building across different areas, including:
+        </p>
+        <ul style="padding-left:24px;margin-bottom:12px;color:#4A6A5A;font-size:15px;line-height:1.8;">
+            <li>Software applications</li>
+            <li>AI-powered products</li>
+            <li>Communication platforms</li>
+            <li>Digital tools</li>
+            <li>Web applications</li>
+            <li>Developer-focused projects</li>
+            <li>Future technology experiences</li>
+        </ul>
+        <p>
+            Rather than building products simply for the sake of having more products, our goal is to create things that are <span class="highlight">useful, meaningful, and genuinely enjoyable to use.</span>
+        </p>
+
+        <div class="divider"></div>
+
+        <h2>Our Philosophy</h2>
+        <p>
+            We believe great technology doesn't have to be complicated.
+        </p>
+        <p>
+            A good product should feel:
+        </p>
+        <div class="values">
+            <div class="value-item">Simple</div>
+            <div class="value-item">Fast</div>
+            <div class="value-item">Useful</div>
+            <div class="value-item">Beautiful</div>
+        </div>
+        <p>
+            That's the philosophy behind Stardust X.
+        </p>
+        <p>
+            We want communication to feel natural, interfaces to feel effortless, and technology to stay out of the user's way.
+        </p>
+
+        <div class="divider"></div>
+
+        <h2>Why Stardust X?</h2>
+        <p>
+            There are already many messaging platforms in the world.
+        </p>
+        <p>
+            We're not here simply to create another copy.
+        </p>
+        <p>
+            Stardust X is our attempt to build something with its <span class="highlight">own identity.</span>
+        </p>
+        <p>
+            From its interface and communication experience to the features we plan to introduce in the future, Stardust X will continue evolving with its users.
+        </p>
+        <p>
+            Our journey is still at the beginning.
+        </p>
+
+        <div class="divider"></div>
+
+        <h2>The Future</h2>
+        <p>
+            Today, Stardust X is a messenger.
+        </p>
+        <p>
+            Tomorrow, it can become much more.
+        </p>
+        <p>
+            As ZISHU TRON continues to grow, we want Stardust X to evolve alongside it — introducing better communication, stronger communities, smarter experiences, and new technology while keeping the platform simple and user-focused.
+        </p>
+        <p>
+            Every product begins with an idea.
+        </p>
+        <p>
+            <span class="highlight">Stardust X began with one.</span>
+        </p>
+        <p>
+            And this is only the beginning.
+        </p>
+
+        <div class="divider"></div>
+
+        <div style="text-align:center;padding:12px 0;">
+            <p style="font-size:16px;font-weight:700;color:#1A2E24;">Built by <span class="highlight">ZISHU TRON</span></p>
+            <p style="font-size:14px;color:#4A6A5A;margin-top:4px;">
+                Created with ideas.<br />
+                Built with code.<br />
+                Driven by curiosity.<br />
+                Designed for the future.
+            </p>
+        </div>
+
+        <div class="footer-text">
+            <span class="brand-name">Stardust X Messenger</span><br />
+            Connect. Communicate. Stay Together.
+        </div>
+    </div>
+</body>
+</html>
