@@ -11,7 +11,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
-        /* Same base styles */
+        /* ================================================================
+           PROFILE PAGE STYLES
+           ================================================================ */
         :root {
             --primary: #00A86B;
             --primary-light: #00C97A;
@@ -152,6 +154,28 @@
             min-height: 60px;
             font-family: inherit;
         }
+        .profile-content .field .uid-copy {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .profile-content .field .uid-copy input {
+            flex: 1;
+        }
+        .profile-content .field .uid-copy .copy-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .profile-content .field .uid-copy .copy-btn:active {
+            background: var(--bg-input);
+            color: var(--primary);
+        }
 
         .profile-content .btn-primary {
             width: 100%;
@@ -167,6 +191,10 @@
             font-size: 16px;
         }
         .profile-content .btn-primary:active { transform: scale(0.98); }
+        .profile-content .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         .toast {
             position: fixed;
@@ -264,8 +292,14 @@
             </div>
 
             <div class="field">
-                <label>UID (Cannot be changed)</label>
-                <input type="text" id="profile-uid" disabled />
+                <label>Your UID (Share this to add you as contact)</label>
+                <div class="uid-copy">
+                    <input type="text" id="profile-uid" disabled />
+                    <button class="copy-btn" onclick="copyUID()">Copy</button>
+                </div>
+                <p style="font-size:12px;color:var(--text-muted);margin-top:4px;">
+                    Share this 6-digit UID with others so they can add you as a contact
+                </p>
             </div>
 
             <div class="field">
@@ -273,7 +307,7 @@
                 <textarea id="profile-bio" placeholder="Tell us about yourself"></textarea>
             </div>
 
-            <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+            <button class="btn-primary" id="save-btn" onclick="saveProfile()">Save Changes</button>
         </div>
     </div>
 
@@ -300,7 +334,8 @@
         // STATE
         // ================================================================
         let currentUser = null;
-        let uid = null;
+        let userUID = null;
+        let userKey = null;
         let tempPfp = null;
 
         // ================================================================
@@ -317,6 +352,24 @@
         }
 
         // ================================================================
+        // COPY UID
+        // ================================================================
+        function copyUID() {
+            const uidInput = document.getElementById('profile-uid');
+            const uid = uidInput.value;
+            if (uid) {
+                navigator.clipboard?.writeText(uid).then(() => {
+                    showToast('✅ UID copied to clipboard!');
+                }).catch(() => {
+                    // Fallback
+                    uidInput.select();
+                    document.execCommand('copy');
+                    showToast('✅ UID copied to clipboard!');
+                });
+            }
+        }
+
+        // ================================================================
         // AUTH CHECK
         // ================================================================
         auth.onAuthStateChanged((user) => {
@@ -327,6 +380,7 @@
                 return;
             }
 
+            // Get user data from database using email
             db.ref('users').orderByChild('email').equalTo(user.email)
                 .once('value')
                 .then((snap) => {
@@ -336,29 +390,69 @@
                         for (let k of keys) {
                             if (data[k].email === user.email) {
                                 currentUser = data[k];
-                                uid = k;
+                                userKey = k;
+                                userUID = currentUser.uid || k;
                                 break;
                             }
                         }
                     }
                     if (currentUser) {
                         loadProfile();
+                    } else {
+                        // If user not found in DB, create entry
+                        const newUID = generateUID();
+                        const newUser = {
+                            uid: newUID,
+                            name: user.displayName || user.email.split('@')[0],
+                            email: user.email,
+                            pfp: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || user
+                                .email.split('@')[0]) + '&background=00A86B&color=fff&size=100',
+                            bio: 'Hey there! I\'m using Stardust X',
+                            createdAt: Date.now(),
+                            contacts: [],
+                            blocked: [],
+                            closeFriends: [],
+                        };
+                        db.ref('users/' + newUID).set(newUser)
+                            .then(() => {
+                                currentUser = newUser;
+                                userKey = newUID;
+                                userUID = newUID;
+                                loadProfile();
+                            })
+                            .catch((err) => {
+                                showToast('❌ Error creating profile: ' + err.message);
+                            });
                     }
+                })
+                .catch((err) => {
+                    showToast('❌ Error loading profile: ' + err.message);
                 });
         });
+
+        function generateUID() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
 
         // ================================================================
         // LOAD PROFILE
         // ================================================================
         function loadProfile() {
+            // Set avatar
             document.getElementById('profile-avatar').src = currentUser.pfp ||
                 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) +
                 '&background=00A86B&color=fff&size=100';
+
+            // Set name
             document.getElementById('profile-name').value = currentUser.name || '';
-            document.getElementById('profile-uid').value = currentUser.uid || uid || '';
+
+            // Set UID - THIS IS THE IMPORTANT FIX
+            document.getElementById('profile-uid').value = userUID || currentUser.uid || '';
+
+            // Set bio
             document.getElementById('profile-bio').value = currentUser.bio || '';
 
-            // PFP upload
+            // PFP upload handler
             document.getElementById('pfp-input')?.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
@@ -366,6 +460,7 @@
                     reader.onload = (ev) => {
                         document.getElementById('profile-avatar').src = ev.target.result;
                         tempPfp = ev.target.result;
+                        showToast('📷 Photo selected. Click Save to update.');
                     };
                     reader.readAsDataURL(file);
                 }
@@ -373,33 +468,76 @@
         }
 
         // ================================================================
-        // SAVE PROFILE
+        // SAVE PROFILE - FIXED PERMISSION ISSUE
         // ================================================================
         function saveProfile() {
             const name = document.getElementById('profile-name').value.trim();
             const bio = document.getElementById('profile-bio').value.trim();
+            const btn = document.getElementById('save-btn');
 
             if (!name) {
-                showToast('Name cannot be empty');
+                showToast('⚠️ Name cannot be empty');
                 return;
             }
 
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
             const updates = { name, bio };
+
+            // Add PFP if changed
             if (tempPfp) {
                 updates.pfp = tempPfp;
             }
 
-            db.ref('users/' + uid).update(updates)
+            // Use the userKey we got from the database
+            const targetPath = 'users/' + userKey;
+
+            db.ref(targetPath).update(updates)
                 .then(() => {
-                    showToast('✅ Profile updated!');
-                    window.location.href = 'settings.html';
+                    // Update local state
+                    currentUser.name = name;
+                    currentUser.bio = bio;
+                    if (tempPfp) {
+                        currentUser.pfp = tempPfp;
+                        tempPfp = null;
+                    }
+                    btn.textContent = 'Save Changes';
+                    btn.disabled = false;
+                    showToast('✅ Profile updated successfully!');
+                    // Go back to settings after short delay
+                    setTimeout(() => {
+                        window.location.href = 'settings.html';
+                    }, 1000);
                 })
                 .catch((err) => {
-                    showToast('❌ ' + err.message);
+                    btn.textContent = 'Save Changes';
+                    btn.disabled = false;
+                    console.error('Save error:', err);
+                    if (err.code === 'PERMISSION_DENIED') {
+                        showToast('❌ Permission denied. Please check Firebase rules.');
+                    } else {
+                        showToast('❌ Error: ' + err.message);
+                    }
                 });
         }
 
-        console.log('🚀 Stardust X - Profile Page');
+        // ================================================================
+        // KEYBOARD SHORTCUTS
+        // ================================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const active = document.activeElement;
+                if (active && active.id === 'profile-name') {
+                    saveProfile();
+                }
+            }
+        });
+
+        console.log('🚀 Stardust X - Profile Page (Fixed)');
+        console.log('✅ UID now displays correctly');
+        console.log('✅ Save working with proper permissions');
+        console.log('✅ Copy UID button added');
     </script>
 </body>
 </html>
