@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Edit Profile - Stardust X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <style>
+        /* Same base styles */
+        :root {
+            --primary: #00A86B;
+            --primary-light: #00C97A;
+            --primary-dark: #008A56;
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F5F9F7;
+            --bg-surface: #ECF5F0;
+            --bg-input: #F0F7F3;
+            --text-primary: #1A2E24;
+            --text-secondary: #4A6A5A;
+            --text-muted: #8AAA9A;
+            --border-color: #D4E8DE;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.25s ease;
+            --danger: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .scrollbar-custom::-webkit-scrollbar { width: 3px; }
+        .scrollbar-custom::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-custom::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        #app {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 168, 107, 0.05);
+        }
+
+        .app-header {
+            background: var(--bg-primary);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            min-height: 54px;
+        }
+        .app-header .back-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        .app-header .back-btn:active { background: var(--bg-surface); }
+        .app-header .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .app-header .placeholder { width: 40px; }
+
+        .profile-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+        .profile-content .avatar-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .profile-content .avatar-section img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            background: var(--bg-surface);
+            margin-bottom: 8px;
+        }
+        .profile-content .avatar-section .change-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .profile-content .avatar-section .change-btn:active { opacity: 0.7; }
+
+        .profile-content .field {
+            margin-bottom: 16px;
+        }
+        .profile-content .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .profile-content .field input,
+        .profile-content .field textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .profile-content .field input:focus,
+        .profile-content .field textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .profile-content .field input:disabled {
+            background: var(--bg-surface);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        .profile-content .field textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .profile-content .btn-primary {
+            width: 100%;
+            margin-top: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+        .profile-content .btn-primary:active { transform: scale(0.98); }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            animation: toastIn 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            font-weight: 500;
+        }
+        .toast.active { display: block; }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        #loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #loading .brand {
+            margin-top: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        #loading .brand .x { color: var(--primary); }
+
+        .file-input-hidden { display: none; }
+
+        @media (max-width: 430px) { #app { max-width: 100%; border-radius: 0; } }
+    </style>
+</head>
+<body>
+
+    <!-- Loading -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="brand">Stardust <span class="x">X</span></div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <!-- App -->
+    <div id="app">
+        <header class="app-header">
+            <button class="back-btn" onclick="window.location.href='settings.html'">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <span class="title">Edit Profile</span>
+            <div class="placeholder"></div>
+        </header>
+
+        <div class="profile-content scrollbar-custom">
+            <div class="avatar-section">
+                <img id="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=100" alt="Profile" />
+                <div>
+                    <button class="change-btn" onclick="document.getElementById('pfp-input').click()">Change Photo</button>
+                    <input type="file" id="pfp-input" class="file-input-hidden" accept="image/*" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Display Name</label>
+                <input type="text" id="profile-name" placeholder="Your name" />
+            </div>
+
+            <div class="field">
+                <label>UID (Cannot be changed)</label>
+                <input type="text" id="profile-uid" disabled />
+            </div>
+
+            <div class="field">
+                <label>Bio</label>
+                <textarea id="profile-bio" placeholder="Tell us about yourself"></textarea>
+            </div>
+
+            <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // FIREBASE CONFIG
+        // ================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
+            authDomain: "stardust-chat-1656d.firebaseapp.com",
+            databaseURL: "https://stardust-chat-1656d-default-rtdb.firebaseio.com",
+            projectId: "stardust-chat-1656d",
+            storageBucket: "stardust-chat-1656d.firebasestorage.app",
+            messagingSenderId: "676902329820",
+            appId: "1:676902329820:web:576bb7bc0e6c9d3e0c4319",
+            measurementId: "G-31GVGLYZDL"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        let currentUser = null;
+        let uid = null;
+        let tempPfp = null;
+
+        // ================================================================
+        // TOAST
+        // ================================================================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('active');
+            if (window.toastTimeout) clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // ================================================================
+        // AUTH CHECK
+        // ================================================================
+        auth.onAuthStateChanged((user) => {
+            document.getElementById('loading').style.display = 'none';
+
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            db.ref('users').orderByChild('email').equalTo(user.email)
+                .once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            if (data[k].email === user.email) {
+                                currentUser = data[k];
+                                uid = k;
+                                break;
+                            }
+                        }
+                    }
+                    if (currentUser) {
+                        loadProfile();
+                    }
+                });
+        });
+
+        // ================================================================
+        // LOAD PROFILE
+        // ================================================================
+        function loadProfile() {
+            document.getElementById('profile-avatar').src = currentUser.pfp ||
+                'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) +
+                '&background=00A86B&color=fff&size=100';
+            document.getElementById('profile-name').value = currentUser.name || '';
+            document.getElementById('profile-uid').value = currentUser.uid || uid || '';
+            document.getElementById('profile-bio').value = currentUser.bio || '';
+
+            // PFP upload
+            document.getElementById('pfp-input')?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        document.getElementById('profile-avatar').src = ev.target.result;
+                        tempPfp = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ================================================================
+        // SAVE PROFILE
+        // ================================================================
+        function saveProfile() {
+            const name = document.getElementById('profile-name').value.trim();
+            const bio = document.getElementById('profile-bio').value.trim();
+
+            if (!name) {
+                showToast('Name cannot be empty');
+                return;
+            }
+
+            const updates = { name, bio };
+            if (tempPfp) {
+                updates.pfp = tempPfp;
+            }
+
+            db.ref('users/' + uid).update(updates)
+                .then(() => {
+                    showToast('✅ Profile updated!');
+                    window.location.href = 'settings.html';
+                })
+                .catch((err) => {
+                    showToast('❌ ' + err.message);
+                });
+        }
+
+        console.log('🚀 Stardust X - Profile Page');
+    </script>
+</body>
+</html>
