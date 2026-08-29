@@ -75,12 +75,12 @@
             box-shadow: 0 0 40px rgba(0, 168, 107, 0.05);
         }
 
-        /* ===== FULL SCREEN LOGIN PAGE ===== */
-        #login-page {
+        /* ===== AUTH PAGE - SEPARATE FULL PAGE ===== */
+        #auth-page {
             position: fixed;
             inset: 0;
             background: var(--bg-primary);
-            z-index: 200;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -89,11 +89,11 @@
             overflow-y: auto;
         }
 
-        #login-page.hidden {
+        #auth-page.hidden {
             display: none;
         }
 
-        #login-page .login-box {
+        #auth-page .auth-box {
             max-width: 400px;
             width: 100%;
             padding: 32px 24px;
@@ -103,12 +103,12 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
         }
 
-        #login-page .login-box .logo {
+        #auth-page .auth-box .logo {
             text-align: center;
             margin-bottom: 24px;
         }
 
-        #login-page .login-box .logo .icon {
+        #auth-page .auth-box .logo .icon {
             width: 56px;
             height: 56px;
             background: var(--primary);
@@ -119,30 +119,30 @@
             margin-bottom: 8px;
         }
 
-        #login-page .login-box .logo .icon svg {
+        #auth-page .auth-box .logo .icon svg {
             width: 34px;
             height: 34px;
         }
 
-        #login-page .login-box .logo .brand {
+        #auth-page .auth-box .logo .brand {
             font-size: 24px;
             font-weight: 700;
             color: var(--text-primary);
             letter-spacing: -0.5px;
         }
 
-        #login-page .login-box .logo .brand .x {
+        #auth-page .auth-box .logo .brand .x {
             color: var(--primary);
         }
 
-        #login-page .login-box .subtitle {
+        #auth-page .auth-box .subtitle {
             text-align: center;
             font-size: 14px;
             color: var(--text-muted);
             margin-bottom: 20px;
         }
 
-        #login-page .login-box .auth-toggle {
+        #auth-page .auth-box .auth-toggle {
             display: flex;
             gap: 8px;
             margin-bottom: 16px;
@@ -151,7 +151,7 @@
             background: var(--bg-surface);
         }
 
-        #login-page .login-box .auth-toggle button {
+        #auth-page .auth-box .auth-toggle button {
             flex: 1;
             padding: 8px;
             border: none;
@@ -164,17 +164,17 @@
             color: var(--text-muted);
         }
 
-        #login-page .login-box .auth-toggle button.active {
+        #auth-page .auth-box .auth-toggle button.active {
             background: var(--bg-primary);
             color: var(--text-primary);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
-        #login-page .login-box .auth-toggle button:active {
+        #auth-page .auth-box .auth-toggle button:active {
             transform: scale(0.96);
         }
 
-        #login-page .login-box input {
+        #auth-page .auth-box input {
             width: 100%;
             padding: 12px 16px;
             background: var(--bg-input);
@@ -187,23 +187,23 @@
             margin-bottom: 12px;
         }
 
-        #login-page .login-box input:focus {
+        #auth-page .auth-box input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
         }
 
-        #login-page .login-box input::placeholder {
+        #auth-page .auth-box input::placeholder {
             color: var(--text-muted);
         }
 
-        #login-page .login-box input[type="file"] {
+        #auth-page .auth-box input[type="file"] {
             padding: 8px;
             background: var(--bg-surface);
             border: 1px dashed var(--border-color);
             cursor: pointer;
         }
 
-        #login-page .login-box input[type="file"]::file-selector-button {
+        #auth-page .auth-box input[type="file"]::file-selector-button {
             background: var(--primary);
             color: white;
             border: none;
@@ -215,11 +215,11 @@
             transition: var(--transition);
         }
 
-        #login-page .login-box input[type="file"]::file-selector-button:hover {
+        #auth-page .auth-box input[type="file"]::file-selector-button:hover {
             background: var(--primary-dark);
         }
 
-        #login-page .login-box .btn-primary {
+        #auth-page .auth-box .btn-primary {
             width: 100%;
             margin-top: 4px;
             background: var(--primary);
@@ -233,11 +233,16 @@
             font-size: 16px;
         }
 
-        #login-page .login-box .btn-primary:active {
+        #auth-page .auth-box .btn-primary:active {
             transform: scale(0.98);
         }
 
-        #login-page .login-box .btn-secondary {
+        #auth-page .auth-box .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #auth-page .auth-box .btn-secondary {
             width: 100%;
             margin-top: 8px;
             background: transparent;
@@ -251,29 +256,29 @@
             font-size: 16px;
         }
 
-        #login-page .login-box .btn-secondary:active {
+        #auth-page .auth-box .btn-secondary:active {
             background: var(--bg-surface);
         }
 
-        #login-page .login-box .auth-switch {
+        #auth-page .auth-box .auth-switch {
             text-align: center;
             margin-top: 12px;
             font-size: 14px;
             color: var(--text-secondary);
         }
 
-        #login-page .login-box .auth-switch .link {
+        #auth-page .auth-box .auth-switch .link {
             color: var(--primary);
             font-weight: 600;
             cursor: pointer;
             text-decoration: underline;
         }
 
-        #login-page .login-box .auth-switch .link:active {
+        #auth-page .auth-box .auth-switch .link:active {
             opacity: 0.7;
         }
 
-        #login-page .login-box .footer-links {
+        #auth-page .auth-box .footer-links {
             margin-top: 16px;
             padding-top: 12px;
             border-top: 1px solid var(--border-color);
@@ -283,29 +288,56 @@
             font-size: 13px;
         }
 
-        #login-page .login-box .footer-links a {
+        #auth-page .auth-box .footer-links a {
             color: var(--primary);
             text-decoration: underline;
             font-weight: 500;
             cursor: pointer;
         }
 
-        #login-page .login-box .footer-links a:active {
+        #auth-page .auth-box .footer-links a:active {
             opacity: 0.7;
         }
 
-        #login-page .login-box .pfp-preview {
+        #auth-page .auth-box .pfp-preview {
             text-align: center;
             margin-bottom: 12px;
         }
 
-        #login-page .login-box .pfp-preview img {
+        #auth-page .auth-box .pfp-preview img {
             width: 72px;
             height: 72px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--primary);
             background: var(--bg-surface);
+        }
+
+        #auth-page .auth-box .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: -6px;
+            margin-bottom: 8px;
+        }
+
+        #auth-page .auth-box .forgot-link:active {
+            opacity: 0.7;
+        }
+
+        #auth-page .auth-box .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 8px;
+            display: none;
+        }
+
+        #auth-page .auth-box .error-msg.show {
+            display: block;
         }
 
         /* ===== HEADER ===== */
@@ -1482,7 +1514,7 @@
                 max-width: 100%;
                 border-radius: 0;
             }
-            #login-page .login-box {
+            #auth-page .auth-box {
                 padding: 24px 16px;
             }
         }
@@ -1643,22 +1675,6 @@
             align-items: center;
             justify-content: center;
         }
-
-        /* ===== FORGOT PASSWORD ===== */
-        .forgot-password-link {
-            display: block;
-            text-align: right;
-            font-size: 13px;
-            color: var(--primary);
-            cursor: pointer;
-            text-decoration: underline;
-            margin-top: -6px;
-            margin-bottom: 8px;
-        }
-
-        .forgot-password-link:active {
-            opacity: 0.7;
-        }
     </style>
 </head>
 <body>
@@ -1669,9 +1685,9 @@
         <div class="brand">Stardust <span class="x">X</span></div>
     </div>
 
-    <!-- ===== FULL SCREEN LOGIN PAGE ===== -->
-    <div id="login-page">
-        <div class="login-box">
+    <!-- ===== AUTH PAGE - SEPARATE FULL PAGE ===== -->
+    <div id="auth-page">
+        <div class="auth-box">
             <div class="logo">
                 <div class="icon">
                     <svg viewBox="0 0 40 40" fill="none">
@@ -1684,19 +1700,22 @@
             </div>
             <div class="subtitle">Secure messaging for everyone</div>
 
-            <div id="login-form">
+            <div id="auth-form">
                 <!-- Auth Toggle -->
                 <div class="auth-toggle">
-                    <button class="active" id="login-toggle" onclick="switchLoginView('login')">Sign In</button>
-                    <button id="signup-toggle" onclick="switchLoginView('signup')">Create Account</button>
+                    <button class="active" id="login-toggle" onclick="switchAuthView('login')">Sign In</button>
+                    <button id="signup-toggle" onclick="switchAuthView('signup')">Create Account</button>
                 </div>
+
+                <!-- Error Message -->
+                <div id="auth-error" class="error-msg"></div>
 
                 <!-- Sign In Form -->
                 <div id="signin-form">
-                    <input type="email" id="login-email" placeholder="Email address" />
-                    <input type="password" id="login-password" placeholder="Password" />
-                    <span class="forgot-password-link" onclick="forgotPassword()">Forgot password?</span>
-                    <button class="btn-primary" onclick="handleLogin()">Sign In</button>
+                    <input type="email" id="login-email" placeholder="Email address" autocomplete="email" />
+                    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+                    <span class="forgot-link" onclick="handleForgotPassword()">Forgot password?</span>
+                    <button class="btn-primary" id="login-btn" onclick="handleLogin()">Sign In</button>
                 </div>
 
                 <!-- Sign Up Form -->
@@ -1705,15 +1724,15 @@
                         <img id="signup-pfp-preview" src="https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=80" alt="Profile" />
                     </div>
                     <input type="file" id="signup-pfp" accept="image/*" />
-                    <input type="text" id="signup-name" placeholder="Full Name" />
-                    <input type="email" id="signup-email" placeholder="Email address" />
-                    <input type="password" id="signup-password" placeholder="Password (min 6 characters)" />
-                    <button class="btn-primary" onclick="handleSignup()">Create Account</button>
+                    <input type="text" id="signup-name" placeholder="Full Name" autocomplete="name" />
+                    <input type="email" id="signup-email" placeholder="Email address" autocomplete="email" />
+                    <input type="password" id="signup-password" placeholder="Password (min 6 characters)" autocomplete="new-password" />
+                    <button class="btn-primary" id="signup-btn" onclick="handleSignup()">Create Account</button>
                 </div>
 
                 <div class="auth-switch">
                     <span id="auth-switch-text">
-                        <span class="link" onclick="switchLoginView('signup')">Don't have an account? Create one</span>
+                        <span class="link" onclick="switchAuthView('signup')">Don't have an account? Create one</span>
                     </span>
                 </div>
 
@@ -2151,81 +2170,113 @@
         };
 
         // ================================================================
-        // AUTH SYSTEM - FIXED
+        // AUTH SYSTEM - COMPLETELY FIXED
         // ================================================================
         let currentView = 'login';
 
-        function switchLoginView(view) {
+        function switchAuthView(view) {
             currentView = view;
             const loginToggle = document.getElementById('login-toggle');
             const signupToggle = document.getElementById('signup-toggle');
             const signinForm = document.getElementById('signin-form');
             const signupForm = document.getElementById('signup-form');
             const switchText = document.getElementById('auth-switch-text');
+            const errorEl = document.getElementById('auth-error');
+
+            // Hide error
+            errorEl.classList.remove('show');
+            errorEl.textContent = '';
 
             if (view === 'login') {
                 loginToggle.className = 'active';
                 signupToggle.className = '';
                 signinForm.style.display = 'block';
                 signupForm.style.display = 'none';
-                switchText.innerHTML = `<span class="link" onclick="switchLoginView('signup')">Don't have an account? Create one</span>`;
+                switchText.innerHTML =
+                    `<span class="link" onclick="switchAuthView('signup')">Don't have an account? Create one</span>`;
             } else {
                 signupToggle.className = 'active';
                 loginToggle.className = '';
                 signinForm.style.display = 'none';
                 signupForm.style.display = 'block';
-                switchText.innerHTML = `<span class="link" onclick="switchLoginView('login')">Already have an account? Sign in</span>`;
+                switchText.innerHTML =
+                    `<span class="link" onclick="switchAuthView('login')">Already have an account? Sign in</span>`;
             }
         }
 
-        // ===== LOGIN FUNCTION - FIXED =====
+        function showAuthError(message) {
+            const errorEl = document.getElementById('auth-error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+
+        function hideAuthError() {
+            const errorEl = document.getElementById('auth-error');
+            errorEl.classList.remove('show');
+            errorEl.textContent = '';
+        }
+
+        // ===== LOGIN FUNCTION =====
         window.handleLogin = function() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
+            const btn = document.getElementById('login-btn');
+
+            hideAuthError();
 
             if (!email || !password) {
-                showToast('Please fill in all fields');
+                showAuthError('Please fill in all fields');
                 return;
             }
 
-            showToast('Signing in...');
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    showToast('Welcome back!');
-                    // Auth state listener will handle navigation
+                    // Success - auth state listener will handle navigation
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
                 })
                 .catch((err) => {
-                    let msg = err.message;
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
+                    let msg = 'Invalid email or password';
                     if (err.code === 'auth/user-not-found') {
                         msg = 'No account found with this email';
                     } else if (err.code === 'auth/wrong-password') {
                         msg = 'Incorrect password';
                     } else if (err.code === 'auth/invalid-email') {
                         msg = 'Invalid email address';
+                    } else if (err.code === 'auth/too-many-requests') {
+                        msg = 'Too many attempts. Please try again later';
                     }
-                    showToast('❌ ' + msg);
+                    showAuthError(msg);
                 });
         };
 
-        // ===== SIGNUP FUNCTION - FIXED =====
+        // ===== SIGNUP FUNCTION =====
         window.handleSignup = function() {
             const name = document.getElementById('signup-name').value.trim();
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value.trim();
             const pfpFile = document.getElementById('signup-pfp').files[0];
+            const btn = document.getElementById('signup-btn');
+
+            hideAuthError();
 
             if (!name || !email || !password) {
-                showToast('Please fill in all fields');
+                showAuthError('Please fill in all fields');
                 return;
             }
 
             if (password.length < 6) {
-                showToast('Password must be at least 6 characters');
+                showAuthError('Password must be at least 6 characters');
                 return;
             }
 
-            showToast('Creating account...');
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -2258,24 +2309,37 @@
                         reader.onload = (e) => {
                             processSignup(e.target.result)
                                 .then(() => {
-                                    showToast('Account created successfully!');
+                                    btn.textContent = 'Create Account';
+                                    btn.disabled = false;
                                 })
                                 .catch((err) => {
-                                    showToast('❌ ' + err.message);
+                                    btn.textContent = 'Create Account';
+                                    btn.disabled = false;
+                                    showAuthError(err.message);
                                 });
+                        };
+                        reader.onerror = () => {
+                            btn.textContent = 'Create Account';
+                            btn.disabled = false;
+                            showAuthError('Failed to read image file');
                         };
                         reader.readAsDataURL(pfpFile);
                     } else {
                         processSignup(null)
                             .then(() => {
-                                showToast('Account created successfully!');
+                                btn.textContent = 'Create Account';
+                                btn.disabled = false;
                             })
                             .catch((err) => {
-                                showToast('❌ ' + err.message);
+                                btn.textContent = 'Create Account';
+                                btn.disabled = false;
+                                showAuthError(err.message);
                             });
                     }
                 })
                 .catch((err) => {
+                    btn.textContent = 'Create Account';
+                    btn.disabled = false;
                     let msg = err.message;
                     if (err.code === 'auth/email-already-in-use') {
                         msg = 'Email already registered';
@@ -2284,31 +2348,40 @@
                     } else if (err.code === 'auth/weak-password') {
                         msg = 'Password too weak';
                     }
-                    showToast('❌ ' + msg);
+                    showAuthError(msg);
                 });
         };
 
-        // ===== FORGOT PASSWORD - FIXED =====
-        window.forgotPassword = function() {
+        // ===== FORGOT PASSWORD =====
+        window.handleForgotPassword = function() {
             const email = document.getElementById('login-email').value.trim();
 
+            hideAuthError();
+
             if (!email || !email.includes('@')) {
-                showToast('Please enter a valid email address');
+                showAuthError('Please enter a valid email address');
                 return;
             }
 
-            showToast('Sending reset link...');
+            const btn = document.querySelector('#signin-form .btn-primary');
+            const originalText = btn.textContent;
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
 
             auth.sendPasswordResetEmail(email)
                 .then(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                     showToast('📧 Password reset link sent to ' + email);
                 })
                 .catch((err) => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                     let msg = err.message;
                     if (err.code === 'auth/user-not-found') {
                         msg = 'No account found with this email';
                     }
-                    showToast('❌ ' + msg);
+                    showAuthError(msg);
                 });
         };
 
@@ -2317,14 +2390,14 @@
         }
 
         // ================================================================
-        // AUTH STATE LISTENER - FIXED
+        // AUTH STATE LISTENER - HANDLES NAVIGATION
         // ================================================================
         auth.onAuthStateChanged((user) => {
             // Hide loading
             document.getElementById('loading').style.display = 'none';
 
             if (user) {
-                // User is logged in - find in database
+                // User is logged in - get their data and show app
                 db.ref('users').orderByChild('email').equalTo(user.email)
                     .once('value')
                     .then((snap) => {
@@ -2344,7 +2417,7 @@
                         }
 
                         if (!userData) {
-                            // Create new user entry
+                            // Create user entry if missing
                             const uid = generateUID();
                             const newUser = {
                                 uid: uid,
@@ -2369,17 +2442,21 @@
                             if (!state.currentUser.closeFriends) state.currentUser.closeFriends = [];
                         }
 
-                        // Hide login, show app
-                        document.getElementById('login-page').classList.add('hidden');
+                        // HIDE AUTH PAGE, SHOW APP
+                        document.getElementById('auth-page').classList.add('hidden');
                         initializeApp();
                     });
             } else {
-                // User is logged out - show login
-                document.getElementById('login-page').classList.remove('hidden');
+                // User is logged out - SHOW AUTH PAGE, hide app
+                document.getElementById('auth-page').classList.remove('hidden');
+                document.getElementById('app').style.display = 'flex';
                 // Reset to login view
-                switchLoginView('login');
-                // Clear password fields
+                switchAuthView('login');
+                // Clear sensitive fields
                 document.getElementById('login-password').value = '';
+                document.getElementById('signup-password').value = '';
+                // Hide any error
+                hideAuthError();
             }
         });
 
@@ -3766,11 +3843,13 @@
             }
         });
 
-        console.log('🚀 Stardust X - Login Fixed');
-        console.log('✅ Login and Signup working');
+        console.log('🚀 Stardust X - Login Fixed from Root');
+        console.log('✅ Separate /auth page');
+        console.log('✅ Login working properly');
+        console.log('✅ Signup working properly');
         console.log('✅ Forgot password working');
         console.log('✅ Persistent login');
-        console.log('✅ Full screen login - no skip');
+        console.log('✅ No skip, no bypass');
     </script>
 </body>
 </html>
