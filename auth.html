@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Sign In - Stardust X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F9F7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .auth-box {
+            max-width: 400px;
+            width: 100%;
+            padding: 32px 24px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            border: 1px solid #D4E8DE;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+        .auth-box .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .auth-box .logo .icon {
+            width: 56px;
+            height: 56px;
+            background: #00A86B;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .auth-box .logo .icon svg {
+            width: 34px;
+            height: 34px;
+        }
+        .auth-box .logo .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A2E24;
+            letter-spacing: -0.5px;
+        }
+        .auth-box .logo .brand .x {
+            color: #00A86B;
+        }
+        .auth-box .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #8AAA9A;
+            margin-bottom: 20px;
+        }
+        .auth-box .auth-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-radius: 10px;
+            padding: 4px;
+            background: #ECF5F0;
+        }
+        .auth-box .auth-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: transparent;
+            color: #8AAA9A;
+        }
+        .auth-box .auth-toggle button.active {
+            background: #FFFFFF;
+            color: #1A2E24;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .auth-box input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #F0F7F3;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            color: #1A2E24;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.25s ease;
+            margin-bottom: 12px;
+        }
+        .auth-box input:focus {
+            border-color: #00A86B;
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .auth-box input::placeholder {
+            color: #8AAA9A;
+        }
+        .auth-box input[type="file"] {
+            padding: 8px;
+            background: #ECF5F0;
+            border: 1px dashed #D4E8DE;
+            cursor: pointer;
+        }
+        .auth-box input[type="file"]::file-selector-button {
+            background: #00A86B;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.25s ease;
+        }
+        .auth-box input[type="file"]::file-selector-button:hover {
+            background: #008A56;
+        }
+        .auth-box .btn-primary {
+            width: 100%;
+            margin-top: 4px;
+            background: #00A86B;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 16px;
+        }
+        .auth-box .btn-primary:hover {
+            background: #008A56;
+        }
+        .auth-box .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .auth-box .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .auth-box .btn-secondary {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: #00A86B;
+            border: 1px solid #00A86B;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 16px;
+        }
+        .auth-box .btn-secondary:hover {
+            background: #ECF5F0;
+        }
+        .auth-box .btn-secondary:active {
+            transform: scale(0.98);
+        }
+        .auth-box .auth-switch {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #4A6A5A;
+        }
+        .auth-box .auth-switch .link {
+            color: #00A86B;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .auth-box .auth-switch .link:hover {
+            opacity: 0.7;
+        }
+        .auth-box .footer-links {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #D4E8DE;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+        .auth-box .footer-links a {
+            color: #00A86B;
+            text-decoration: underline;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .auth-box .footer-links a:hover {
+            opacity: 0.7;
+        }
+        .auth-box .pfp-preview {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .auth-box .pfp-preview img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #00A86B;
+            background: #ECF5F0;
+        }
+        .auth-box .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: #00A86B;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: -6px;
+            margin-bottom: 8px;
+        }
+        .auth-box .forgot-link:hover {
+            opacity: 0.7;
+        }
+        .auth-box .error-msg {
+            color: #EF4444;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 8px;
+            display: none;
+        }
+        .auth-box .error-msg.show {
+            display: block;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1A2E24;
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 10px;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            animation: toastIn 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            font-weight: 500;
+        }
+        .toast.active {
+            display: block;
+        }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #D4E8DE;
+            border-top-color: #00A86B;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading .brand {
+            margin-top: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A2E24;
+        }
+        .loading .brand .x {
+            color: #00A86B;
+        }
+        @media (max-width: 430px) {
+            .auth-box {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading -->
+    <div id="loading">
+        <div class="spinner"></div>
+        <div class="brand">Stardust <span class="x">X</span></div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <!-- Auth Box -->
+    <div class="auth-box">
+        <div class="logo">
+            <div class="icon">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <rect x="4" y="4" width="32" height="32" rx="8" fill="white" />
+                    <path d="M12 20 L18 26 L30 14" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 14 L28 14 L28 20" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="brand">Stardust <span class="x">X</span></div>
+        </div>
+        <div class="subtitle">Secure messaging for everyone</div>
+
+        <div id="auth-form">
+            <!-- Auth Toggle -->
+            <div class="auth-toggle">
+                <button class="active" id="login-toggle" onclick="switchView('login')">Sign In</button>
+                <button id="signup-toggle" onclick="switchView('signup')">Create Account</button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="auth-error" class="error-msg"></div>
+
+            <!-- Sign In Form -->
+            <div id="signin-form">
+                <input type="email" id="login-email" placeholder="Email address" autocomplete="email" />
+                <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+                <span class="forgot-link" onclick="handleForgotPassword()">Forgot password?</span>
+                <button class="btn-primary" id="login-btn" onclick="handleLogin()">Sign In</button>
+            </div>
+
+            <!-- Sign Up Form -->
+            <div id="signup-form" style="display:none;">
+                <div class="pfp-preview">
+                    <img id="signup-pfp-preview" src="https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=80" alt="Profile" />
+                </div>
+                <input type="file" id="signup-pfp" accept="image/*" />
+                <input type="text" id="signup-name" placeholder="Full Name" autocomplete="name" />
+                <input type="email" id="signup-email" placeholder="Email address" autocomplete="email" />
+                <input type="password" id="signup-password" placeholder="Password (min 6 characters)" autocomplete="new-password" />
+                <button class="btn-primary" id="signup-btn" onclick="handleSignup()">Create Account</button>
+            </div>
+
+            <div class="auth-switch">
+                <span id="auth-switch-text">
+                    <span class="link" onclick="switchView('signup')">Don't have an account? Create one</span>
+                </span>
+            </div>
+
+            <div class="footer-links">
+                <a href="privacy.html" target="_blank">Privacy Policy</a>
+                <a href="terms.html" target="_blank">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // FIREBASE CONFIG
+        // ================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
+            authDomain: "stardust-chat-1656d.firebaseapp.com",
+            databaseURL: "https://stardust-chat-1656d-default-rtdb.firebaseio.com",
+            projectId: "stardust-chat-1656d",
+            storageBucket: "stardust-chat-1656d.firebasestorage.app",
+            messagingSenderId: "676902329820",
+            appId: "1:676902329820:web:576bb7bc0e6c9d3e0c4319",
+            measurementId: "G-31GVGLYZDL"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentView = 'login';
+
+        // ================================================================
+        // UI HELPERS
+        // ================================================================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('active');
+            if (window.toastTimeout) clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function showError(message) {
+            const el = document.getElementById('auth-error');
+            el.textContent = message;
+            el.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('auth-error').classList.remove('show');
+        }
+
+        function switchView(view) {
+            currentView = view;
+            const loginToggle = document.getElementById('login-toggle');
+            const signupToggle = document.getElementById('signup-toggle');
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
+            const switchText = document.getElementById('auth-switch-text');
+
+            hideError();
+
+            if (view === 'login') {
+                loginToggle.className = 'active';
+                signupToggle.className = '';
+                signinForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                switchText.innerHTML = `<span class="link" onclick="switchView('signup')">Don't have an account? Create one</span>`;
+            } else {
+                signupToggle.className = 'active';
+                loginToggle.className = '';
+                signinForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                switchText.innerHTML = `<span class="link" onclick="switchView('login')">Already have an account? Sign in</span>`;
+            }
+        }
+
+        function generateUID() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        // ================================================================
+        // LOGIN
+        // ================================================================
+        window.handleLogin = function() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const btn = document.getElementById('login-btn');
+
+            hideError();
+
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
+                    // Redirect to chat page
+                    window.location.href = 'chat.html';
+                })
+                .catch((err) => {
+                    btn.textContent = 'Sign In';
+                    btn.disabled = false;
+                    let msg = 'Invalid email or password';
+                    if (err.code === 'auth/user-not-found') msg = 'No account found with this email';
+                    else if (err.code === 'auth/wrong-password') msg = 'Incorrect password';
+                    else if (err.code === 'auth/invalid-email') msg = 'Invalid email address';
+                    else if (err.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later';
+                    showError(msg);
+                });
+        };
+
+        // ================================================================
+        // SIGNUP
+        // ================================================================
+        window.handleSignup = function() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            const pfpFile = document.getElementById('signup-pfp').files[0];
+            const btn = document.getElementById('signup-btn');
+
+            hideError();
+
+            if (!name || !email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    const uid = generateUID();
+
+                    const processSignup = (pfpBase64) => {
+                        const userData = {
+                            uid: uid,
+                            name: name,
+                            email: email,
+                            pfp: pfpBase64 || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) +
+                                '&background=00A86B&color=fff&size=72',
+                            bio: 'Hey there! I\'m using Stardust X',
+                            createdAt: Date.now(),
+                            contacts: [],
+                            blocked: [],
+                            closeFriends: [],
+                        };
+
+                        return db.ref('users/' + uid).set(userData)
+                            .then(() => user.updateProfile({ displayName: name }));
+                    };
+
+                    if (pfpFile) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            processSignup(e.target.result)
+                                .then(() => {
+                                    btn.textContent = 'Create Account';
+                                    btn.disabled = false;
+                                    window.location.href = 'chat.html';
+                                })
+                                .catch((err) => {
+                                    btn.textContent = 'Create Account';
+                                    btn.disabled = false;
+                                    showError(err.message);
+                                });
+                        };
+                        reader.readAsDataURL(pfpFile);
+                    } else {
+                        processSignup(null)
+                            .then(() => {
+                                btn.textContent = 'Create Account';
+                                btn.disabled = false;
+                                window.location.href = 'chat.html';
+                            })
+                            .catch((err) => {
+                                btn.textContent = 'Create Account';
+                                btn.disabled = false;
+                                showError(err.message);
+                            });
+                    }
+                })
+                .catch((err) => {
+                    btn.textContent = 'Create Account';
+                    btn.disabled = false;
+                    let msg = err.message;
+                    if (err.code === 'auth/email-already-in-use') msg = 'Email already registered';
+                    else if (err.code === 'auth/invalid-email') msg = 'Invalid email address';
+                    else if (err.code === 'auth/weak-password') msg = 'Password too weak';
+                    showError(msg);
+                });
+        };
+
+        // ================================================================
+        // FORGOT PASSWORD
+        // ================================================================
+        window.handleForgotPassword = function() {
+            const email = document.getElementById('login-email').value.trim();
+            hideError();
+
+            if (!email || !email.includes('@')) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            const btn = document.querySelector('#signin-form .btn-primary');
+            const originalText = btn.textContent;
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    showToast('📧 Password reset link sent to ' + email);
+                })
+                .catch((err) => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    let msg = err.message;
+                    if (err.code === 'auth/user-not-found') msg = 'No account found with this email';
+                    showError(msg);
+                });
+        };
+
+        // ================================================================
+        // AUTH STATE - Redirect if already logged in
+        // ================================================================
+        auth.onAuthStateChanged((user) => {
+            document.getElementById('loading').style.display = 'none';
+
+            if (user) {
+                // Already logged in - redirect to chat
+                window.location.href = 'chat.html';
+            }
+        });
+
+        // ================================================================
+        // PFP PREVIEW
+        // ================================================================
+        document.getElementById('signup-pfp')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById('signup-pfp-preview').src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        console.log('🚀 Stardust X - Auth Page');
+    </script>
+</body>
+</html>
