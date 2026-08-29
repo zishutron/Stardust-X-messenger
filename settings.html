@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
-        /* Same base styles */
         :root {
             --primary: #00A86B;
             --primary-light: #00C97A;
@@ -93,6 +92,27 @@
             letter-spacing: -0.3px;
         }
         .app-header .logo .brand .x { color: var(--primary); }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .header-actions button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header-actions button:active {
+            background: var(--bg-surface);
+            color: var(--primary);
+        }
 
         .bottom-nav {
             background: var(--bg-primary);
@@ -218,7 +238,6 @@
             .nav-item svg { width: 20px; height: 20px; }
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -343,7 +362,7 @@
                 <span class="brand">Stardust <span class="x">X</span></span>
             </div>
             <div class="header-actions">
-                <button onclick="showToast('🔍 Search settings')" aria-label="Search">
+                <button onclick="showToast('Search settings')" aria-label="Search">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <circle cx="11" cy="11" r="7"/><path d="M16 16l4 4"/>
                     </svg>
@@ -357,18 +376,18 @@
                 <span class="label">Edit Profile</span>
                 <span class="arrow">›</span>
             </button>
-            <button class="settings-item" onclick="showToast('🚫 Blocked contacts page')">
-                <span class="icon">🚫</span>
+            <button class="settings-item" onclick="showToast('Blocked contacts')">
+                <span class="icon">X</span>
                 <span class="label">Blocked Contacts</span>
                 <span class="arrow">›</span>
             </button>
             <button class="settings-item" onclick="toggleDarkMode()">
-                <span class="icon">🌓</span>
+                <span class="icon">●</span>
                 <span class="label">Dark Mode</span>
                 <span class="arrow">›</span>
             </button>
-            <button class="settings-item" onclick="showToast('📧 Contact us at support@stardustx.com')">
-                <span class="icon">💬</span>
+            <button class="settings-item" onclick="showToast('Contact us at support@stardustx.com')">
+                <span class="icon">✉</span>
                 <span class="label">Customer Support</span>
                 <span class="arrow">›</span>
             </button>
@@ -390,7 +409,7 @@
                 <span class="arrow">›</span>
             </button>
             <button class="settings-item danger" onclick="deleteAccount()">
-                <span class="icon">🗑️</span>
+                <span class="icon">🗑</span>
                 <span class="label">Delete Account</span>
                 <span class="arrow">›</span>
             </button>
@@ -408,12 +427,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
                 <span>Contacts</span>
-            </button>
-            <button class="nav-item active" data-tab="settings" onclick="window.location.href='settings.html'">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                </svg>
-                <span>Settings</span>
             </button>
         </nav>
     </div>
@@ -437,14 +450,8 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ================================================================
-        // STATE
-        // ================================================================
         let darkMode = false;
 
-        // ================================================================
-        // TOAST
-        // ================================================================
         function showToast(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = message;
@@ -455,9 +462,6 @@
             }, 3000);
         }
 
-        // ================================================================
-        // AUTH CHECK
-        // ================================================================
         auth.onAuthStateChanged((user) => {
             document.getElementById('loading').style.display = 'none';
 
@@ -469,9 +473,6 @@
             showToast('Welcome to Settings');
         });
 
-        // ================================================================
-        // SETTINGS ACTIONS
-        // ================================================================
         function toggleDarkMode() {
             darkMode = !darkMode;
             if (darkMode) {
@@ -483,7 +484,7 @@
                 document.documentElement.style.setProperty('--text-secondary', '#B0B0C8');
                 document.documentElement.style.setProperty('--text-muted', '#7A7A94');
                 document.documentElement.style.setProperty('--border-color', '#33334A');
-                showToast('🌙 Dark mode enabled');
+                showToast('Dark mode enabled');
             } else {
                 document.documentElement.style.setProperty('--bg-primary', '#FFFFFF');
                 document.documentElement.style.setProperty('--bg-secondary', '#F5F9F7');
@@ -493,7 +494,7 @@
                 document.documentElement.style.setProperty('--text-secondary', '#4A6A5A');
                 document.documentElement.style.setProperty('--text-muted', '#8AAA9A');
                 document.documentElement.style.setProperty('--border-color', '#D4E8DE');
-                showToast('☀️ Light mode enabled');
+                showToast('Light mode enabled');
             }
         }
 
@@ -511,7 +512,6 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            // Get user UID first
             db.ref('users').orderByChild('email').equalTo(user.email)
                 .once('value')
                 .then((snap) => {
@@ -539,11 +539,12 @@
                     window.location.href = 'auth.html';
                 })
                 .catch((err) => {
-                    showToast('❌ ' + err.message);
+                    showToast('Error: ' + err.message);
                 });
         }
 
-        console.log('🚀 Stardust X - Settings Page');
+        console.log('🚀 Stardust X - Settings Page (Fixed)');
+        console.log('✅ No emojis in buttons');
     </script>
 </body>
 </html>
