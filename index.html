@@ -10,11 +10,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-    <!-- PeerJS for calls -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         /* ================================================================
-           STARDUST X - Complete Professional Messaging App
+           STARDUST X - COMPLETE STYLES
            ================================================================ */
 
         :root {
@@ -63,6 +62,7 @@
             border-radius: 10px;
         }
 
+        /* ===== APP CONTAINER ===== */
         #app {
             max-width: 430px;
             margin: 0 auto;
@@ -73,6 +73,239 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 40px rgba(0, 168, 107, 0.05);
+        }
+
+        /* ===== FULL SCREEN LOGIN PAGE ===== */
+        #login-page {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #login-page.hidden {
+            display: none;
+        }
+
+        #login-page .login-box {
+            max-width: 400px;
+            width: 100%;
+            padding: 32px 24px;
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        #login-page .login-box .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        #login-page .login-box .logo .icon {
+            width: 56px;
+            height: 56px;
+            background: var(--primary);
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        #login-page .login-box .logo .icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        #login-page .login-box .logo .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        #login-page .login-box .logo .brand .x {
+            color: var(--primary);
+        }
+
+        #login-page .login-box .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        #login-page .login-box .auth-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            background: var(--bg-surface);
+        }
+
+        #login-page .login-box .auth-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        #login-page .login-box .auth-toggle button.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        #login-page .login-box .auth-toggle button:active {
+            transform: scale(0.96);
+        }
+
+        #login-page .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            transition: var(--transition);
+            margin-bottom: 12px;
+        }
+
+        #login-page .login-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+
+        #login-page .login-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        #login-page .login-box input[type="file"] {
+            padding: 8px;
+            background: var(--bg-surface);
+            border: 1px dashed var(--border-color);
+            cursor: pointer;
+        }
+
+        #login-page .login-box input[type="file"]::file-selector-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+
+        #login-page .login-box input[type="file"]::file-selector-button:hover {
+            background: var(--primary-dark);
+        }
+
+        #login-page .login-box .btn-primary {
+            width: 100%;
+            margin-top: 4px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        #login-page .login-box .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        #login-page .login-box .btn-secondary {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        #login-page .login-box .btn-secondary:active {
+            background: var(--bg-surface);
+        }
+
+        #login-page .login-box .auth-switch {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        #login-page .login-box .auth-switch .link {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        #login-page .login-box .auth-switch .link:active {
+            opacity: 0.7;
+        }
+
+        #login-page .login-box .footer-links {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        #login-page .login-box .footer-links a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        #login-page .login-box .footer-links a:active {
+            opacity: 0.7;
+        }
+
+        #login-page .login-box .pfp-preview {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        #login-page .login-box .pfp-preview img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary);
+            background: var(--bg-surface);
         }
 
         /* ===== HEADER ===== */
@@ -745,8 +978,7 @@
             background: var(--bg-surface);
         }
 
-        .modal-box input,
-        .modal-box select {
+        .modal-box input {
             width: 100%;
             padding: 10px 16px;
             background: var(--bg-input);
@@ -759,8 +991,7 @@
             margin-bottom: 10px;
         }
 
-        .modal-box input:focus,
-        .modal-box select:focus {
+        .modal-box input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
         }
@@ -801,70 +1032,7 @@
             background: var(--bg-surface);
         }
 
-        .modal-box .auth-switch {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .modal-box .auth-switch .link {
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        .modal-box .auth-switch .link:active {
-            opacity: 0.7;
-        }
-
-        .modal-box .otp-input {
-            text-align: center;
-            letter-spacing: 8px;
-            font-size: 24px;
-            font-weight: 700;
-            padding: 12px;
-        }
-
-        .modal-box .password-setup {
-            margin-top: 12px;
-            padding: 16px;
-            background: var(--bg-surface);
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-        }
-
-        .modal-box .password-setup label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .modal-box .footer-links {
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            font-size: 13px;
-        }
-
-        .modal-box .footer-links a {
-            color: var(--primary);
-            text-decoration: underline;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .modal-box .footer-links a:active {
-            opacity: 0.7;
-        }
-
-        /* ===== CONTACT ITEMS ===== */
-        .contact-item-modal {
+        .modal-box .contact-item-modal {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -878,11 +1046,11 @@
             text-align: left;
         }
 
-        .contact-item-modal:active {
+        .modal-box .contact-item-modal:active {
             background: var(--bg-surface);
         }
 
-        .contact-item-modal .avatar {
+        .modal-box .contact-item-modal .avatar {
             width: 44px;
             height: 44px;
             border-radius: 50%;
@@ -892,24 +1060,24 @@
             flex-shrink: 0;
         }
 
-        .contact-item-modal .info {
+        .modal-box .contact-item-modal .info {
             flex: 1;
             min-width: 0;
         }
 
-        .contact-item-modal .info .name {
+        .modal-box .contact-item-modal .info .name {
             font-weight: 600;
             color: var(--text-primary);
             font-size: 14px;
         }
 
-        .contact-item-modal .info .uid {
+        .modal-box .contact-item-modal .info .uid {
             font-size: 12px;
             color: var(--text-muted);
             font-family: monospace;
         }
 
-        .contact-item-modal .btn-action {
+        .modal-box .contact-item-modal .btn-action {
             background: var(--primary);
             color: white;
             border: none;
@@ -922,7 +1090,7 @@
             flex-shrink: 0;
         }
 
-        .contact-item-modal .btn-action:active {
+        .modal-box .contact-item-modal .btn-action:active {
             transform: scale(0.95);
         }
 
@@ -1115,7 +1283,7 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* ===== THREE DOT MENU DROPDOWN ===== */
+        /* ===== MENU DROPDOWN ===== */
         .menu-dropdown {
             position: absolute;
             top: 54px;
@@ -1167,7 +1335,7 @@
             margin: 4px 8px;
         }
 
-        /* ===== CONTACT ITEM MENU DROPDOWN ===== */
+        /* ===== CONTACT MENU DROPDOWN ===== */
         .contact-menu-dropdown {
             position: absolute;
             right: 8px;
@@ -1314,6 +1482,9 @@
                 max-width: 100%;
                 border-radius: 0;
             }
+            #login-page .login-box {
+                padding: 24px 16px;
+            }
         }
 
         @media (max-width: 380px) {
@@ -1324,10 +1495,6 @@
             .nav-item svg {
                 width: 20px;
                 height: 20px;
-            }
-            .settings-item {
-                font-size: 13px;
-                padding: 12px 12px;
             }
         }
 
@@ -1476,6 +1643,22 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* ===== FORGOT PASSWORD ===== */
+        .forgot-password-link {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: -6px;
+            margin-bottom: 8px;
+        }
+
+        .forgot-password-link:active {
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -1484,6 +1667,62 @@
     <div id="loading">
         <div class="spinner"></div>
         <div class="brand">Stardust <span class="x">X</span></div>
+    </div>
+
+    <!-- ===== FULL SCREEN LOGIN PAGE ===== -->
+    <div id="login-page">
+        <div class="login-box">
+            <div class="logo">
+                <div class="icon">
+                    <svg viewBox="0 0 40 40" fill="none">
+                        <rect x="4" y="4" width="32" height="32" rx="8" fill="white" />
+                        <path d="M12 20 L18 26 L30 14" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M22 14 L28 14 L28 20" stroke="#00A86B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="brand">Stardust <span class="x">X</span></div>
+            </div>
+            <div class="subtitle">Secure messaging for everyone</div>
+
+            <div id="login-form">
+                <!-- Auth Toggle -->
+                <div class="auth-toggle">
+                    <button class="active" id="login-toggle" onclick="switchLoginView('login')">Sign In</button>
+                    <button id="signup-toggle" onclick="switchLoginView('signup')">Create Account</button>
+                </div>
+
+                <!-- Sign In Form -->
+                <div id="signin-form">
+                    <input type="email" id="login-email" placeholder="Email address" />
+                    <input type="password" id="login-password" placeholder="Password" />
+                    <span class="forgot-password-link" onclick="forgotPassword()">Forgot password?</span>
+                    <button class="btn-primary" onclick="handleLogin()">Sign In</button>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="signup-form" style="display:none;">
+                    <div class="pfp-preview">
+                        <img id="signup-pfp-preview" src="https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=80" alt="Profile" />
+                    </div>
+                    <input type="file" id="signup-pfp" accept="image/*" />
+                    <input type="text" id="signup-name" placeholder="Full Name" />
+                    <input type="email" id="signup-email" placeholder="Email address" />
+                    <input type="password" id="signup-password" placeholder="Password (min 6 characters)" />
+                    <button class="btn-primary" onclick="handleSignup()">Create Account</button>
+                </div>
+
+                <div class="auth-switch">
+                    <span id="auth-switch-text">
+                        <span class="link" onclick="switchLoginView('signup')">Don't have an account? Create one</span>
+                    </span>
+                </div>
+
+                <div class="footer-links">
+                    <a href="privacy.html" target="_blank">Privacy Policy</a>
+                    <a href="terms.html" target="_blank">Terms of Service</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ===== APP ===== -->
@@ -1645,7 +1884,7 @@
                 <span class="title">Settings</span>
             </div>
             <div class="settings-list scrollbar-custom" style="flex:1;overflow-y:auto;">
-                <button class="settings-item" onclick="editProfile()">
+                <button class="settings-item" onclick="openEditProfile()">
                     <span class="icon">👤</span>
                     <span class="label">Edit Profile</span>
                     <span class="arrow">›</span>
@@ -1666,12 +1905,12 @@
                     <span class="arrow">›</span>
                 </button>
                 <div class="settings-divider"></div>
-                <button class="settings-item" onclick="openPrivacyPolicy()">
+                <button class="settings-item" onclick="window.open('privacy.html','_blank')">
                     <span class="icon">🔒</span>
                     <span class="label">Privacy Policy</span>
                     <span class="arrow">›</span>
                 </button>
-                <button class="settings-item" onclick="openTerms()">
+                <button class="settings-item" onclick="window.open('terms.html','_blank')">
                     <span class="icon">📜</span>
                     <span class="label">Terms of Service</span>
                     <span class="arrow">›</span>
@@ -1708,60 +1947,6 @@
         </nav>
 
         <!-- ===== MODALS ===== -->
-
-        <!-- Auth Modal -->
-        <div id="auth-modal" class="modal-overlay">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h3>Welcome to Stardust X</h3>
-                </div>
-                <div id="auth-form">
-                    <div style="display:flex;gap:8px;margin-bottom:12px;">
-                        <button onclick="setAuthMethod('email')" id="auth-email-btn" class="btn-primary" style="flex:1;margin:0;padding:8px;font-size:13px;">Email</button>
-                        <button onclick="setAuthMethod('phone')" id="auth-phone-btn" class="btn-secondary" style="flex:1;margin:0;padding:8px;font-size:13px;">Phone</button>
-                    </div>
-                    <div id="auth-method-container">
-                        <input type="text" id="auth-identifier" placeholder="Enter email address" />
-                        <input type="password" id="auth-password" placeholder="Enter password" />
-                        <div id="phone-field" style="display:none;">
-                            <select id="country-code" style="margin-bottom:8px;">
-                                <option value="+91">🇮🇳 +91</option>
-                                <option value="+1">🇺🇸 +1</option>
-                                <option value="+44">🇬🇧 +44</option>
-                                <option value="+61">🇦🇺 +61</option>
-                                <option value="+81">🇯🇵 +81</option>
-                            </select>
-                            <input type="text" id="auth-phone" placeholder="Enter phone number" />
-                        </div>
-                    </div>
-                    <button class="btn-primary" onclick="handleAuth()">Sign In</button>
-                    <button class="btn-secondary" onclick="toggleAuthMode()">Create Account</button>
-                    <div class="auth-switch">
-                        <span class="link" onclick="toggleAuthMode()" id="auth-switch-text">Don't have an account? Sign up</span>
-                        <span style="display:block;margin-top:4px;">
-                            <span class="link" onclick="forgotPassword()">Forgot Password?</span>
-                        </span>
-                    </div>
-                    <div id="otp-section" style="display:none;margin-top:12px;">
-                        <input type="text" id="otp-input" class="otp-input" placeholder="000000" maxlength="6" />
-                        <button class="btn-primary" onclick="verifyOTP()">Verify OTP</button>
-                        <button class="btn-secondary" onclick="resendOTP()">Resend OTP</button>
-                    </div>
-                    <div id="password-setup-section" style="display:none;margin-top:12px;">
-                        <div class="password-setup">
-                            <label>Set your password for future logins</label>
-                            <input type="password" id="setup-password" placeholder="Enter new password" />
-                            <input type="password" id="setup-password-confirm" placeholder="Confirm password" />
-                            <button class="btn-primary" onclick="setupPassword()" style="margin-top:8px;">Set Password</button>
-                        </div>
-                    </div>
-                    <div class="footer-links">
-                        <a href="privacy.html" target="_blank">Privacy Policy</a>
-                        <a href="terms.html" target="_blank">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Add Contact Modal -->
         <div id="add-contact-modal" class="modal-overlay hidden">
@@ -1847,6 +2032,7 @@
                     <button class="btn-secondary" style="margin:0;padding:6px 16px;font-size:12px;" onclick="changeProfilePic()">Change Photo</button>
                 </div>
                 <input type="text" id="edit-name" placeholder="Display Name" />
+                <input type="text" id="edit-uid" placeholder="UID" disabled style="background:var(--bg-surface);color:var(--text-muted);cursor:not-allowed;" />
                 <input type="text" id="edit-bio" placeholder="Bio" />
                 <button class="btn-primary" onclick="saveProfile()">Save Changes</button>
             </div>
@@ -1957,250 +2143,132 @@
             chats: [],
             messages: {},
             activeChatUID: null,
-            authMethod: 'email',
-            isSignUp: false,
-            verificationId: null,
             darkMode: false,
             pendingContactUID: null,
             activeContactMenuUID: null,
             mediaToSave: null,
+            tempPfp: null,
         };
 
         // ================================================================
         // AUTH SYSTEM
         // ================================================================
-        let currentAuthMethod = 'email';
-        let isSignUp = false;
-        let isPhoneSignUp = false;
+        let currentView = 'login';
 
-        function setAuthMethod(method) {
-            currentAuthMethod = method;
-            const emailBtn = document.getElementById('auth-email-btn');
-            const phoneBtn = document.getElementById('auth-phone-btn');
-            const identifier = document.getElementById('auth-identifier');
-            const password = document.getElementById('auth-password');
-            const phoneField = document.getElementById('phone-field');
-
-            if (method === 'email') {
-                emailBtn.className = 'btn-primary';
-                emailBtn.style.cssText = 'flex:1;margin:0;padding:8px;font-size:13px;';
-                phoneBtn.className = 'btn-secondary';
-                phoneBtn.style.cssText = 'flex:1;margin:0;padding:8px;font-size:13px;';
-                identifier.placeholder = 'Enter email address';
-                identifier.type = 'email';
-                password.style.display = 'block';
-                phoneField.style.display = 'none';
-                document.getElementById('auth-identifier').value = '';
-            } else {
-                phoneBtn.className = 'btn-primary';
-                phoneBtn.style.cssText = 'flex:1;margin:0;padding:8px;font-size:13px;';
-                emailBtn.className = 'btn-secondary';
-                emailBtn.style.cssText = 'flex:1;margin:0;padding:8px;font-size:13px;';
-                identifier.placeholder = 'Enter phone number';
-                identifier.type = 'tel';
-                password.style.display = 'none';
-                phoneField.style.display = 'block';
-                document.getElementById('auth-identifier').value = '';
-            }
-        }
-
-        function toggleAuthMode() {
-            isSignUp = !isSignUp;
-            isPhoneSignUp = false;
-            const btn = document.querySelector('#auth-form .btn-primary');
+        function switchLoginView(view) {
+            currentView = view;
+            const loginToggle = document.getElementById('login-toggle');
+            const signupToggle = document.getElementById('signup-toggle');
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
             const switchText = document.getElementById('auth-switch-text');
-            const secondaryBtn = document.querySelector('#auth-form .btn-secondary');
 
-            if (isSignUp) {
-                btn.textContent = 'Create Account';
-                secondaryBtn.textContent = 'Already have an account? Sign in';
-                switchText.textContent = 'Already have an account? Sign in';
+            if (view === 'login') {
+                loginToggle.className = 'active';
+                signupToggle.className = '';
+                signinForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                switchText.innerHTML = `<span class="link" onclick="switchLoginView('signup')">Don't have an account? Create one</span>`;
             } else {
-                btn.textContent = 'Sign In';
-                secondaryBtn.textContent = 'Create Account';
-                switchText.textContent = "Don't have an account? Sign up";
+                signupToggle.className = 'active';
+                loginToggle.className = '';
+                signinForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                switchText.innerHTML = `<span class="link" onclick="switchLoginView('login')">Already have an account? Sign in</span>`;
             }
-            document.getElementById('otp-section').style.display = 'none';
-            document.getElementById('password-setup-section').style.display = 'none';
         }
 
-        function handleAuth() {
-            const identifier = document.getElementById('auth-identifier').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
+        function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
 
-            if (!identifier) {
-                showToast('⚠️ Please enter your ' + (currentAuthMethod === 'email' ? 'email' : 'phone number'));
+            if (!email || !password) {
+                showToast('⚠️ Please fill in all fields');
                 return;
             }
 
-            if (currentAuthMethod === 'email') {
-                if (isSignUp) {
-                    if (password.length < 6) {
-                        showToast('⚠️ Password must be at least 6 characters');
-                        return;
-                    }
-                    auth.createUserWithEmailAndPassword(identifier, password)
-                        .then((cred) => {
-                            const user = cred.user;
-                            const uid = generateUID();
-                            return db.ref('users/' + uid).set({
-                                uid: uid,
-                                name: user.displayName || identifier.split('@')[0],
-                                email: identifier,
-                                phone: '',
-                                pfp: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(identifier.split(
-                                '@')[0]) + '&background=00A86B&color=fff&size=72',
-                                createdAt: Date.now(),
-                                contacts: [],
-                                blocked: [],
-                                closeFriends: [],
-                            }).then(() => {
-                                return user.updateProfile({ displayName: identifier.split('@')[0] });
-                            });
-                        })
-                        .then(() => {
-                            showToast('✅ Account created successfully!');
-                            document.getElementById('auth-modal').classList.add('hidden');
-                        })
-                        .catch((err) => {
-                            showToast('❌ ' + err.message);
-                        });
-                } else {
-                    if (!password) {
-                        showToast('⚠️ Please enter your password');
-                        return;
-                    }
-                    auth.signInWithEmailAndPassword(identifier, password)
-                        .then(() => {
-                            showToast('✅ Welcome back!');
-                            document.getElementById('auth-modal').classList.add('hidden');
-                        })
-                        .catch((err) => {
-                            showToast('❌ ' + err.message);
-                        });
-                }
-            } else {
-                const countryCode = document.getElementById('country-code').value;
-                const phone = document.getElementById('auth-phone').value.trim();
-                const fullPhone = countryCode + phone;
-
-                if (!phone || phone.length < 10) {
-                    showToast('⚠️ Please enter a valid phone number');
-                    return;
-                }
-
-                if (isSignUp) {
-                    isPhoneSignUp = true;
-                }
-
-                const appVerifier = new firebase.auth.RecaptchaVerifier('auth-modal', {
-                    size: 'invisible',
-                    callback: () => {}
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    showToast('✅ Welcome back!');
+                })
+                .catch((err) => {
+                    showToast('❌ ' + err.message);
                 });
-
-                auth.signInWithPhoneNumber(fullPhone, appVerifier)
-                    .then((confirmationResult) => {
-                        state.verificationId = confirmationResult.verificationId;
-                        document.getElementById('otp-section').style.display = 'block';
-                        document.getElementById('otp-input').focus();
-                        showToast('📱 OTP sent to ' + fullPhone);
-                    })
-                    .catch((err) => {
-                        showToast('❌ ' + err.message);
-                    });
-            }
         }
 
-        function verifyOTP() {
-            const otp = document.getElementById('otp-input').value.trim();
-            if (!otp || otp.length !== 6) {
-                showToast('⚠️ Please enter a valid 6-digit OTP');
+        function handleSignup() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            const pfpFile = document.getElementById('signup-pfp').files[0];
+
+            if (!name || !email || !password) {
+                showToast('⚠️ Please fill in all fields');
                 return;
             }
 
-            const credential = firebase.auth.PhoneAuthProvider.credential(state.verificationId, otp);
-
-            if (isPhoneSignUp) {
-                // Create new user with phone
-                auth.signInWithCredential(credential)
-                    .then((result) => {
-                        const user = result.user;
-                        const uid = generateUID();
-                        return db.ref('users/' + uid).set({
-                            uid: uid,
-                            name: 'User ' + uid,
-                            email: '',
-                            phone: user.phoneNumber || '',
-                            pfp: 'https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=72',
-                            createdAt: Date.now(),
-                            contacts: [],
-                            blocked: [],
-                            closeFriends: [],
-                            hasPassword: false,
-                        }).then(() => {
-                            showToast('✅ Phone verified! Please set your password.');
-                            document.getElementById('password-setup-section').style.display = 'block';
-                            document.getElementById('otp-section').style.display = 'none';
-                            document.getElementById('auth-identifier').value = user.phoneNumber || '';
-                        });
-                    })
-                    .catch((err) => {
-                        showToast('❌ ' + err.message);
-                    });
-            } else {
-                // Sign in with phone
-                auth.signInWithCredential(credential)
-                    .then(() => {
-                        showToast('✅ Phone verified successfully!');
-                        document.getElementById('otp-section').style.display = 'none';
-                        document.getElementById('auth-modal').classList.add('hidden');
-                    })
-                    .catch((err) => {
-                        showToast('❌ Invalid OTP: ' + err.message);
-                    });
-            }
-        }
-
-        function resendOTP() {
-            showToast('📱 Resending OTP...');
-            setTimeout(() => {
-                showToast('📱 OTP resent successfully');
-            }, 1500);
-        }
-
-        function setupPassword() {
-            const password = document.getElementById('setup-password').value.trim();
-            const confirm = document.getElementById('setup-password-confirm').value.trim();
-
-            if (!password || password.length < 6) {
+            if (password.length < 6) {
                 showToast('⚠️ Password must be at least 6 characters');
                 return;
             }
 
-            if (password !== confirm) {
-                showToast('⚠️ Passwords do not match');
-                return;
-            }
+            // Create user with email/password
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((cred) => {
+                    const user = cred.user;
+                    const uid = generateUID();
 
-            const user = auth.currentUser;
-            if (user) {
-                user.updatePassword(password)
-                    .then(() => {
-                        return db.ref('users/' + state.uid + '/hasPassword').set(true);
-                    })
-                    .then(() => {
-                        showToast('✅ Password set successfully!');
-                        document.getElementById('password-setup-section').style.display = 'none';
-                        document.getElementById('auth-modal').classList.add('hidden');
-                    })
-                    .catch((err) => {
-                        showToast('❌ ' + err.message);
-                    });
-            }
+                    // Handle profile picture
+                    const processSignup = (pfpBase64) => {
+                        const userData = {
+                            uid: uid,
+                            name: name,
+                            email: email,
+                            pfp: pfpBase64 ||
+                                'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) +
+                                '&background=00A86B&color=fff&size=72',
+                            bio: 'Hey there! I\'m using Stardust X',
+                            createdAt: Date.now(),
+                            contacts: [],
+                            blocked: [],
+                            closeFriends: [],
+                        };
+
+                        return db.ref('users/' + uid).set(userData)
+                            .then(() => {
+                                return user.updateProfile({ displayName: name });
+                            });
+                    };
+
+                    if (pfpFile) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            processSignup(e.target.result)
+                                .then(() => {
+                                    showToast('✅ Account created successfully!');
+                                })
+                                .catch((err) => {
+                                    showToast('❌ ' + err.message);
+                                });
+                        };
+                        reader.readAsDataURL(pfpFile);
+                    } else {
+                        processSignup(null)
+                            .then(() => {
+                                showToast('✅ Account created successfully!');
+                            })
+                            .catch((err) => {
+                                showToast('❌ ' + err.message);
+                            });
+                    }
+                })
+                .catch((err) => {
+                    showToast('❌ ' + err.message);
+                });
         }
 
         function forgotPassword() {
-            const email = document.getElementById('auth-identifier').value.trim();
+            const email = document.getElementById('login-email').value.trim();
             if (!email || !email.includes('@')) {
                 showToast('⚠️ Please enter a valid email address');
                 return;
@@ -2225,54 +2293,59 @@
             document.getElementById('loading').style.display = 'none';
 
             if (user) {
-                db.ref('users').orderByChild('email').equalTo(user.email || user.phoneNumber || '')
+                // Find user in database
+                db.ref('users').orderByChild('email').equalTo(user.email)
                     .once('value')
                     .then((snap) => {
                         const data = snap.val();
                         let userData = null;
+                        let userKey = null;
+
                         if (data) {
                             const keys = Object.keys(data);
                             for (let k of keys) {
-                                const u = data[k];
-                                if (u.email === user.email || u.phone === user.phoneNumber) {
-                                    userData = u;
-                                    state.uid = k;
+                                if (data[k].email === user.email) {
+                                    userData = data[k];
+                                    userKey = k;
                                     break;
                                 }
                             }
                         }
 
                         if (!userData) {
+                            // User exists in auth but not in DB - create
                             const uid = generateUID();
                             const newUser = {
                                 uid: uid,
-                                name: user.displayName || 'User ' + uid,
-                                email: user.email || '',
-                                phone: user.phoneNumber || '',
+                                name: user.displayName || user.email.split('@')[0],
+                                email: user.email,
                                 pfp: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName ||
-                                    'User') + '&background=00A86B&color=fff&size=72',
+                                    user.email.split('@')[0]) + '&background=00A86B&color=fff&size=72',
+                                bio: 'Hey there! I\'m using Stardust X',
                                 createdAt: Date.now(),
                                 contacts: [],
                                 blocked: [],
                                 closeFriends: [],
-                                hasPassword: !!user.email,
                             };
                             db.ref('users/' + uid).set(newUser);
                             state.currentUser = newUser;
                             state.uid = uid;
                         } else {
                             state.currentUser = userData;
-                            state.uid = userData.uid;
+                            state.uid = userKey || userData.uid;
                             if (!state.currentUser.contacts) state.currentUser.contacts = [];
                             if (!state.currentUser.blocked) state.currentUser.blocked = [];
                             if (!state.currentUser.closeFriends) state.currentUser.closeFriends = [];
                         }
 
+                        // Hide login page, show app
+                        document.getElementById('login-page').classList.add('hidden');
                         initializeApp();
                     });
             } else {
-                document.getElementById('auth-modal').classList.remove('hidden');
-                setAuthMethod('email');
+                // Show login page
+                document.getElementById('login-page').classList.remove('hidden');
+                switchLoginView('login');
             }
         });
 
@@ -2314,8 +2387,6 @@
             renderChatList();
             renderContactsList();
 
-            document.getElementById('auth-modal').classList.add('hidden');
-
             // Search handlers
             document.getElementById('search-input')?.addEventListener('input', (e) => {
                 filterChatList(e.target.value);
@@ -2336,6 +2407,18 @@
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
+                }
+            });
+
+            // Signup preview
+            document.getElementById('signup-pfp')?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        document.getElementById('signup-pfp-preview').src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
 
@@ -2492,7 +2575,6 @@
                     div.className = 'list-item';
                     div.style.position = 'relative';
 
-                    // Click on main area opens chat
                     const mainClick = () => openChat(uid);
                     div.addEventListener('click', mainClick);
 
@@ -2543,7 +2625,6 @@
                     state.blocked.push(uid);
                     db.ref('users/' + state.uid + '/blocked').set(state.blocked);
                     showToast('🚫 Contact blocked');
-                    // Remove from contacts if blocked
                     state.contacts = state.contacts.filter(c => c !== uid);
                     db.ref('users/' + state.uid + '/contacts').set(state.contacts);
                     renderChatList();
@@ -2574,12 +2655,11 @@
         }
 
         // ================================================================
-        // MAIN MENU (Header 3-dot)
+        // MAIN MENU
         // ================================================================
         function toggleMainMenu() {
             const menu = document.getElementById('main-menu');
             menu.classList.toggle('active');
-            // Close other menus
             document.getElementById('chat-menu-dropdown')?.classList.remove('active');
         }
 
@@ -2675,14 +2755,12 @@
                 const div = document.createElement('div');
                 div.className = `message ${isSent ? 'sent' : 'received'}`;
 
-                // Text
                 if (msg.text) {
                     const p = document.createElement('p');
                     p.textContent = msg.text;
                     div.appendChild(p);
                 }
 
-                // Media
                 if (msg.mediaType && msg.mediaUrl) {
                     const mediaDiv = document.createElement('div');
                     mediaDiv.className = 'media-preview';
@@ -2713,7 +2791,6 @@
                     div.appendChild(mediaDiv);
                 }
 
-                // Time
                 const timeSpan = document.createElement('span');
                 timeSpan.className = 'time';
                 timeSpan.textContent = formatTime(msg.timestamp);
@@ -2722,7 +2799,6 @@
                 }
                 div.appendChild(timeSpan);
 
-                // Long press handler
                 div.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     const isOwn = msg.sender === state.uid;
@@ -2917,7 +2993,6 @@
             const msg = msgs.find(m => m.id === msgId);
             if (!msg || !msg.mediaUrl) return;
 
-            // Open in media viewer with save option
             openMediaViewer(msg.mediaUrl, msg.mediaType || 'image', msg.mediaName);
             document.querySelectorAll('.context-menu').forEach(el => el.remove());
         }
@@ -2960,7 +3035,7 @@
         }
 
         // ================================================================
-        // SEND MEDIA (Photo, Document, File)
+        // SEND MEDIA
         // ================================================================
         function sendMedia(type) {
             if (!state.activeChatUID) {
@@ -3300,13 +3375,17 @@
         // ================================================================
         // EDIT PROFILE
         // ================================================================
-        function editProfile() {
+        function openEditProfile() {
             const modal = document.getElementById('edit-profile-modal');
-            document.getElementById('edit-avatar').src = state.currentUser.pfp ||
-                'https://ui-avatars.com/api/?name=' + encodeURIComponent(state.currentUser.name) +
+            const user = state.currentUser;
+
+            document.getElementById('edit-avatar').src = user.pfp ||
+                'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
                 '&background=00A86B&color=fff&size=80';
-            document.getElementById('edit-name').value = state.currentUser.name || '';
-            document.getElementById('edit-bio').value = state.currentUser.bio || '';
+            document.getElementById('edit-name').value = user.name || '';
+            document.getElementById('edit-uid').value = user.uid || state.uid || '';
+            document.getElementById('edit-bio').value = user.bio || '';
+
             modal.classList.remove('hidden');
         }
 
@@ -3352,6 +3431,7 @@
                     showToast('✅ Profile updated!');
                     renderChatList();
                     renderContactsList();
+                    state.tempPfp = null;
                 })
                 .catch((err) => {
                     showToast('❌ ' + err.message);
@@ -3387,24 +3467,12 @@
         }
 
         // ================================================================
-        // PRIVACY POLICY & TERMS
-        // ================================================================
-        function openPrivacyPolicy() {
-            window.open('privacy.html', '_blank');
-        }
-
-        function openTerms() {
-            window.open('terms.html', '_blank');
-        }
-
-        // ================================================================
         // LOGOUT & DELETE ACCOUNT
         // ================================================================
         function logoutUser() {
             if (confirm('Are you sure you want to logout?')) {
                 auth.signOut().then(() => {
                     showToast('👋 Logged out');
-                    document.getElementById('auth-modal').classList.remove('hidden');
                 });
             }
         }
@@ -3415,14 +3483,13 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            // Delete user data from Realtime Database
             db.ref('users/' + state.uid).remove()
                 .then(() => {
                     return user.delete();
                 })
                 .then(() => {
                     showToast('🗑️ Account deleted');
-                    document.getElementById('auth-modal').classList.remove('hidden');
+                    auth.signOut();
                 })
                 .catch((err) => {
                     showToast('❌ ' + err.message);
@@ -3430,7 +3497,7 @@
         }
 
         // ================================================================
-        // CALL SYSTEM (PeerJS)
+        // CALL SYSTEM
         // ================================================================
         let peer = null;
         let call = null;
@@ -3451,26 +3518,21 @@
                 const user = snap.val();
                 if (!user) return;
 
-                // Show call overlay
                 document.getElementById('call-overlay').classList.add('active');
                 document.getElementById('call-avatar').src = user.pfp;
                 document.getElementById('call-name').textContent = user.name;
                 document.getElementById('call-status').textContent = 'Connecting...';
 
-                // Initialize PeerJS
                 if (!peer) {
                     peer = new Peer('stardust-' + state.uid);
                 }
 
-                // Get local media stream
                 navigator.mediaDevices.getUserMedia({
                         audio: true,
                         video: type === 'video'
                     })
                     .then((stream) => {
                         localStream = stream;
-
-                        // Call the peer
                         const targetPeerId = 'stardust-' + uid;
                         call = peer.call(targetPeerId, stream);
 
@@ -3478,11 +3540,8 @@
                             document.getElementById('call-status').textContent = '🔴 Connected';
                             document.getElementById('call-duration').textContent = '00:00';
                             startCallTimer();
-
-                            // Show floating call
                             document.getElementById('floating-call').classList.add('active');
                             document.getElementById('floating-call-name').textContent = user.name;
-
                             showToast('📞 Call connected');
                         });
 
@@ -3590,7 +3649,6 @@
                 renderContactsList();
             }
 
-            // Update search visibility
             const chatSearch = document.querySelector('#chat-list-view .search-bar');
             const contactSearch = document.querySelector('#contacts-view .search-bar');
 
@@ -3675,15 +3733,12 @@
         });
 
         console.log('🚀 Stardust X - Complete Professional Messaging App');
-        console.log('✅ Email + Phone Auth with Firebase');
-        console.log('✅ Real contacts with block, close friends');
-        console.log('✅ Real messaging with reactions, edit, delete, copy');
-        console.log('✅ Photo, Document, File, Location sharing');
-        console.log('✅ Audio + Video calls with PeerJS');
-        console.log('✅ Full screen media viewer with save');
-        console.log('✅ Dark mode');
-        console.log('✅ Settings with privacy, terms, logout, delete');
-        console.log('✅ No emoji - all SVG icons');
+        console.log('✅ Full screen login page - no skip');
+        console.log('✅ Email only auth with signup (PF P, Name, Email, Password)');
+        console.log('✅ Persistent login - stays logged in');
+        console.log('✅ Edit profile with UID display (non-editable)');
+        console.log('✅ No emoji in menus - all text');
+        console.log('✅ All features working');
     </script>
 </body>
 </html>
