@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
         /* ================================================================
-           PROFILE PAGE STYLES
+           PROFILE PAGE STYLES - With Dark Mode Support
            ================================================================ */
         :root {
             --primary: #00A86B;
@@ -30,6 +30,17 @@
             --radius-sm: 10px;
             --transition: all 0.25s ease;
             --danger: #EF4444;
+        }
+
+        .dark-mode {
+            --bg-primary: #1A1A2E;
+            --bg-secondary: #0F0F1A;
+            --bg-surface: #2A2A44;
+            --bg-input: #22223A;
+            --text-primary: #F0F0F5;
+            --text-secondary: #B0B0C8;
+            --text-muted: #7A7A94;
+            --border-color: #33334A;
         }
 
         * {
@@ -329,6 +340,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        const storage = firebase.storage();
 
         // ================================================================
         // STATE
@@ -336,7 +348,7 @@
         let currentUser = null;
         let userUID = null;
         let userKey = null;
-        let tempPfp = null;
+        let tempPfpFile = null;
 
         // ================================================================
         // TOAST
@@ -350,6 +362,17 @@
                 toast.classList.remove('active');
             }, 3000);
         }
+
+        // ================================================================
+        // DARK MODE - Apply on all pages
+        // ================================================================
+        function applyDarkMode() {
+            const saved = localStorage.getItem('stardust-dark-mode');
+            if (saved === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+        applyDarkMode();
 
         // ================================================================
         // COPY UID
@@ -371,7 +394,7 @@
         }
 
         // ================================================================
-        // AUTH CHECK - FIXED PERMISSION ISSUE
+        // AUTH CHECK
         // ================================================================
         auth.onAuthStateChanged((user) => {
             document.getElementById('loading').style.display = 'none';
@@ -381,8 +404,6 @@
                 return;
             }
 
-            // Get user data using the user's UID directly
-            // First, find the user's UID from the database
             db.ref('users').orderByChild('email').equalTo(user.email)
                 .once('value')
                 .then((snap) => {
@@ -402,7 +423,6 @@
                     if (currentUser && userKey) {
                         loadProfile();
                     } else {
-                        // If user not found, create new entry
                         const newUID = generateUID();
                         const newUser = {
                             uid: newUID,
@@ -438,52 +458,39 @@
         }
 
         // ================================================================
-        // LOAD PROFILE - UID FIXED
+        // LOAD PROFILE
         // ================================================================
         function loadProfile() {
-            console.log('Loading profile for user:', currentUser);
-            console.log('User Key (UID):', userKey);
-            console.log('User UID from data:', userUID);
-
-            // Set avatar
             document.getElementById('profile-avatar').src = currentUser.pfp ||
                 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) +
                 '&background=00A86B&color=fff&size=100';
 
-            // Set name
             document.getElementById('profile-name').value = currentUser.name || '';
 
-            // ===== IMPORTANT: Set UID properly =====
-            // Try multiple sources to get the UID
             let displayUID = userUID || currentUser.uid || userKey || '';
-
-            // If UID is still empty, try to get it from the user's email
             if (!displayUID) {
                 const email = currentUser.email || '';
                 const parts = email.split('@');
                 if (parts.length > 0) {
                     displayUID = parts[0].substring(0, 6).toUpperCase();
-                    // Pad with zeros if needed
                     while (displayUID.length < 6) {
                         displayUID += '0';
                     }
                 }
             }
 
-            console.log('Displaying UID:', displayUID);
             document.getElementById('profile-uid').value = displayUID;
 
-            // Set bio
             document.getElementById('profile-bio').value = currentUser.bio || '';
 
-            // PFP upload handler
+            // PFP upload handler - FIXED PERMISSION
             document.getElementById('pfp-input')?.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
+                    tempPfpFile = file;
                     const reader = new FileReader();
                     reader.onload = (ev) => {
                         document.getElementById('profile-avatar').src = ev.target.result;
-                        tempPfp = ev.target.result;
                         showToast('Photo selected. Click Save to update.');
                     };
                     reader.readAsDataURL(file);
@@ -492,7 +499,7 @@
         }
 
         // ================================================================
-        // SAVE PROFILE - FIXED PERMISSION ISSUE
+        // SAVE PROFILE - FIXED PERMISSION WITH STORAGE
         // ================================================================
         function saveProfile() {
             const name = document.getElementById('profile-name').value.trim();
@@ -509,44 +516,63 @@
 
             const updates = { name, bio };
 
-            // Add PFP if changed
-            if (tempPfp) {
-                updates.pfp = tempPfp;
+            // Handle profile picture upload to Firebase Storage
+            const saveWithPFP = (pfpUrl) => {
+                if (pfpUrl) {
+                    updates.pfp = pfpUrl;
+                }
+
+                const targetPath = 'users/' + userKey;
+
+                db.ref(targetPath).update(updates)
+                    .then(() => {
+                        currentUser.name = name;
+                        currentUser.bio = bio;
+                        if (pfpUrl) {
+                            currentUser.pfp = pfpUrl;
+                        }
+                        btn.textContent = 'Save Changes';
+                        btn.disabled = false;
+                        showToast('Profile updated successfully!');
+                        setTimeout(() => {
+                            window.location.href = 'settings.html';
+                        }, 1000);
+                    })
+                    .catch((err) => {
+                        btn.textContent = 'Save Changes';
+                        btn.disabled = false;
+                        console.error('Save error:', err);
+                        if (err.code === 'PERMISSION_DENIED') {
+                            showToast('Permission denied. Please check Firebase rules.');
+                        } else {
+                            showToast('Error: ' + err.message);
+                        }
+                    });
+            };
+
+            if (tempPfpFile) {
+                // Upload to Firebase Storage
+                const storageRef = storage.ref('profiles/' + userKey + '/' + Date.now() + '_' + tempPfpFile.name);
+                storageRef.put(tempPfpFile)
+                    .then((snapshot) => {
+                        return snapshot.ref.getDownloadURL();
+                    })
+                    .then((downloadURL) => {
+                        saveWithPFP(downloadURL);
+                    })
+                    .catch((err) => {
+                        btn.textContent = 'Save Changes';
+                        btn.disabled = false;
+                        console.error('Upload error:', err);
+                        if (err.code === 'storage/unauthorized') {
+                            showToast('Storage permission denied. Please check Firebase Storage rules.');
+                        } else {
+                            showToast('Upload error: ' + err.message);
+                        }
+                    });
+            } else {
+                saveWithPFP(null);
             }
-
-            // Use the userKey for the path - this is the UID
-            const targetPath = 'users/' + userKey;
-
-            console.log('Saving to path:', targetPath);
-            console.log('Updates:', updates);
-
-            db.ref(targetPath).update(updates)
-                .then(() => {
-                    // Update local state
-                    currentUser.name = name;
-                    currentUser.bio = bio;
-                    if (tempPfp) {
-                        currentUser.pfp = tempPfp;
-                        tempPfp = null;
-                    }
-                    btn.textContent = 'Save Changes';
-                    btn.disabled = false;
-                    showToast('Profile updated successfully!');
-                    setTimeout(() => {
-                        window.location.href = 'settings.html';
-                    }, 1000);
-                })
-                .catch((err) => {
-                    btn.textContent = 'Save Changes';
-                    btn.disabled = false;
-                    console.error('Save error:', err);
-
-                    if (err.code === 'PERMISSION_DENIED') {
-                        showToast('Permission denied. Please check Firebase rules.');
-                    } else {
-                        showToast('Error: ' + err.message);
-                    }
-                });
         }
 
         // ================================================================
@@ -562,10 +588,10 @@
         });
 
         console.log('🚀 Stardust X - Profile Page (Fully Fixed)');
-        console.log('✅ UID now displays correctly');
-        console.log('✅ Permission denied fixed - using proper path');
+        console.log('✅ UID displays correctly');
+        console.log('✅ Permission denied fixed - using Firebase Storage');
         console.log('✅ Copy UID button working');
-        console.log('✅ No emojis in buttons');
+        console.log('✅ Dark Mode persistent');
     </script>
 </body>
 </html>
