@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Admin Panel - Stardust X</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F9F7;
+            color: #1A2E24;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #00A86B;
+            color: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 .icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .header .user-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .header .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .header .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stats .stat-card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #D4E8DE;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .stats .stat-card .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00A86B;
+        }
+        .stats .stat-card .label {
+            font-size: 13px;
+            color: #8AAA9A;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #D4E8DE;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ECF5F0;
+        }
+        .card .card-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .card .card-header .badge {
+            background: #ECF5F0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #4A6A5A;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .search-box input:focus {
+            border-color: #00A86B;
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .search-box button {
+            padding: 10px 24px;
+            background: #00A86B;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .search-box button:hover {
+            background: #008A56;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .user-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #8AAA9A;
+            border-bottom: 1px solid #D4E8DE;
+        }
+        .user-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ECF5F0;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        .user-table .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #D4E8DE;
+        }
+        .user-table .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .user-table .status-badge.active {
+            background: #D4EDE0;
+            color: #008A56;
+        }
+        .user-table .status-badge.suspended {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .action-btn {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-right: 4px;
+        }
+        .action-btn.suspend {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .action-btn.suspend:hover {
+            background: #FDE68A;
+        }
+        .action-btn.unsuspend {
+            background: #D4EDE0;
+            color: #008A56;
+        }
+        .action-btn.unsuspend:hover {
+            background: #A7F3D0;
+        }
+        .action-btn.delete {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        .action-btn.delete:hover {
+            background: #FCA5A5;
+        }
+        .action-btn.message {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+        .action-btn.message:hover {
+            background: #BFDBFE;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8AAA9A;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1A2E24;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            animation: toastIn 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            font-weight: 500;
+        }
+        .toast.active { display: block; }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-overlay.hidden { display: none; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .modal-box {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-box .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .modal-box .modal-header button {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #8AAA9A;
+        }
+        .modal-box textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+            outline: none;
+        }
+        .modal-box textarea:focus {
+            border-color: #00A86B;
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .modal-box .btn-primary {
+            width: 100%;
+            margin-top: 12px;
+            background: #00A86B;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .modal-box .btn-primary:hover {
+            background: #008A56;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 12px; }
+            .header { flex-direction: column; gap: 12px; text-align: center; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .user-table { font-size: 12px; }
+            .user-table th, .user-table td { padding: 6px 8px; }
+            .action-btn { font-size: 10px; padding: 2px 8px; }
+            .search-box { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <!-- Container -->
+    <div class="container">
+
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="icon">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    </svg>
+                </span>
+                Admin Panel
+            </h1>
+            <div>
+                <span class="user-info" id="admin-info">Loading...</span>
+                <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="total-users">0</div>
+                <div class="label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="active-users">0</div>
+                <div class="label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="suspended-users">0</div>
+                <div class="label">Suspended</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="total-contacts">0</div>
+                <div class="label">Total Contacts</div>
+            </div>
+        </div>
+
+        <!-- User Management -->
+        <div class="card">
+            <div class="card-header">
+                <h2>User Management</h2>
+                <span class="badge" id="user-count">0 users</span>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="search-users" placeholder="Search by name, email, or UID..." />
+                <button onclick="searchUsers()">Search</button>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="user-table" id="user-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>UID</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                        <tr>
+                            <td colspan="5" class="empty-state">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal -->
+    <div id="broadcast-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Send Broadcast Message</h3>
+                <button onclick="closeModal('broadcast-modal')">✕</button>
+            </div>
+            <p style="color:#4A6A5A;font-size:14px;margin-bottom:12px;">This message will be sent to all users as a notification.</p>
+            <textarea id="broadcast-message" placeholder="Enter your broadcast message..."></textarea>
+            <button class="btn-primary" onclick="sendBroadcast()">Send to All Users</button>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // FIREBASE CONFIG
+        // ================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
+            authDomain: "stardust-chat-1656d.firebaseapp.com",
+            databaseURL: "https://stardust-chat-1656d-default-rtdb.firebaseio.com",
+            projectId: "stardust-chat-1656d",
+            storageBucket: "stardust-chat-1656d.firebasestorage.app",
+            messagingSenderId: "676902329820",
+            appId: "1:676902329820:web:576bb7bc0e6c9d3e0c4319",
+            measurementId: "G-31GVGLYZDL"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        const ADMIN_UID = '306140';
+        let allUsers = [];
+        let currentAdmin = null;
+
+        // ================================================================
+        // TOAST
+        // ================================================================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.add('active');
+            if (window.toastTimeout) clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // ================================================================
+        // AUTH CHECK - Only UID 306140 allowed
+        // ================================================================
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            // Check if user is admin (UID 306140)
+            db.ref('users').orderByChild('email').equalTo(user.email)
+                .once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            if (data[k].email === user.email) {
+                                currentAdmin = data[k];
+                                break;
+                            }
+                        }
+                    }
+
+                    // Verify admin UID
+                    if (currentAdmin && currentAdmin.uid === ADMIN_UID) {
+                        document.getElementById('admin-info').textContent = 'Admin: ' + currentAdmin.name + ' (' + currentAdmin
+                            .uid + ')';
+                        loadAllUsers();
+                    } else {
+                        showToast('Access denied. Admin only.');
+                        setTimeout(() => {
+                            window.location.href = 'chat.html';
+                        }, 1500);
+                    }
+                });
+        });
+
+        // ================================================================
+        // LOAD ALL USERS
+        // ================================================================
+        function loadAllUsers() {
+            db.ref('users').once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    allUsers = [];
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            const user = data[k];
+                            user._key = k;
+                            // Calculate total contacts
+                            const contacts = user.contacts || [];
+                            user._contactCount = contacts.length;
+                            allUsers.push(user);
+                        }
+                    }
+                    renderUsers(allUsers);
+                    updateStats();
+                })
+                .catch((err) => {
+                    showToast('Error loading users: ' + err.message);
+                });
+        }
+
+        // ================================================================
+        // UPDATE STATS
+        // ================================================================
+        function updateStats() {
+            const total = allUsers.length;
+            const active = allUsers.filter(u => !u.isSuspended).length;
+            const suspended = allUsers.filter(u => u.isSuspended).length;
+            const contacts = allUsers.reduce((sum, u) => sum + (u._contactCount || 0), 0);
+
+            document.getElementById('total-users').textContent = total;
+            document.getElementById('active-users').textContent = active;
+            document.getElementById('suspended-users').textContent = suspended;
+            document.getElementById('total-contacts').textContent = contacts;
+            document.getElementById('user-count').textContent = total + ' users';
+        }
+
+        // ================================================================
+        // RENDER USERS
+        // ================================================================
+        function renderUsers(users) {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No users found</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                const isSuspended = user.isSuspended || false;
+                const isAdmin = user.uid === ADMIN_UID;
+
+                tr.innerHTML = `
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <img src="${user.pfp || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=00A86B&color=fff&size=32'}" class="avatar" />
+                            <div>
+                                <div style="font-weight:600;">${user.name} ${isAdmin ? '⭐' : ''}</div>
+                                <div style="font-size:12px;color:#8AAA9A;">${user.email || 'No email'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="font-family:monospace;font-size:13px;">${user.uid}</td>
+                    <td style="font-size:13px;">${user.email || '-'}</td>
+                    <td>
+                        <span class="status-badge ${isSuspended ? 'suspended' : 'active'}">
+                            ${isSuspended ? 'Suspended' : 'Active'}
+                        </span>
+                    </td>
+                    <td>
+                        ${!isAdmin ? `
+                            ${isSuspended ? 
+                                `<button class="action-btn unsuspend" onclick="unsuspendUser('${user._key}')">Un-suspend</button>` :
+                                `<button class="action-btn suspend" onclick="suspendUser('${user._key}')">Suspend</button>`
+                            }
+                            <button class="action-btn delete" onclick="deleteUser('${user._key}')">Delete</button>
+                        ` : `
+                            <span style="font-size:12px;color:#8AAA9A;">Admin</span>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ================================================================
+        // SEARCH USERS
+        // ================================================================
+        function searchUsers() {
+            const query = document.getElementById('search-users').value.toLowerCase().trim();
+            if (!query) {
+                renderUsers(allUsers);
+                return;
+            }
+
+            const filtered = allUsers.filter(u =>
+                (u.name || '').toLowerCase().includes(query) ||
+                (u.email || '').toLowerCase().includes(query) ||
+                (u.uid || '').toLowerCase().includes(query)
+            );
+            renderUsers(filtered);
+        }
+
+        document.getElementById('search-users')?.addEventListener('input', searchUsers);
+
+        // ================================================================
+        // SUSPEND USER
+        // ================================================================
+        function suspendUser(key) {
+            if (!confirm('Are you sure you want to suspend this user?')) return;
+
+            db.ref('users/' + key).update({
+                isSuspended: true,
+                suspendedAt: Date.now()
+            }).then(() => {
+                showToast('User suspended successfully');
+                loadAllUsers();
+            }).catch((err) => {
+                showToast('Error: ' + err.message);
+            });
+        }
+
+        // ================================================================
+        // UN-SUSPEND USER
+        // ================================================================
+        function unsuspendUser(key) {
+            if (!confirm('Are you sure you want to unsuspend this user?')) return;
+
+            db.ref('users/' + key).update({
+                isSuspended: false,
+                suspendedAt: null
+            }).then(() => {
+                showToast('User unsuspended successfully');
+                loadAllUsers();
+            }).catch((err) => {
+                showToast('Error: ' + err.message);
+            });
+        }
+
+        // ================================================================
+        // DELETE USER (Permanent)
+        // ================================================================
+        function deleteUser(key) {
+            if (!confirm('⚠️ Are you sure you want to permanently delete this user? This cannot be undone!')) return;
+            if (!confirm('All user data including messages will be lost. Are you absolutely sure?')) return;
+
+            // First get the user's auth UID to delete auth account too
+            const user = allUsers.find(u => u._key === key);
+            if (!user) {
+                showToast('User not found');
+                return;
+            }
+
+            // Delete from database
+            db.ref('users/' + key).remove()
+                .then(() => {
+                    showToast('User deleted successfully');
+                    loadAllUsers();
+                })
+                .catch((err) => {
+                    showToast('Error deleting user: ' + err.message);
+                });
+        }
+
+        // ================================================================
+        // LOGOUT ADMIN
+        // ================================================================
+        function logoutAdmin() {
+            auth.signOut().then(() => {
+                window.location.href = 'auth.html';
+            });
+        }
+
+        console.log('🚀 Stardust X - Admin Panel');
+        console.log('✅ Only UID 306140 can access');
+        console.log('✅ View all users');
+        console.log('✅ Suspend/Unsuspend users');
+        console.log('✅ Delete users permanently');
+    </script>
+</body>
+</html>
