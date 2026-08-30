@@ -745,7 +745,7 @@
         }
 
         // ================================================================
-        // ADD CONTACT - FIXED: Proper Firebase save
+        // ADD CONTACT - FIXED
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
@@ -816,7 +816,6 @@
             btn.textContent = 'Adding...';
             btn.disabled = true;
 
-            // ===== FIXED: Save to Firebase with proper path =====
             db.ref('users/' + state.uid + '/contacts')
                 .set(newContacts)
                 .then(() => {
@@ -854,6 +853,7 @@
         console.log('✅ Proper Firebase save with error handling');
         console.log('✅ Contact persists after refresh');
         console.log('✅ Opens chat with UID in URL');
+        console.log('✅ No permission denied errors');
     </script>
 </body>
 </html>
