@@ -542,7 +542,7 @@
             <!-- Rendered by JS -->
         </div>
 
-        <!-- Add Contact Modal -->
+        <!-- Add Contact Modal - NO CHAT OPENING -->
         <div id="add-contact-modal" class="modal-overlay hidden">
             <div class="modal-box">
                 <div class="modal-header">
@@ -558,7 +558,7 @@
                             <div id="preview-name" style="font-weight:600;font-size:15px;">Name</div>
                             <div id="preview-uid" style="font-size:12px;color:var(--text-muted);">@000000</div>
                         </div>
-                        <button class="btn-primary" style="margin:0;padding:6px 16px;width:auto;" onclick="confirmAddContact()">Add</button>
+                        <button class="btn-primary" style="margin:0;padding:6px 16px;width:auto;" onclick="confirmAddContact()">Add Contact</button>
                         <button class="btn-secondary" style="margin:0;padding:6px 16px;width:auto;" onclick="closeModal('add-contact-modal')">Cancel</button>
                     </div>
                 </div>
@@ -797,7 +797,7 @@
         }
 
         // ================================================================
-        // CONTACT CONTEXT MENU (Long press on contact)
+        // CONTACT CONTEXT MENU
         // ================================================================
         function showContactContextMenu(x, y, uid, name) {
             document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
@@ -817,10 +817,10 @@
             const isCloseFriend = state.closeFriends.includes(uid);
 
             menu.innerHTML = `
-                <button onclick="deleteContact('${uid}')" class="danger">🗑️ Delete Contact</button>
-                <button onclick="blockContact('${uid}')">🚫 Block Contact</button>
-                <button onclick="toggleCloseFriendContact('${uid}')">${isCloseFriend ? '⭐ Remove Close Friend' : '⭐ Add to Close Friend'}</button>
-                <button onclick="reportContact('${uid}', '${name}')">⚠️ Report</button>
+                <button onclick="deleteContact('${uid}')" class="danger">Delete Contact</button>
+                <button onclick="blockContact('${uid}')">Block Contact</button>
+                <button onclick="toggleCloseFriendContact('${uid}')">${isCloseFriend ? 'Remove Close Friend' : 'Add to Close Friend'}</button>
+                <button onclick="reportContact('${uid}', '${name}')">Report</button>
             `;
 
             document.body.appendChild(menu);
@@ -897,16 +897,19 @@
         }
 
         // ================================================================
-        // ADD CONTACT
+        // ADD CONTACT - NO CHAT OPENING
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
             document.getElementById('add-contact-uid').value = '';
             document.getElementById('contact-preview').style.display = 'none';
+            document.getElementById('add-contact-uid').focus();
         };
 
         window.searchContact = function() {
             const uid = document.getElementById('add-contact-uid').value.trim();
+            const preview = document.getElementById('contact-preview');
+
             if (!uid || uid.length !== 6) {
                 showToast('Please enter a valid 6-digit UID');
                 return;
@@ -941,7 +944,7 @@
                     '&background=00A86B&color=fff&size=72';
                 document.getElementById('preview-name').textContent = user.name;
                 document.getElementById('preview-uid').textContent = '@' + uid;
-                document.getElementById('contact-preview').style.display = 'block';
+                preview.style.display = 'block';
             });
         };
 
@@ -949,16 +952,35 @@
             const uid = state.pendingContactUID;
             if (!uid) return;
 
-            state.contacts.push(uid);
-            db.ref('users/' + state.uid + '/contacts').set(state.contacts);
-            closeModal('add-contact-modal');
-            showToast('Contact added!');
-            window.location.href = 'chat.html?uid=' + uid;
+            // Add to contacts - NO CHAT OPENING
+            if (!state.contacts.includes(uid)) {
+                state.contacts.push(uid);
+                db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+                closeModal('add-contact-modal');
+                showToast('✅ Contact added successfully!');
+                renderContactsList();
+
+                // Send notification to the added user
+                const notifRef = db.ref('notifications/' + uid);
+                notifRef.push({
+                    id: 'notif_' + Date.now(),
+                    type: 'contact_added',
+                    message: state.currentUser.name + ' added you as a contact',
+                    timestamp: Date.now(),
+                    read: false,
+                    sourceUserId: state.uid,
+                    isContactAdd: true
+                });
+            } else {
+                showToast('Already in contacts');
+                closeModal('add-contact-modal');
+            }
         };
 
         console.log('🚀 Stardust X - Contacts Page (Fixed)');
-        console.log('✅ Report button in contact menu');
-        console.log('✅ Long press contact: Delete, Block, Close Friend, Report');
+        console.log('✅ Add contact without opening chat');
+        console.log('✅ Contact persists until deleted');
+        console.log('✅ Tap contact to open chat');
         console.log('✅ Dark mode works');
     </script>
 </body>
