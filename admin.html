@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Admin Panel - Stardust X</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
+        /* ================================================================
+           ADMIN PANEL STYLES
+           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -23,12 +24,14 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
+
+        /* Header */
         .header {
-            background: #00A86B;
+            background: linear-gradient(135deg, #00A86B, #008A56);
             color: white;
             padding: 20px 24px;
             border-radius: 16px;
@@ -36,6 +39,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
         }
         .header h1 {
             font-size: 24px;
@@ -71,11 +76,46 @@
             background: rgba(255,255,255,0.3);
         }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid #D4E8DE;
+            overflow-x: auto;
+        }
+        .tabs button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: transparent;
+            color: #8AAA9A;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+        .tabs button.active {
+            background: #00A86B;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 168, 107, 0.2);
+        }
+        .tabs button:hover:not(.active) {
+            background: #ECF5F0;
+        }
+
+        /* Stats */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .stats .stat-card {
             background: white;
@@ -94,6 +134,7 @@
             color: #8AAA9A;
         }
 
+        /* Cards */
         .card {
             background: white;
             border-radius: 16px;
@@ -109,10 +150,15 @@
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid #ECF5F0;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .card .card-header h2 {
             font-size: 18px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .card .card-header .badge {
             background: #ECF5F0;
@@ -121,11 +167,17 @@
             font-size: 12px;
             color: #4A6A5A;
         }
+        .card .card-header .badge.primary {
+            background: #00A86B;
+            color: white;
+        }
 
+        /* Search */
         .search-box {
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
         .search-box input {
             flex: 1;
@@ -135,10 +187,20 @@
             font-size: 14px;
             outline: none;
             transition: all 0.25s ease;
+            min-width: 150px;
         }
         .search-box input:focus {
             border-color: #00A86B;
             box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .search-box select {
+            padding: 10px 16px;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+            cursor: pointer;
         }
         .search-box button {
             padding: 10px 24px;
@@ -153,57 +215,92 @@
         .search-box button:hover {
             background: #008A56;
         }
+        .search-box button.secondary {
+            background: #ECF5F0;
+            color: #4A6A5A;
+        }
+        .search-box button.secondary:hover {
+            background: #D4E8DE;
+        }
 
-        .user-table {
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 14px;
         }
-        .user-table th {
+        table th {
             text-align: left;
             padding: 10px 12px;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             color: #8AAA9A;
-            border-bottom: 1px solid #D4E8DE;
+            border-bottom: 2px solid #D4E8DE;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
         }
-        .user-table td {
+        table td {
             padding: 10px 12px;
             border-bottom: 1px solid #ECF5F0;
-            font-size: 14px;
             vertical-align: middle;
         }
-        .user-table .avatar {
+        table tr:hover td {
+            background: #F5F9F7;
+        }
+        table .avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #D4E8DE;
         }
-        .user-table .status-badge {
+        table .status-badge {
             padding: 2px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
+            display: inline-block;
         }
-        .user-table .status-badge.active {
+        table .status-badge.active {
             background: #D4EDE0;
             color: #008A56;
         }
-        .user-table .status-badge.suspended {
+        table .status-badge.suspended {
             background: #FEE2E2;
             color: #DC2626;
         }
+        table .status-badge.pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
 
+        /* Action Buttons */
+        .action-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
         .action-btn {
-            padding: 4px 12px;
+            padding: 4px 14px;
             border: none;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s ease;
-            margin-right: 4px;
+            white-space: nowrap;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        .action-btn:active {
+            transform: scale(0.95);
         }
         .action-btn.suspend {
             background: #FEF3C7;
@@ -233,37 +330,102 @@
         .action-btn.message:hover {
             background: #BFDBFE;
         }
+        .action-btn.view {
+            background: #ECF5F0;
+            color: #4A6A5A;
+        }
+        .action-btn.view:hover {
+            background: #D4E8DE;
+        }
+        .action-btn.broadcast {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+        .action-btn.broadcast:hover {
+            background: #DDD6FE;
+        }
 
+        /* History Item */
+        .history-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #ECF5F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-item .left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+        .history-item .left .details {
+            flex: 1;
+            min-width: 0;
+        }
+        .history-item .left .details .main {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .history-item .left .details .sub {
+            font-size: 12px;
+            color: #8AAA9A;
+        }
+        .history-item .time {
+            font-size: 12px;
+            color: #8AAA9A;
+            white-space: nowrap;
+        }
+        .history-item .type-badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .history-item .type-badge.message {
+            background: #DBEAFE;
+            color: #2563EB;
+        }
+        .history-item .type-badge.call {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+        .history-item .type-badge.media {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .history-item .type-badge.contact {
+            background: #D4EDE0;
+            color: #008A56;
+        }
+
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: #8AAA9A;
         }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1A2E24;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 10px;
-            z-index: 100;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-            animation: toastIn 0.3s ease-out;
-            max-width: 90%;
-            text-align: center;
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+        .empty-state .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4A6A5A;
+        }
+        .empty-state .sub {
             font-size: 14px;
-            display: none;
-            font-weight: 500;
-        }
-        .toast.active { display: block; }
-        @keyframes toastIn {
-            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
+        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -282,7 +444,7 @@
             background: white;
             border-radius: 16px;
             padding: 24px;
-            max-width: 400px;
+            max-width: 500px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
@@ -316,7 +478,7 @@
             border-radius: 10px;
             font-size: 14px;
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
             font-family: inherit;
             outline: none;
         }
@@ -339,15 +501,83 @@
         .modal-box .btn-primary:hover {
             background: #008A56;
         }
+        .modal-box .btn-secondary {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: #00A86B;
+            border: 1px solid #00A86B;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .modal-box .btn-secondary:hover {
+            background: #ECF5F0;
+        }
 
-        @media (max-width: 600px) {
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1A2E24;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            animation: toastIn 0.3s ease-out;
+            max-width: 90%;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            font-weight: 500;
+        }
+        .toast.active { display: block; }
+        @keyframes toastIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Scrollable Table Body */
+        .table-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .table-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #F5F9F7;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #D4E8DE;
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
             .container { padding: 12px; }
-            .header { flex-direction: column; gap: 12px; text-align: center; }
+            .header { flex-direction: column; text-align: center; }
             .stats { grid-template-columns: 1fr 1fr; }
-            .user-table { font-size: 12px; }
-            .user-table th, .user-table td { padding: 6px 8px; }
-            .action-btn { font-size: 10px; padding: 2px 8px; }
+            .tabs button { font-size: 12px; padding: 8px 12px; min-width: 60px; }
             .search-box { flex-direction: column; }
+            .search-box input { min-width: auto; }
+            table { font-size: 12px; }
+            table th, table td { padding: 6px 8px; }
+            .action-btn { font-size: 10px; padding: 2px 8px; }
+            .action-group { gap: 4px; }
+            .card { padding: 16px; }
+            .history-item { padding: 8px 12px; }
+            .history-item .left .details .main { font-size: 13px; }
+        }
+        @media (max-width: 480px) {
+            .stats { grid-template-columns: 1fr 1fr; }
+            .stats .stat-card .number { font-size: 20px; }
+            .header h1 { font-size: 18px; }
         }
     </style>
 </head>
@@ -392,40 +622,116 @@
                 <div class="label">Suspended</div>
             </div>
             <div class="stat-card">
-                <div class="number" id="total-contacts">0</div>
-                <div class="label">Total Contacts</div>
+                <div class="number" id="total-messages">0</div>
+                <div class="label">Total Messages</div>
             </div>
         </div>
 
-        <!-- User Management -->
-        <div class="card">
-            <div class="card-header">
-                <h2>User Management</h2>
-                <span class="badge" id="user-count">0 users</span>
-            </div>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="active" data-tab="users" onclick="switchTab('users')">Users</button>
+            <button data-tab="history" onclick="switchTab('history')">History</button>
+            <button data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
+        </div>
 
-            <div class="search-box">
-                <input type="text" id="search-users" placeholder="Search by name, email, or UID..." />
-                <button onclick="searchUsers()">Search</button>
-            </div>
+        <!-- ===== TAB 1: USERS ===== -->
+        <div id="tab-users" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>User Management</h2>
+                    <span class="badge primary" id="user-count">0 users</span>
+                </div>
 
-            <div style="overflow-x:auto;">
-                <table class="user-table" id="user-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>UID</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-table-body">
-                        <tr>
-                            <td colspan="5" class="empty-state">Loading users...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="search-box">
+                    <input type="text" id="search-users" placeholder="Search by name, email, or UID..." />
+                    <select id="filter-status">
+                        <option value="all">All Users</option>
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                    <button onclick="searchUsers()">Search</button>
+                    <button class="secondary" onclick="resetSearch()">Reset</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="min-width:180px;">User</th>
+                                    <th style="min-width:100px;">UID</th>
+                                    <th style="min-width:150px;">Email</th>
+                                    <th style="min-width:90px;">Status</th>
+                                    <th style="min-width:200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <tr>
+                                    <td colspan="5" class="empty-state">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 2: HISTORY ===== -->
+        <div id="tab-history" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Activity History</h2>
+                    <span class="badge primary" id="history-count">0 events</span>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" id="search-history" placeholder="Search by user, message, or type..." />
+                    <select id="filter-history-type">
+                        <option value="all">All Types</option>
+                        <option value="message">Messages</option>
+                        <option value="call">Calls</option>
+                        <option value="media">Media</option>
+                        <option value="contact">Contacts</option>
+                    </select>
+                    <button onclick="searchHistory()">Filter</button>
+                    <button class="secondary" onclick="resetHistorySearch()">Reset</button>
+                </div>
+
+                <div id="history-list">
+                    <div class="empty-state">
+                        <div class="icon">📋</div>
+                        <div class="title">No History Yet</div>
+                        <div class="sub">Activity will appear here as users interact</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TAB 3: BROADCAST ===== -->
+        <div id="tab-broadcast" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Broadcast Message</h2>
+                    <span class="badge">Send to all users</span>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="font-weight:600;font-size:14px;display:block;margin-bottom:4px;">Message Content</label>
+                    <textarea id="broadcast-text" placeholder="Enter your broadcast message here..." style="width:100%;padding:12px;border:1px solid #D4E8DE;border-radius:10px;font-size:14px;resize:vertical;min-height:120px;font-family:inherit;outline:none;"></textarea>
+                </div>
+
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <button class="action-btn broadcast" onclick="sendBroadcast()" style="padding:10px 24px;font-size:14px;">
+                        📤 Send to All Users
+                    </button>
+                    <button class="action-btn view" onclick="document.getElementById('broadcast-text').value=''" style="padding:10px 24px;font-size:14px;">
+                        Clear
+                    </button>
+                </div>
+
+                <div id="broadcast-status" style="margin-top:12px;padding:12px;border-radius:10px;display:none;background:#ECF5F0;color:#4A6A5A;font-size:14px;">
+                    <span id="broadcast-result">Broadcast sent successfully!</span>
+                </div>
             </div>
         </div>
     </div>
@@ -439,7 +745,8 @@
             </div>
             <p style="color:#4A6A5A;font-size:14px;margin-bottom:12px;">This message will be sent to all users as a notification.</p>
             <textarea id="broadcast-message" placeholder="Enter your broadcast message..."></textarea>
-            <button class="btn-primary" onclick="sendBroadcast()">Send to All Users</button>
+            <button class="btn-primary" onclick="sendBroadcastFromModal()">Send to All Users</button>
+            <button class="btn-secondary" onclick="closeModal('broadcast-modal')">Cancel</button>
         </div>
     </div>
 
@@ -465,6 +772,8 @@
         const ADMIN_UID = '306140';
         let allUsers = [];
         let currentAdmin = null;
+        let allHistory = [];
+        let filteredUsers = [];
 
         // ================================================================
         // TOAST
@@ -484,7 +793,22 @@
         }
 
         // ================================================================
-        // AUTH CHECK - Only UID 306140 allowed
+        // TABS
+        // ================================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
+
+            document.getElementById('tab-' + tab).style.display = 'block';
+            document.querySelector(`.tabs button[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'history') {
+                loadHistory();
+            }
+        }
+
+        // ================================================================
+        // AUTH CHECK
         // ================================================================
         auth.onAuthStateChanged((user) => {
             if (!user) {
@@ -492,7 +816,6 @@
                 return;
             }
 
-            // Check if user is admin (UID 306140)
             db.ref('users').orderByChild('email').equalTo(user.email)
                 .once('value')
                 .then((snap) => {
@@ -507,11 +830,11 @@
                         }
                     }
 
-                    // Verify admin UID
                     if (currentAdmin && currentAdmin.uid === ADMIN_UID) {
                         document.getElementById('admin-info').textContent = 'Admin: ' + currentAdmin.name + ' (' + currentAdmin
                             .uid + ')';
                         loadAllUsers();
+                        loadHistory();
                     } else {
                         showToast('Access denied. Admin only.');
                         setTimeout(() => {
@@ -534,13 +857,13 @@
                         for (let k of keys) {
                             const user = data[k];
                             user._key = k;
-                            // Calculate total contacts
                             const contacts = user.contacts || [];
                             user._contactCount = contacts.length;
                             allUsers.push(user);
                         }
                     }
-                    renderUsers(allUsers);
+                    filteredUsers = [...allUsers];
+                    renderUsers(filteredUsers);
                     updateStats();
                 })
                 .catch((err) => {
@@ -555,12 +878,17 @@
             const total = allUsers.length;
             const active = allUsers.filter(u => !u.isSuspended).length;
             const suspended = allUsers.filter(u => u.isSuspended).length;
-            const contacts = allUsers.reduce((sum, u) => sum + (u._contactCount || 0), 0);
+
+            // Count total messages from history
+            let totalMessages = 0;
+            if (allHistory.length > 0) {
+                totalMessages = allHistory.filter(h => h.type === 'message').length;
+            }
 
             document.getElementById('total-users').textContent = total;
             document.getElementById('active-users').textContent = active;
             document.getElementById('suspended-users').textContent = suspended;
-            document.getElementById('total-contacts').textContent = contacts;
+            document.getElementById('total-messages').textContent = totalMessages;
             document.getElementById('user-count').textContent = total + ' users';
         }
 
@@ -599,15 +927,18 @@
                         </span>
                     </td>
                     <td>
-                        ${!isAdmin ? `
-                            ${isSuspended ? 
-                                `<button class="action-btn unsuspend" onclick="unsuspendUser('${user._key}')">Un-suspend</button>` :
-                                `<button class="action-btn suspend" onclick="suspendUser('${user._key}')">Suspend</button>`
-                            }
-                            <button class="action-btn delete" onclick="deleteUser('${user._key}')">Delete</button>
-                        ` : `
-                            <span style="font-size:12px;color:#8AAA9A;">Admin</span>
-                        `}
+                        <div class="action-group">
+                            ${!isAdmin ? `
+                                ${isSuspended ? 
+                                    `<button class="action-btn unsuspend" onclick="unsuspendUser('${user._key}')">Un-suspend</button>` :
+                                    `<button class="action-btn suspend" onclick="suspendUser('${user._key}')">Suspend</button>`
+                                }
+                                <button class="action-btn delete" onclick="deleteUser('${user._key}')">Delete</button>
+                                <button class="action-btn message" onclick="sendUserMessage('${user._key}')">Message</button>
+                            ` : `
+                                <span style="font-size:12px;color:#8AAA9A;padding:4px 12px;background:#ECF5F0;border-radius:6px;">Admin</span>
+                            `}
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -619,20 +950,37 @@
         // ================================================================
         function searchUsers() {
             const query = document.getElementById('search-users').value.toLowerCase().trim();
-            if (!query) {
-                renderUsers(allUsers);
-                return;
+            const status = document.getElementById('filter-status').value;
+
+            let filtered = [...allUsers];
+
+            if (query) {
+                filtered = filtered.filter(u =>
+                    (u.name || '').toLowerCase().includes(query) ||
+                    (u.email || '').toLowerCase().includes(query) ||
+                    (u.uid || '').toLowerCase().includes(query)
+                );
             }
 
-            const filtered = allUsers.filter(u =>
-                (u.name || '').toLowerCase().includes(query) ||
-                (u.email || '').toLowerCase().includes(query) ||
-                (u.uid || '').toLowerCase().includes(query)
-            );
-            renderUsers(filtered);
+            if (status === 'active') {
+                filtered = filtered.filter(u => !u.isSuspended);
+            } else if (status === 'suspended') {
+                filtered = filtered.filter(u => u.isSuspended);
+            }
+
+            filteredUsers = filtered;
+            renderUsers(filteredUsers);
+        }
+
+        function resetSearch() {
+            document.getElementById('search-users').value = '';
+            document.getElementById('filter-status').value = 'all';
+            filteredUsers = [...allUsers];
+            renderUsers(filteredUsers);
         }
 
         document.getElementById('search-users')?.addEventListener('input', searchUsers);
+        document.getElementById('filter-status')?.addEventListener('change', searchUsers);
 
         // ================================================================
         // SUSPEND USER
@@ -640,12 +988,16 @@
         function suspendUser(key) {
             if (!confirm('Are you sure you want to suspend this user?')) return;
 
+            const user = allUsers.find(u => u._key === key);
+            if (!user) return;
+
             db.ref('users/' + key).update({
                 isSuspended: true,
                 suspendedAt: Date.now()
             }).then(() => {
-                showToast('User suspended successfully');
+                showToast(`User ${user.name} suspended successfully`);
                 loadAllUsers();
+                addHistory(user.uid, 'suspend', `User ${user.name} was suspended by admin`);
             }).catch((err) => {
                 showToast('Error: ' + err.message);
             });
@@ -657,44 +1009,325 @@
         function unsuspendUser(key) {
             if (!confirm('Are you sure you want to unsuspend this user?')) return;
 
+            const user = allUsers.find(u => u._key === key);
+            if (!user) return;
+
             db.ref('users/' + key).update({
                 isSuspended: false,
                 suspendedAt: null
             }).then(() => {
-                showToast('User unsuspended successfully');
+                showToast(`User ${user.name} unsuspended successfully`);
                 loadAllUsers();
+                addHistory(user.uid, 'unsuspend', `User ${user.name} was unsuspended by admin`);
             }).catch((err) => {
                 showToast('Error: ' + err.message);
             });
         }
 
         // ================================================================
-        // DELETE USER (Permanent)
+        // DELETE USER
         // ================================================================
         function deleteUser(key) {
             if (!confirm('⚠️ Are you sure you want to permanently delete this user? This cannot be undone!')) return;
             if (!confirm('All user data including messages will be lost. Are you absolutely sure?')) return;
 
-            // First get the user's auth UID to delete auth account too
             const user = allUsers.find(u => u._key === key);
             if (!user) {
                 showToast('User not found');
                 return;
             }
 
-            // Delete from database
             db.ref('users/' + key).remove()
                 .then(() => {
-                    showToast('User deleted successfully');
+                    showToast(`User ${user.name} deleted successfully`);
+                    addHistory(user.uid, 'delete', `User ${user.name} was permanently deleted by admin`);
                     loadAllUsers();
                 })
                 .catch((err) => {
-                    showToast('Error deleting user: ' + err.message);
+                    showToast('Error: ' + err.message);
                 });
         }
 
         // ================================================================
-        // LOGOUT ADMIN
+        // SEND USER MESSAGE
+        // ================================================================
+        function sendUserMessage(key) {
+            const user = allUsers.find(u => u._key === key);
+            if (!user) {
+                showToast('User not found');
+                return;
+            }
+
+            const message = prompt('Enter message to send to ' + user.name + ':');
+            if (!message) return;
+
+            // Send as notification
+            const notifRef = db.ref('notifications/' + user.uid);
+            notifRef.push({
+                id: 'notif_' + Date.now(),
+                type: 'message',
+                message: 'Admin: ' + message,
+                timestamp: Date.now(),
+                read: false,
+                sourceUserId: ADMIN_UID,
+                isAdmin: true
+            }).then(() => {
+                showToast(`Message sent to ${user.name}`);
+                addHistory(user.uid, 'admin_message', `Admin sent message to ${user.name}: "${message}"`);
+            }).catch((err) => {
+                showToast('Error: ' + err.message);
+            });
+        }
+
+        // ================================================================
+        // BROADCAST
+        // ================================================================
+        function sendBroadcast() {
+            const message = document.getElementById('broadcast-text').value.trim();
+            if (!message) {
+                showToast('Please enter a message');
+                return;
+            }
+
+            const statusDiv = document.getElementById('broadcast-status');
+            const resultSpan = document.getElementById('broadcast-result');
+
+            statusDiv.style.display = 'block';
+            resultSpan.textContent = 'Sending to all users...';
+
+            const promises = allUsers.map(user => {
+                const notifRef = db.ref('notifications/' + user.uid);
+                return notifRef.push({
+                    id: 'notif_' + Date.now(),
+                    type: 'broadcast',
+                    message: '📢 Admin Broadcast: ' + message,
+                    timestamp: Date.now(),
+                    read: false,
+                    sourceUserId: ADMIN_UID,
+                    isAdmin: true,
+                    isBroadcast: true
+                });
+            });
+
+            Promise.all(promises)
+                .then(() => {
+                    resultSpan.textContent = `✅ Broadcast sent to ${allUsers.length} users successfully!`;
+                    document.getElementById('broadcast-text').value = '';
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 5000);
+                    showToast(`Broadcast sent to ${allUsers.length} users`);
+                    addHistory('ALL', 'broadcast', `Admin broadcast: "${message}" sent to all users`);
+                })
+                .catch((err) => {
+                    resultSpan.textContent = '❌ Error: ' + err.message;
+                    showToast('Error sending broadcast: ' + err.message);
+                });
+        }
+
+        function sendBroadcastFromModal() {
+            const message = document.getElementById('broadcast-message').value.trim();
+            if (!message) {
+                showToast('Please enter a message');
+                return;
+            }
+
+            closeModal('broadcast-modal');
+            document.getElementById('broadcast-text').value = message;
+            sendBroadcast();
+        }
+
+        // ================================================================
+        // HISTORY SYSTEM
+        // ================================================================
+        function addHistory(userId, type, description) {
+            const historyRef = db.ref('adminHistory');
+            historyRef.push({
+                userId: userId,
+                type: type,
+                description: description,
+                timestamp: Date.now()
+            }).catch((err) => {
+                console.error('Error saving history:', err);
+            });
+        }
+
+        function loadHistory() {
+            db.ref('adminHistory').orderByChild('timestamp').limitToLast(200)
+                .once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    allHistory = [];
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            allHistory.push({ id: k, ...data[k] });
+                        }
+                    }
+                    allHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    renderHistory(allHistory);
+                    document.getElementById('history-count').textContent = allHistory.length + ' events';
+                    updateStats();
+                })
+                .catch((err) => {
+                    console.error('Error loading history:', err);
+                });
+
+            // Also listen for real-time updates
+            db.ref('adminHistory').limitToLast(50).on('child_added', (snap) => {
+                const data = snap.val();
+                if (data) {
+                    const existing = allHistory.find(h => h.id === snap.key);
+                    if (!existing) {
+                        allHistory.unshift({ id: snap.key, ...data });
+                        if (document.getElementById('tab-history').style.display !== 'none') {
+                            renderHistory(allHistory);
+                            document.getElementById('history-count').textContent = allHistory.length + ' events';
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderHistory(history) {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📋</div>
+                        <div class="title">No History Yet</div>
+                        <div class="sub">Activity will appear here as users interact</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by date
+            const groups = {};
+            history.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleDateString();
+                if (!groups[date]) groups[date] = [];
+                groups[date].push(item);
+            });
+
+            const sortedDates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
+
+            sortedDates.forEach(date => {
+                const dateHeader = document.createElement('div');
+                dateHeader.style.cssText = `
+                    padding: 8px 12px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #8AAA9A;
+                    background: #F5F9F7;
+                    border-radius: 8px;
+                    margin: 8px 0 4px;
+                `;
+                dateHeader.textContent = date;
+                container.appendChild(dateHeader);
+
+                groups[date].forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+
+                    let typeLabel = '';
+                    let typeClass = '';
+                    switch (item.type) {
+                        case 'message':
+                        case 'admin_message':
+                            typeLabel = '💬 Message';
+                            typeClass = 'message';
+                            break;
+                        case 'call':
+                            typeLabel = '📞 Call';
+                            typeClass = 'call';
+                            break;
+                        case 'media':
+                            typeLabel = '📷 Media';
+                            typeClass = 'media';
+                            break;
+                        case 'contact':
+                            typeLabel = '👤 Contact';
+                            typeClass = 'contact';
+                            break;
+                        case 'suspend':
+                            typeLabel = '🚫 Suspend';
+                            typeClass = 'message';
+                            break;
+                        case 'unsuspend':
+                            typeLabel = '✅ Unsuspend';
+                            typeClass = 'message';
+                            break;
+                        case 'delete':
+                            typeLabel = '🗑️ Delete';
+                            typeClass = 'message';
+                            break;
+                        case 'broadcast':
+                            typeLabel = '📢 Broadcast';
+                            typeClass = 'message';
+                            break;
+                        default:
+                            typeLabel = '📌 Event';
+                            typeClass = 'message';
+                    }
+
+                    // Get user name
+                    let userName = item.userId || 'System';
+                    if (item.userId && item.userId !== 'ALL') {
+                        const user = allUsers.find(u => u.uid === item.userId);
+                        if (user) userName = user.name;
+                    } else if (item.userId === 'ALL') {
+                        userName = 'All Users';
+                    }
+
+                    div.innerHTML = `
+                        <div class="left">
+                            <span class="type-badge ${typeClass}">${typeLabel}</span>
+                            <div class="details">
+                                <div class="main">${item.description || 'Activity'}</div>
+                                <div class="sub">User: ${userName}</div>
+                            </div>
+                        </div>
+                        <div class="time">${item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</div>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+        }
+
+        function searchHistory() {
+            const query = document.getElementById('search-history').value.toLowerCase().trim();
+            const type = document.getElementById('filter-history-type').value;
+
+            let filtered = [...allHistory];
+
+            if (query) {
+                filtered = filtered.filter(h =>
+                    (h.description || '').toLowerCase().includes(query) ||
+                    (h.userId || '').toLowerCase().includes(query)
+                );
+            }
+
+            if (type !== 'all') {
+                filtered = filtered.filter(h => h.type === type);
+            }
+
+            renderHistory(filtered);
+        }
+
+        function resetHistorySearch() {
+            document.getElementById('search-history').value = '';
+            document.getElementById('filter-history-type').value = 'all';
+            renderHistory(allHistory);
+        }
+
+        document.getElementById('search-history')?.addEventListener('input', searchHistory);
+        document.getElementById('filter-history-type')?.addEventListener('change', searchHistory);
+
+        // ================================================================
+        // LOGOUT
         // ================================================================
         function logoutAdmin() {
             auth.signOut().then(() => {
@@ -702,11 +1335,15 @@
             });
         }
 
-        console.log('🚀 Stardust X - Admin Panel');
+        console.log('🚀 Stardust X - Admin Panel (Complete)');
         console.log('✅ Only UID 306140 can access');
-        console.log('✅ View all users');
-        console.log('✅ Suspend/Unsuspend users');
-        console.log('✅ Delete users permanently');
+        console.log('✅ View all users with search & filter');
+        console.log('✅ Suspend/Unsuspend/Delete users');
+        console.log('✅ Send individual messages to users');
+        console.log('✅ Broadcast to all users');
+        console.log('✅ Full activity history with search');
+        console.log('✅ Real-time history updates');
+        console.log('✅ Action buttons properly spaced');
     </script>
 </body>
 </html>
