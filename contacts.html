@@ -245,20 +245,6 @@
             text-overflow: ellipsis;
             flex: 1;
         }
-        .contact-item .item-menu-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 4px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: var(--transition);
-            flex-shrink: 0;
-        }
-        .contact-item .item-menu-btn:active {
-            background: var(--bg-surface);
-            color: var(--primary);
-        }
 
         .empty-state {
             display: flex;
@@ -579,11 +565,6 @@
         const db = firebase.database();
 
         // ================================================================
-        // IMGBB API
-        // ================================================================
-        const IMGBB_API_KEY = '94dc61c3580abc8c9218268d0c773961';
-
-        // ================================================================
         // STATE
         // ================================================================
         const state = {
@@ -593,6 +574,7 @@
             blocked: [],
             closeFriends: [],
             pendingContactUID: null,
+            isAddingContact: false,
         };
 
         // ================================================================
@@ -609,14 +591,18 @@
         // ================================================================
         // TOAST
         // ================================================================
-        function showToast(message) {
+        function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
-            document.getElementById('toast-message').textContent = message;
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            toast.style.background = isError ? '#EF4444' : 'var(--text-primary)';
+            toast.style.color = 'white';
             toast.classList.add('active');
             if (window.toastTimeout) clearTimeout(window.toastTimeout);
             window.toastTimeout = setTimeout(() => {
                 toast.classList.remove('active');
-            }, 3000);
+                toast.style.background = 'var(--text-primary)';
+            }, 4000);
         }
 
         function closeModal(id) {
@@ -667,11 +653,10 @@
         function initializeApp() {
             // Listen for contacts - REAL-TIME
             db.ref('users/' + state.uid + '/contacts').on('value', (snap) => {
-                state.contacts = snap.val() || [];
-                renderContactsList();
-                // Also update chat list if chat page is open
-                if (window.opener) {
-                    // Notify chat page to refresh
+                // Only update if not in the middle of adding
+                if (!state.isAddingContact) {
+                    state.contacts = snap.val() || [];
+                    renderContactsList();
                 }
             });
 
@@ -770,7 +755,7 @@
         }
 
         // ================================================================
-        // ADD CONTACT - FIXED: Adds to top and persists
+        // ADD CONTACT - FIXED: Proper Firebase save with error handling
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
@@ -784,30 +769,30 @@
             const preview = document.getElementById('contact-preview');
 
             if (!uid || uid.length !== 6) {
-                showToast('Please enter a valid 6-digit UID');
+                showToast('Please enter a valid 6-digit UID', true);
                 return;
             }
 
             if (uid === state.uid) {
-                showToast('You cannot add yourself');
+                showToast('You cannot add yourself', true);
                 return;
             }
 
             if (state.contacts.includes(uid)) {
-                showToast('Already in contacts');
+                showToast('Already in contacts', true);
                 closeModal('add-contact-modal');
                 return;
             }
 
             if (state.blocked.includes(uid)) {
-                showToast('This user is blocked');
+                showToast('This user is blocked', true);
                 return;
             }
 
             db.ref('users/' + uid).once('value').then((snap) => {
                 const user = snap.val();
                 if (!user) {
-                    showToast('User not found');
+                    showToast('User not found', true);
                     return;
                 }
 
@@ -825,44 +810,67 @@
             const uid = state.pendingContactUID;
             if (!uid) return;
 
-            // Add to contacts - PERSISTENT
-            if (!state.contacts.includes(uid)) {
-                state.contacts.push(uid);
-                db.ref('users/' + state.uid + '/contacts').set(state.contacts)
-                    .then(() => {
-                        closeModal('add-contact-modal');
-                        showToast('✅ Contact added successfully!');
-                        renderContactsList();
-
-                        // Send notification to the added user
-                        const notifRef = db.ref('notifications/' + uid);
-                        notifRef.push({
-                            id: 'notif_' + Date.now(),
-                            type: 'contact_added',
-                            message: state.currentUser.name + ' added you as a contact',
-                            timestamp: Date.now(),
-                            read: false,
-                            sourceUserId: state.uid,
-                            isContactAdd: true
-                        });
-
-                        // Don't open chat - just stay on contacts page
-                    })
-                    .catch((err) => {
-                        showToast('Error: ' + err.message);
-                    });
-            } else {
-                showToast('Already in contacts');
+            // Check if already in contacts
+            if (state.contacts.includes(uid)) {
+                showToast('Already in contacts', true);
                 closeModal('add-contact-modal');
+                return;
             }
+
+            // Prevent double adding
+            if (state.isAddingContact) return;
+            state.isAddingContact = true;
+
+            // Create new contacts array
+            const newContacts = [...state.contacts, uid];
+
+            // Show loading
+            const btn = document.querySelector('#contact-preview .btn-primary');
+            const originalText = btn.textContent;
+            btn.textContent = 'Adding...';
+            btn.disabled = true;
+
+            // Save to Firebase
+            db.ref('users/' + state.uid + '/contacts')
+                .set(newContacts)
+                .then(() => {
+                    // Success - update local state
+                    state.contacts = newContacts;
+                    state.isAddingContact = false;
+                    closeModal('add-contact-modal');
+                    showToast('✅ Contact added successfully!');
+                    renderContactsList();
+
+                    // Send notification to the added user
+                    const notifRef = db.ref('notifications/' + uid);
+                    notifRef.push({
+                        id: 'notif_' + Date.now(),
+                        type: 'contact_added',
+                        message: state.currentUser.name + ' added you as a contact',
+                        timestamp: Date.now(),
+                        read: false,
+                        sourceUserId: state.uid,
+                        isContactAdd: true
+                    });
+
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                })
+                .catch((err) => {
+                    // Error - revert
+                    state.isAddingContact = false;
+                    showToast('❌ Unable to add contact: ' + err.message, true);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    console.error('Add contact error:', err);
+                });
         };
 
-        console.log('🚀 Stardust X - Contacts Page (Fixed)');
-        console.log('✅ Add contact without opening chat');
-        console.log('✅ Contact persists after page refresh');
-        console.log('✅ Contact appears at top of list');
-        console.log('✅ Tap contact to open chat with UID in URL');
-        console.log('✅ Dark mode works');
+        console.log('🚀 Stardust X - Contacts Page (Complete Fix)');
+        console.log('✅ Proper Firebase save with error handling');
+        console.log('✅ No fake UI updates on failed save');
+        console.log('✅ Contact persists after refresh');
+        console.log('✅ Opens chat with UID in URL');
     </script>
 </body>
 </html>
