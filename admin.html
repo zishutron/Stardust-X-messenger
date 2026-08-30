@@ -8,9 +8,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <!-- No Firebase Storage -->
     <style>
         /* ================================================================
-           ADMIN PANEL STYLES - With Reports Section
+           ADMIN PANEL STYLES
            ================================================================ */
         * {
             margin: 0;
@@ -28,7 +29,6 @@
             margin: 0 auto;
             padding: 20px;
         }
-
         .header {
             background: linear-gradient(135deg, #00A86B, #008A56);
             color: white;
@@ -167,9 +167,55 @@
             background: #00A86B;
             color: white;
         }
-        .card .card-header .badge.warning {
-            background: #FEF3C7;
-            color: #D97706;
+
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.25s ease;
+            min-width: 150px;
+        }
+        .search-box input:focus {
+            border-color: #00A86B;
+            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+        }
+        .search-box select {
+            padding: 10px 16px;
+            border: 1px solid #D4E8DE;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+            cursor: pointer;
+        }
+        .search-box button {
+            padding: 10px 24px;
+            background: #00A86B;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .search-box button:hover {
+            background: #008A56;
+        }
+        .search-box button.secondary {
+            background: #ECF5F0;
+            color: #4A6A5A;
+        }
+        .search-box button.secondary:hover {
+            background: #D4E8DE;
         }
 
         .table-wrapper {
@@ -215,14 +261,6 @@
         table .status-badge.suspended {
             background: #FEE2E2;
             color: #DC2626;
-        }
-        table .status-badge.pending {
-            background: #FEF3C7;
-            color: #D97706;
-        }
-        table .status-badge.resolved {
-            background: #D4EDE0;
-            color: #008A56;
         }
 
         .action-group {
@@ -273,31 +311,6 @@
         }
         .action-btn.message:hover {
             background: #BFDBFE;
-        }
-        .action-btn.resolve {
-            background: #D4EDE0;
-            color: #008A56;
-        }
-        .action-btn.resolve:hover {
-            background: #A7F3D0;
-        }
-        .action-btn.dismiss {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-        .action-btn.dismiss:hover {
-            background: #FCA5A5;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #8AAA9A;
-        }
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.3;
         }
 
         .toast {
@@ -399,12 +412,34 @@
         .modal-box .btn-primary:hover {
             background: #008A56;
         }
+        .modal-box .btn-secondary {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
+            color: #00A86B;
+            border: 1px solid #00A86B;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .modal-box .btn-secondary:hover {
+            background: #ECF5F0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8AAA9A;
+        }
 
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { flex-direction: column; text-align: center; }
             .stats { grid-template-columns: 1fr 1fr; }
             .tabs button { font-size: 12px; padding: 8px 12px; min-width: 60px; }
+            .search-box { flex-direction: column; }
         }
     </style>
 </head>
@@ -448,16 +483,11 @@
                 <div class="number" id="suspended-users">0</div>
                 <div class="label">Suspended</div>
             </div>
-            <div class="stat-card">
-                <div class="number" id="report-count">0</div>
-                <div class="label">Reports</div>
-            </div>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
             <button class="active" data-tab="users" onclick="switchTab('users')">Users</button>
-            <button data-tab="reports" onclick="switchTab('reports')">Reports</button>
             <button data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
         </div>
 
@@ -497,46 +527,18 @@
             </div>
         </div>
 
-        <!-- Tab: Reports -->
-        <div id="tab-reports" class="tab-content" style="display:none;">
-            <div class="card">
-                <div class="card-header">
-                    <h2>📋 User Reports</h2>
-                    <span class="badge warning" id="report-badge">0 pending</span>
-                </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Reported By</th>
-                                <th>Reported User</th>
-                                <th>Reason</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reports-table-body">
-                            <tr><td colspan="7" class="empty-state">Loading reports...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
         <!-- Tab: Broadcast -->
         <div id="tab-broadcast" class="tab-content" style="display:none;">
             <div class="card">
                 <div class="card-header">
-                    <h2>📢 Broadcast Message</h2>
+                    <h2>Broadcast Message</h2>
                     <span class="badge">Send to all users</span>
                 </div>
                 <div style="margin-bottom:16px;">
                     <label style="font-weight:600;font-size:14px;display:block;margin-bottom:4px;">Message</label>
                     <textarea id="broadcast-text" placeholder="Enter your broadcast message here..." style="width:100%;padding:12px;border:1px solid #D4E8DE;border-radius:10px;font-size:14px;resize:vertical;min-height:100px;font-family:inherit;outline:none;"></textarea>
                 </div>
-                <button class="action-btn broadcast" onclick="sendBroadcast()" style="padding:10px 24px;font-size:14px;">📤 Send to All Users</button>
+                <button class="action-btn" onclick="sendBroadcast()" style="padding:10px 24px;font-size:14px;background:#00A86B;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Send to All Users</button>
                 <div id="broadcast-status" style="margin-top:12px;padding:12px;border-radius:10px;display:none;background:#ECF5F0;color:#4A6A5A;font-size:14px;">
                     <span id="broadcast-result">Broadcast sent successfully!</span>
                 </div>
@@ -546,7 +548,7 @@
 
     <script>
         // ================================================================
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG - No Storage
         // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
@@ -562,11 +564,11 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
+        // NO Firebase Storage
 
         const ADMIN_UID = '306140';
         let allUsers = [];
         let currentAdmin = null;
-        let allReports = [];
 
         // ================================================================
         // TOAST
@@ -589,10 +591,6 @@
             document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tab).style.display = 'block';
             document.querySelector(`.tabs button[data-tab="${tab}"]`).classList.add('active');
-
-            if (tab === 'reports') {
-                loadReports();
-            }
         }
 
         // ================================================================
@@ -622,7 +620,6 @@
                         document.getElementById('admin-info').textContent = 'Admin: ' + currentAdmin.name + ' (' + currentAdmin
                             .uid + ')';
                         loadAllUsers();
-                        loadReports();
                     } else {
                         showToast('Access denied. Admin only.');
                         setTimeout(() => window.location.href = 'chat.html', 1500);
@@ -659,14 +656,11 @@
             const total = allUsers.length;
             const active = allUsers.filter(u => !u.isSuspended).length;
             const suspended = allUsers.filter(u => u.isSuspended).length;
-            const pendingReports = allReports.filter(r => r.status === 'pending').length;
 
             document.getElementById('total-users').textContent = total;
             document.getElementById('active-users').textContent = active;
             document.getElementById('suspended-users').textContent = suspended;
-            document.getElementById('report-count').textContent = allReports.length;
             document.getElementById('user-count').textContent = total + ' users';
-            document.getElementById('report-badge').textContent = pendingReports + ' pending';
         }
 
         // ================================================================
@@ -711,7 +705,7 @@
                                     `<button class="action-btn suspend" onclick="suspendUser('${user._key}')">Suspend</button>`
                                 }
                                 <button class="action-btn delete" onclick="deleteUser('${user._key}')">Delete</button>
-                                <button class="action-btn message" onclick="openMessageModal('${user._key}')">Message</button>
+                                <button class="action-btn message" onclick="sendUserMessage('${user._key}')">Message</button>
                             ` : `
                                 <span style="font-size:12px;color:#8AAA9A;padding:4px 12px;background:#ECF5F0;border-radius:6px;">Admin</span>
                             `}
@@ -781,111 +775,74 @@
         }
 
         // ================================================================
-        // LOAD REPORTS
+        // SEND USER MESSAGE
         // ================================================================
-        function loadReports() {
-            db.ref('reports').once('value')
-                .then((snap) => {
-                    const data = snap.val();
-                    allReports = [];
-                    if (data) {
-                        const keys = Object.keys(data);
-                        for (let k of keys) {
-                            allReports.push({ id: k, ...data[k] });
-                        }
-                    }
-                    allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    renderReports(allReports);
-                    updateStats();
-                })
-                .catch((err) => showToast('Error loading reports: ' + err.message));
-
-            // Listen for new reports
-            db.ref('reports').limitToLast(10).on('child_added', (snap) => {
-                const data = snap.val();
-                if (data) {
-                    const existing = allReports.find(r => r.id === snap.key);
-                    if (!existing) {
-                        allReports.unshift({ id: snap.key, ...data });
-                        if (document.getElementById('tab-reports').style.display !== 'none') {
-                            renderReports(allReports);
-                            updateStats();
-                        }
-                    }
-                }
-            });
-        }
-
-        // ================================================================
-        // RENDER REPORTS
-        // ================================================================
-        function renderReports(reports) {
-            const tbody = document.getElementById('reports-table-body');
-            tbody.innerHTML = '';
-
-            if (reports.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No reports found</td></tr>`;
+        function sendUserMessage(key) {
+            const user = allUsers.find(u => u._key === key);
+            if (!user) {
+                showToast('User not found');
                 return;
             }
 
-            reports.forEach((report, index) => {
-                const tr = document.createElement('tr');
-                const status = report.status || 'pending';
-                const date = report.timestamp ? new Date(report.timestamp).toLocaleString() : 'N/A';
+            const message = prompt('Enter message to send to ' + user.name + ':');
+            if (!message) return;
 
-                tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>
-                        <strong>${report.reporterName || 'Unknown'}</strong>
-                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reporterUID || ''}</span>
-                    </td>
-                    <td>
-                        <strong>${report.reportedName || 'Unknown'}</strong>
-                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reportedUID || ''}</span>
-                    </td>
-                    <td style="max-width:200px;word-break:break-word;">${report.reason || 'No reason provided'}</td>
-                    <td style="font-size:13px;">${date}</td>
-                    <td>
-                        <span class="status-badge ${status === 'pending' ? 'pending' : status === 'resolved' ? 'resolved' : 'active'}">
-                            ${status.charAt(0).toUpperCase() + status.slice(1)}
-                        </span>
-                    </td>
-                    <td>
-                        ${status === 'pending' ? `
-                            <div class="action-group">
-                                <button class="action-btn resolve" onclick="resolveReport('${report.id}')">Resolve</button>
-                                <button class="action-btn dismiss" onclick="dismissReport('${report.id}')">Dismiss</button>
-                            </div>
-                        ` : `
-                            <span style="font-size:12px;color:#8AAA9A;">${status === 'resolved' ? '✅ Resolved' : '❌ Dismissed'}</span>
-                        `}
-                    </td>
-                `;
-                tbody.appendChild(tr);
+            const notifRef = db.ref('notifications/' + user.uid);
+            notifRef.push({
+                id: 'notif_' + Date.now(),
+                type: 'admin_message',
+                message: 'Admin: ' + message,
+                timestamp: Date.now(),
+                read: false,
+                sourceUserId: ADMIN_UID,
+                isAdmin: true
+            }).then(() => {
+                showToast(`Message sent to ${user.name}`);
+            }).catch((err) => {
+                showToast('Error: ' + err.message);
             });
         }
 
         // ================================================================
-        // REPORT ACTIONS
+        // BROADCAST
         // ================================================================
-        function resolveReport(reportId) {
-            if (!confirm('Mark this report as resolved?')) return;
-            db.ref('reports/' + reportId).update({ status: 'resolved', resolvedAt: Date.now() })
-                .then(() => {
-                    showToast('Report resolved');
-                    loadReports();
-                })
-                .catch((err) => showToast('Error: ' + err.message));
-        }
+        function sendBroadcast() {
+            const message = document.getElementById('broadcast-text').value.trim();
+            if (!message) {
+                showToast('Please enter a message');
+                return;
+            }
 
-        function dismissReport(reportId) {
-            if (!confirm('Dismiss this report?')) return;
-            db.ref('reports/' + reportId).update({ status: 'dismissed', dismissedAt: Date.now() })
+            const statusDiv = document.getElementById('broadcast-status');
+            const resultSpan = document.getElementById('broadcast-result');
+            statusDiv.style.display = 'block';
+            resultSpan.textContent = 'Sending to all users...';
+
+            const promises = allUsers.map(user => {
+                const notifRef = db.ref('notifications/' + user.uid);
+                return notifRef.push({
+                    id: 'notif_' + Date.now(),
+                    type: 'broadcast',
+                    message: '📢 Admin: ' + message,
+                    timestamp: Date.now(),
+                    read: false,
+                    sourceUserId: ADMIN_UID,
+                    isAdmin: true,
+                    isBroadcast: true
+                });
+            });
+
+            Promise.all(promises)
                 .then(() => {
-                    showToast('Report dismissed');
-                    loadReports();
+                    resultSpan.textContent = `✅ Broadcast sent to ${allUsers.length} users successfully!`;
+                    document.getElementById('broadcast-text').value = '';
+                    setTimeout(() => statusDiv.style.display = 'none', 5000);
+                    showToast(`Broadcast sent to ${allUsers.length} users`);
                 })
-                .catch((err) => showToast('Error: ' + err.message));
+                .catch((err) => {
+                    resultSpan.textContent = '❌ Error: ' + err.message;
+                    showToast('Error: ' + err.message);
+                });
         }
 
         // ================================================================
@@ -895,10 +852,9 @@
             auth.signOut().then(() => window.location.href = 'auth.html');
         }
 
-        console.log('🚀 Stardust X - Admin Panel (With Reports)');
-        console.log('✅ Reports section with all details');
-        console.log('✅ Resolve/Dismiss reports');
-        console.log('✅ Real-time report updates');
+        console.log('🚀 Stardust X - Admin Panel (ImgBB Only)');
+        console.log('✅ No Firebase Storage - All images via ImgBB');
+        console.log('✅ Admin UID: 306140');
     </script>
 </body>
 </html>
