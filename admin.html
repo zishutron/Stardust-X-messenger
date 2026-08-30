@@ -9,7 +9,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        /* Same styles as before - keep existing CSS */
+        /* ================================================================
+           ADMIN PANEL STYLES - With Reports Section
+           ================================================================ */
         * {
             margin: 0;
             padding: 0;
@@ -26,6 +28,7 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         .header {
             background: linear-gradient(135deg, #00A86B, #008A56);
             color: white;
@@ -164,55 +167,9 @@
             background: #00A86B;
             color: white;
         }
-
-        .search-box {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .search-box input {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #D4E8DE;
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.25s ease;
-            min-width: 150px;
-        }
-        .search-box input:focus {
-            border-color: #00A86B;
-            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
-        }
-        .search-box select {
-            padding: 10px 16px;
-            border: 1px solid #D4E8DE;
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
-            background: white;
-            cursor: pointer;
-        }
-        .search-box button {
-            padding: 10px 24px;
-            background: #00A86B;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-        .search-box button:hover {
-            background: #008A56;
-        }
-        .search-box button.secondary {
-            background: #ECF5F0;
-            color: #4A6A5A;
-        }
-        .search-box button.secondary:hover {
-            background: #D4E8DE;
+        .card .card-header .badge.warning {
+            background: #FEF3C7;
+            color: #D97706;
         }
 
         .table-wrapper {
@@ -258,6 +215,14 @@
         table .status-badge.suspended {
             background: #FEE2E2;
             color: #DC2626;
+        }
+        table .status-badge.pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        table .status-badge.resolved {
+            background: #D4EDE0;
+            color: #008A56;
         }
 
         .action-group {
@@ -309,19 +274,30 @@
         .action-btn.message:hover {
             background: #BFDBFE;
         }
-        .action-btn.view {
-            background: #ECF5F0;
-            color: #4A6A5A;
+        .action-btn.resolve {
+            background: #D4EDE0;
+            color: #008A56;
         }
-        .action-btn.view:hover {
-            background: #D4E8DE;
+        .action-btn.resolve:hover {
+            background: #A7F3D0;
         }
-        .action-btn.broadcast {
-            background: #EDE9FE;
-            color: #7C3AED;
+        .action-btn.dismiss {
+            background: #FEE2E2;
+            color: #DC2626;
         }
-        .action-btn.broadcast:hover {
-            background: #DDD6FE;
+        .action-btn.dismiss:hover {
+            background: #FCA5A5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8AAA9A;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
         }
 
         .toast {
@@ -348,7 +324,6 @@
             100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        /* ===== PROFESSIONAL MESSAGE MODAL ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -366,13 +341,12 @@
         .modal-box {
             background: white;
             border-radius: 16px;
-            padding: 28px;
+            padding: 24px;
             max-width: 500px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease-out;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
         }
         @keyframes slideUp {
             0% { opacity: 0; transform: translateY(30px) scale(0.96); }
@@ -382,199 +356,55 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #ECF5F0;
+            margin-bottom: 16px;
         }
         .modal-box .modal-header h3 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: #1A2E24;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .modal-box .modal-header h3 .badge {
-            font-size: 11px;
-            background: #ECF5F0;
-            color: #4A6A5A;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 500;
         }
         .modal-box .modal-header button {
             background: transparent;
             border: none;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             color: #8AAA9A;
-            transition: all 0.25s ease;
-            padding: 4px 8px;
-            border-radius: 8px;
         }
-        .modal-box .modal-header button:hover {
-            background: #F5F9F7;
-            color: #1A2E24;
-        }
-        .modal-box .message-input-group {
-            margin-bottom: 16px;
-        }
-        .modal-box .message-input-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 13px;
-            color: #4A6A5A;
-            margin-bottom: 6px;
-        }
-        .modal-box .message-input-group textarea {
+        .modal-box textarea {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             border: 1px solid #D4E8DE;
             border-radius: 10px;
             font-size: 14px;
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
             font-family: inherit;
             outline: none;
-            transition: all 0.25s ease;
-            background: #F5F9F7;
         }
-        .modal-box .message-input-group textarea:focus {
+        .modal-box textarea:focus {
             border-color: #00A86B;
             box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
-            background: white;
-        }
-        .modal-box .media-upload-area {
-            border: 2px dashed #D4E8DE;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            margin-bottom: 16px;
-            background: #F5F9F7;
-        }
-        .modal-box .media-upload-area:hover {
-            border-color: #00A86B;
-            background: #ECF5F0;
-        }
-        .modal-box .media-upload-area .icon {
-            font-size: 32px;
-            margin-bottom: 4px;
-        }
-        .modal-box .media-upload-area .text {
-            font-size: 13px;
-            color: #8AAA9A;
-        }
-        .modal-box .media-upload-area .text strong {
-            color: #00A86B;
-        }
-        .modal-box .media-preview {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            background: #ECF5F0;
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-        .modal-box .media-preview img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .modal-box .media-preview .name {
-            flex: 1;
-            font-size: 13px;
-            font-weight: 500;
-            color: #1A2E24;
-        }
-        .modal-box .media-preview .remove {
-            background: transparent;
-            border: none;
-            color: #EF4444;
-            cursor: pointer;
-            font-size: 16px;
         }
         .modal-box .btn-primary {
             width: 100%;
-            margin-top: 4px;
+            margin-top: 12px;
             background: #00A86B;
             color: white;
             border: none;
-            padding: 14px;
+            padding: 12px;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s ease;
-            font-size: 16px;
         }
         .modal-box .btn-primary:hover {
             background: #008A56;
         }
-        .modal-box .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .modal-box .btn-secondary {
-            width: 100%;
-            margin-top: 8px;
-            background: transparent;
-            color: #00A86B;
-            border: 1px solid #00A86B;
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            font-size: 16px;
-        }
-        .modal-box .btn-secondary:hover {
-            background: #ECF5F0;
-        }
-        .modal-box .btn-row {
-            display: flex;
-            gap: 10px;
-        }
-        .modal-box .btn-row .btn-primary,
-        .modal-box .btn-row .btn-secondary {
-            flex: 1;
-            margin-top: 0;
-        }
-        .modal-box .divider {
-            text-align: center;
-            color: #8AAA9A;
-            font-size: 13px;
-            margin: 12px 0;
-            position: relative;
-        }
-        .modal-box .divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 50%;
-            height: 1px;
-            background: #D4E8DE;
-        }
-        .modal-box .divider span {
-            background: white;
-            padding: 0 12px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .file-input-hidden { display: none; }
 
         @media (max-width: 768px) {
             .container { padding: 12px; }
             .header { flex-direction: column; text-align: center; }
             .stats { grid-template-columns: 1fr 1fr; }
             .tabs button { font-size: 12px; padding: 8px 12px; min-width: 60px; }
-            .search-box { flex-direction: column; }
-            .modal-box { padding: 20px; }
-            .modal-box .btn-row { flex-direction: column; }
         }
     </style>
 </head>
@@ -619,14 +449,15 @@
                 <div class="label">Suspended</div>
             </div>
             <div class="stat-card">
-                <div class="number" id="total-messages">0</div>
-                <div class="label">Total Messages</div>
+                <div class="number" id="report-count">0</div>
+                <div class="label">Reports</div>
             </div>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
             <button class="active" data-tab="users" onclick="switchTab('users')">Users</button>
+            <button data-tab="reports" onclick="switchTab('reports')">Reports</button>
             <button data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
         </div>
 
@@ -666,6 +497,34 @@
             </div>
         </div>
 
+        <!-- Tab: Reports -->
+        <div id="tab-reports" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 User Reports</h2>
+                    <span class="badge warning" id="report-badge">0 pending</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Reported By</th>
+                                <th>Reported User</th>
+                                <th>Reason</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table-body">
+                            <tr><td colspan="7" class="empty-state">Loading reports...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Tab: Broadcast -->
         <div id="tab-broadcast" class="tab-content" style="display:none;">
             <div class="card">
@@ -681,45 +540,6 @@
                 <div id="broadcast-status" style="margin-top:12px;padding:12px;border-radius:10px;display:none;background:#ECF5F0;color:#4A6A5A;font-size:14px;">
                     <span id="broadcast-result">Broadcast sent successfully!</span>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== PROFESSIONAL MESSAGE MODAL ===== -->
-    <div id="message-modal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3>
-                    💬 Send Message
-                    <span class="badge" id="modal-user-badge">User</span>
-                </h3>
-                <button onclick="closeModal('message-modal')">✕</button>
-            </div>
-
-            <div class="message-input-group">
-                <label>Message</label>
-                <textarea id="modal-message-text" placeholder="Type your message here..."></textarea>
-            </div>
-
-            <div class="divider"><span>or</span></div>
-
-            <div class="media-upload-area" onclick="document.getElementById('modal-file-input').click()">
-                <div class="icon">📎</div>
-                <div class="text">
-                    Click to upload <strong>Photo</strong> or <strong>Document</strong>
-                </div>
-                <input type="file" id="modal-file-input" class="file-input-hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
-            </div>
-
-            <div id="modal-media-preview" style="display:none;" class="media-preview">
-                <img id="modal-preview-img" src="" alt="Preview" />
-                <span class="name" id="modal-preview-name">file.jpg</span>
-                <button class="remove" onclick="removeModalMedia()">✕</button>
-            </div>
-
-            <div class="btn-row">
-                <button class="btn-secondary" onclick="closeModal('message-modal')">Cancel</button>
-                <button class="btn-primary" id="modal-send-btn" onclick="sendModalMessage()">Send Message</button>
             </div>
         </div>
     </div>
@@ -743,16 +563,10 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ================================================================
-        // IMGBB API
-        // ================================================================
-        const IMGBB_API_KEY = '94dc61c3580abc8c9218268d0c773961';
-
         const ADMIN_UID = '306140';
         let allUsers = [];
         let currentAdmin = null;
-        let modalTargetUser = null;
-        let modalFile = null;
+        let allReports = [];
 
         // ================================================================
         // TOAST
@@ -767,13 +581,6 @@
             }, 3000);
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            modalFile = null;
-            document.getElementById('modal-media-preview').style.display = 'none';
-            document.getElementById('modal-message-text').value = '';
-        }
-
         // ================================================================
         // TABS
         // ================================================================
@@ -782,6 +589,10 @@
             document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tab).style.display = 'block';
             document.querySelector(`.tabs button[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'reports') {
+                loadReports();
+            }
         }
 
         // ================================================================
@@ -811,6 +622,7 @@
                         document.getElementById('admin-info').textContent = 'Admin: ' + currentAdmin.name + ' (' + currentAdmin
                             .uid + ')';
                         loadAllUsers();
+                        loadReports();
                     } else {
                         showToast('Access denied. Admin only.');
                         setTimeout(() => window.location.href = 'chat.html', 1500);
@@ -847,10 +659,14 @@
             const total = allUsers.length;
             const active = allUsers.filter(u => !u.isSuspended).length;
             const suspended = allUsers.filter(u => u.isSuspended).length;
+            const pendingReports = allReports.filter(r => r.status === 'pending').length;
+
             document.getElementById('total-users').textContent = total;
             document.getElementById('active-users').textContent = active;
             document.getElementById('suspended-users').textContent = suspended;
+            document.getElementById('report-count').textContent = allReports.length;
             document.getElementById('user-count').textContent = total + ' users';
+            document.getElementById('report-badge').textContent = pendingReports + ' pending';
         }
 
         // ================================================================
@@ -938,7 +754,7 @@
         // SUSPEND / UNSUSPEND / DELETE
         // ================================================================
         function suspendUser(key) {
-            if (!confirm('Are you sure you want to suspend this user?')) return;
+            if (!confirm('Suspend this user?')) return;
             const user = allUsers.find(u => u._key === key);
             if (!user) return;
             db.ref('users/' + key).update({ isSuspended: true, suspendedAt: Date.now() })
@@ -947,7 +763,7 @@
         }
 
         function unsuspendUser(key) {
-            if (!confirm('Are you sure you want to unsuspend this user?')) return;
+            if (!confirm('Unsuspend this user?')) return;
             const user = allUsers.find(u => u._key === key);
             if (!user) return;
             db.ref('users/' + key).update({ isSuspended: false, suspendedAt: null })
@@ -956,7 +772,7 @@
         }
 
         function deleteUser(key) {
-            if (!confirm('⚠️ Permanently delete this user? This cannot be undone!')) return;
+            if (!confirm('Permanently delete this user?')) return;
             const user = allUsers.find(u => u._key === key);
             if (!user) return;
             db.ref('users/' + key).remove()
@@ -965,176 +781,111 @@
         }
 
         // ================================================================
-        // UPLOAD TO IMGBB
+        // LOAD REPORTS
         // ================================================================
-        function uploadToImgBB(file) {
-            return new Promise((resolve, reject) => {
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('key', IMGBB_API_KEY);
-                fetch('https://api.imgbb.com/1/upload', {
-                    method: 'POST',
-                    body: formData
+        function loadReports() {
+            db.ref('reports').once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    allReports = [];
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            allReports.push({ id: k, ...data[k] });
+                        }
+                    }
+                    allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    renderReports(allReports);
+                    updateStats();
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) resolve(data.data.url);
-                    else reject(new Error(data.error?.message || 'Upload failed'));
-                })
-                .catch(reject);
+                .catch((err) => showToast('Error loading reports: ' + err.message));
+
+            // Listen for new reports
+            db.ref('reports').limitToLast(10).on('child_added', (snap) => {
+                const data = snap.val();
+                if (data) {
+                    const existing = allReports.find(r => r.id === snap.key);
+                    if (!existing) {
+                        allReports.unshift({ id: snap.key, ...data });
+                        if (document.getElementById('tab-reports').style.display !== 'none') {
+                            renderReports(allReports);
+                            updateStats();
+                        }
+                    }
+                }
             });
         }
 
         // ================================================================
-        // MESSAGE MODAL - PROFESSIONAL
+        // RENDER REPORTS
         // ================================================================
-        function openMessageModal(key) {
-            const user = allUsers.find(u => u._key === key);
-            if (!user) { showToast('User not found'); return; }
-            modalTargetUser = user;
-            document.getElementById('modal-user-badge').textContent = user.name + ' (' + user.uid + ')';
-            document.getElementById('modal-message-text').value = '';
-            document.getElementById('modal-media-preview').style.display = 'none';
-            modalFile = null;
-            document.getElementById('message-modal').classList.remove('hidden');
-        }
+        function renderReports(reports) {
+            const tbody = document.getElementById('reports-table-body');
+            tbody.innerHTML = '';
 
-        // File input handler
-        document.getElementById('modal-file-input')?.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            modalFile = file;
-            const preview = document.getElementById('modal-media-preview');
-            const img = document.getElementById('modal-preview-img');
-            const name = document.getElementById('modal-preview-name');
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => { img.src = ev.target.result; img.style.display = 'block'; };
-                reader.readAsDataURL(file);
-            } else {
-                img.style.display = 'none';
-            }
-            name.textContent = file.name;
-            preview.style.display = 'flex';
-            document.getElementById('modal-file-input').value = '';
-        });
-
-        function removeModalMedia() {
-            modalFile = null;
-            document.getElementById('modal-media-preview').style.display = 'none';
-            document.getElementById('modal-file-input').value = '';
-        }
-
-        // ================================================================
-        // SEND MODAL MESSAGE - WITH IMGBB
-        // ================================================================
-        async function sendModalMessage() {
-            const text = document.getElementById('modal-message-text').value.trim();
-            const btn = document.getElementById('modal-send-btn');
-
-            if (!text && !modalFile) {
-                showToast('Please enter a message or attach a file');
+            if (reports.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No reports found</td></tr>`;
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = 'Sending...';
+            reports.forEach((report, index) => {
+                const tr = document.createElement('tr');
+                const status = report.status || 'pending';
+                const date = report.timestamp ? new Date(report.timestamp).toLocaleString() : 'N/A';
 
-            try {
-                let mediaUrl = null;
-                let mediaType = null;
-                let mediaName = null;
-
-                if (modalFile) {
-                    if (modalFile.type.startsWith('image/')) {
-                        mediaUrl = await uploadToImgBB(modalFile);
-                        mediaType = 'image';
-                        mediaName = modalFile.name;
-                    } else {
-                        // For documents, use base64
-                        mediaUrl = await new Promise((resolve) => {
-                            const reader = new FileReader();
-                            reader.onload = (ev) => resolve(ev.target.result);
-                            reader.readAsDataURL(modalFile);
-                        });
-                        mediaType = 'document';
-                        mediaName = modalFile.name;
-                    }
-                }
-
-                // Send to user's notifications
-                const notifRef = db.ref('notifications/' + modalTargetUser.uid);
-                await notifRef.push({
-                    id: 'notif_' + Date.now(),
-                    type: 'admin_message',
-                    message: text || '📎 ' + mediaName,
-                    timestamp: Date.now(),
-                    read: false,
-                    sourceUserId: ADMIN_UID,
-                    isAdmin: true,
-                    mediaUrl: mediaUrl,
-                    mediaType: mediaType,
-                    mediaName: mediaName,
-                });
-
-                showToast(`✅ Message sent to ${modalTargetUser.name}`);
-                closeModal('message-modal');
-                btn.disabled = false;
-                btn.textContent = 'Send Message';
-
-                // Add to history
-                const historyRef = db.ref('adminHistory');
-                await historyRef.push({
-                    userId: modalTargetUser.uid,
-                    type: 'admin_message',
-                    description: `Admin sent message to ${modalTargetUser.name}: ${text || '📎 ' + mediaName}`,
-                    timestamp: Date.now()
-                });
-
-            } catch (err) {
-                showToast('❌ Error: ' + err.message);
-                btn.disabled = false;
-                btn.textContent = 'Send Message';
-            }
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <strong>${report.reporterName || 'Unknown'}</strong>
+                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reporterUID || ''}</span>
+                    </td>
+                    <td>
+                        <strong>${report.reportedName || 'Unknown'}</strong>
+                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reportedUID || ''}</span>
+                    </td>
+                    <td style="max-width:200px;word-break:break-word;">${report.reason || 'No reason provided'}</td>
+                    <td style="font-size:13px;">${date}</td>
+                    <td>
+                        <span class="status-badge ${status === 'pending' ? 'pending' : status === 'resolved' ? 'resolved' : 'active'}">
+                            ${status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        ${status === 'pending' ? `
+                            <div class="action-group">
+                                <button class="action-btn resolve" onclick="resolveReport('${report.id}')">Resolve</button>
+                                <button class="action-btn dismiss" onclick="dismissReport('${report.id}')">Dismiss</button>
+                            </div>
+                        ` : `
+                            <span style="font-size:12px;color:#8AAA9A;">${status === 'resolved' ? '✅ Resolved' : '❌ Dismissed'}</span>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
         // ================================================================
-        // BROADCAST
+        // REPORT ACTIONS
         // ================================================================
-        function sendBroadcast() {
-            const message = document.getElementById('broadcast-text').value.trim();
-            if (!message) { showToast('Please enter a message'); return; }
-
-            const statusDiv = document.getElementById('broadcast-status');
-            const resultSpan = document.getElementById('broadcast-result');
-            statusDiv.style.display = 'block';
-            resultSpan.textContent = 'Sending to all users...';
-
-            const promises = allUsers.map(user => {
-                const notifRef = db.ref('notifications/' + user.uid);
-                return notifRef.push({
-                    id: 'notif_' + Date.now(),
-                    type: 'broadcast',
-                    message: '📢 Admin: ' + message,
-                    timestamp: Date.now(),
-                    read: false,
-                    sourceUserId: ADMIN_UID,
-                    isAdmin: true,
-                    isBroadcast: true
-                });
-            });
-
-            Promise.all(promises)
+        function resolveReport(reportId) {
+            if (!confirm('Mark this report as resolved?')) return;
+            db.ref('reports/' + reportId).update({ status: 'resolved', resolvedAt: Date.now() })
                 .then(() => {
-                    resultSpan.textContent = `✅ Broadcast sent to ${allUsers.length} users successfully!`;
-                    document.getElementById('broadcast-text').value = '';
-                    setTimeout(() => statusDiv.style.display = 'none', 5000);
-                    showToast(`Broadcast sent to ${allUsers.length} users`);
+                    showToast('Report resolved');
+                    loadReports();
                 })
-                .catch((err) => {
-                    resultSpan.textContent = '❌ Error: ' + err.message;
-                    showToast('Error: ' + err.message);
-                });
+                .catch((err) => showToast('Error: ' + err.message));
+        }
+
+        function dismissReport(reportId) {
+            if (!confirm('Dismiss this report?')) return;
+            db.ref('reports/' + reportId).update({ status: 'dismissed', dismissedAt: Date.now() })
+                .then(() => {
+                    showToast('Report dismissed');
+                    loadReports();
+                })
+                .catch((err) => showToast('Error: ' + err.message));
         }
 
         // ================================================================
@@ -1144,11 +895,10 @@
             auth.signOut().then(() => window.location.href = 'auth.html');
         }
 
-        console.log('🚀 Stardust X - Admin Panel (Fully Fixed)');
-        console.log('✅ Professional message modal with media');
-        console.log('✅ ImgBB integration for images');
-        console.log('✅ Send text + images + documents');
-        console.log('✅ No permission denied errors');
+        console.log('🚀 Stardust X - Admin Panel (With Reports)');
+        console.log('✅ Reports section with all details');
+        console.log('✅ Resolve/Dismiss reports');
+        console.log('✅ Real-time report updates');
     </script>
 </body>
 </html>
