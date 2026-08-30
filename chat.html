@@ -10,7 +10,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
-        /* Same styles as before - keeping consistent */
+        /* ================================================================
+           CHAT PAGE STYLES
+           ================================================================ */
         :root {
             --primary: #00A86B;
             --primary-light: #00C97A;
@@ -982,6 +984,8 @@
             isChatOpen: false,
             blocked: [],
             closeFriends: [],
+            isAddingContact: false,
+            initialLoadDone: false,
         };
 
         // ================================================================
@@ -1099,22 +1103,28 @@
             // Listen for contacts - REAL-TIME
             db.ref('users/' + state.uid + '/contacts').on('value', (snap) => {
                 state.contacts = snap.val() || [];
-                buildChatList();
-                renderChatList();
+                if (state.initialLoadDone) {
+                    buildChatList();
+                    renderChatList();
+                }
             });
 
             // Listen for blocked
             db.ref('users/' + state.uid + '/blocked').on('value', (snap) => {
                 state.blocked = snap.val() || [];
-                buildChatList();
-                renderChatList();
+                if (state.initialLoadDone) {
+                    buildChatList();
+                    renderChatList();
+                }
             });
 
             // Listen for close friends
             db.ref('users/' + state.uid + '/closeFriends').on('value', (snap) => {
                 state.closeFriends = snap.val() || [];
-                buildChatList();
-                renderChatList();
+                if (state.initialLoadDone) {
+                    buildChatList();
+                    renderChatList();
+                }
             });
 
             // Listen for messages - REAL-TIME
@@ -1122,42 +1132,43 @@
                 const data = snap.val();
                 if (data) {
                     state.messages = data;
-                    buildChatList();
-                    renderChatList();
-                    if (state.activeChatUID && state.isChatOpen) {
-                        renderMessages(state.activeChatUID);
+                    if (state.initialLoadDone) {
+                        buildChatList();
+                        renderChatList();
+                        if (state.activeChatUID && state.isChatOpen) {
+                            renderMessages(state.activeChatUID);
+                        }
                     }
                 }
             });
 
-            // ===== CHECK FOR UID FROM URL (from contacts page) =====
+            // ===== CHECK FOR UID FROM URL =====
             const params = new URLSearchParams(window.location.search);
             const uid = params.get('uid');
             if (uid && uid !== state.uid) {
-                // Verify user is in contacts
-                if (state.contacts.includes(uid)) {
-                    setTimeout(() => {
-                        openChat(uid);
-                    }, 600);
-                } else {
-                    // Try to get user info and add to contacts
-                    db.ref('users/' + uid).once('value').then((snap) => {
-                        const user = snap.val();
-                        if (user) {
-                            showToast('Opening chat with ' + user.name);
-                            // Add to contacts if not already
-                            if (!state.contacts.includes(uid)) {
-                                state.contacts.push(uid);
-                                db.ref('users/' + state.uid + '/contacts').set(state.contacts);
-                            }
-                            setTimeout(() => {
-                                openChat(uid);
-                            }, 500);
+                // Verify user is in contacts or add them
+                db.ref('users/' + uid).once('value').then((snap) => {
+                    const user = snap.val();
+                    if (user) {
+                        if (!state.contacts.includes(uid)) {
+                            // Add to contacts
+                            const newContacts = [...state.contacts, uid];
+                            db.ref('users/' + state.uid + '/contacts').set(newContacts)
+                                .then(() => {
+                                    state.contacts = newContacts;
+                                    showToast('Opening chat with ' + user.name);
+                                    setTimeout(() => openChat(uid), 400);
+                                })
+                                .catch((err) => {
+                                    showToast('Error adding contact: ' + err.message);
+                                });
                         } else {
-                            showToast('User not found');
+                            setTimeout(() => openChat(uid), 300);
                         }
-                    });
-                }
+                    } else {
+                        showToast('User not found');
+                    }
+                });
             }
 
             document.getElementById('search-input')?.addEventListener('input', (e) => {
@@ -1176,6 +1187,7 @@
                 }
             });
 
+            state.initialLoadDone = true;
             buildChatList();
             renderChatList();
             showToast('Welcome, ' + state.currentUser.name + '!');
@@ -1235,16 +1247,16 @@
         }
 
         // ================================================================
-        // BUILD CHAT LIST
+        // BUILD CHAT LIST - Deterministic
         // ================================================================
         function buildChatList() {
             state.chats = [];
             const contactList = state.contacts.filter(c => !state.blocked.includes(c));
 
-            contactList.forEach(contactUID => {
-                db.ref('users/' + contactUID).once('value').then((snap) => {
+            const promises = contactList.map(contactUID => {
+                return db.ref('users/' + contactUID).once('value').then((snap) => {
                     const contact = snap.val();
-                    if (!contact) return;
+                    if (!contact) return null;
 
                     const threadKey = state.uid < contactUID ? state.uid + '_' + contactUID : contactUID + '_' +
                         state.uid;
@@ -1252,29 +1264,26 @@
                     const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
                     const unread = msgs.filter(m => m.sender === contactUID && !m.seen).length;
 
-                    const existing = state.chats.find(c => c.uid === contactUID);
-                    if (existing) {
-                        existing.lastMessage = lastMsg ? lastMsg.text : 'No messages';
-                        existing.lastMessageTime = lastMsg ? lastMsg.timestamp : 0;
-                        existing.unreadCount = unread;
-                    } else {
-                        state.chats.push({
-                            uid: contactUID,
-                            name: contact.name || 'User',
-                            pfp: contact.pfp ||
-                                'https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=72',
-                            online: contact.online || false,
-                            lastMessage: lastMsg ? lastMsg.text : 'No messages yet',
-                            lastMessageTime: lastMsg ? lastMsg.timestamp : 0,
-                            unreadCount: unread,
-                            isCloseFriend: state.closeFriends.includes(contactUID),
-                            isBlocked: state.blocked.includes(contactUID),
-                        });
-                    }
-
-                    state.chats.sort((a, b) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
-                    renderChatList();
+                    return {
+                        uid: contactUID,
+                        name: contact.name || 'User',
+                        pfp: contact.pfp ||
+                            'https://ui-avatars.com/api/?name=User&background=00A86B&color=fff&size=72',
+                        online: contact.online || false,
+                        lastMessage: lastMsg ? lastMsg.text : 'No messages yet',
+                        lastMessageTime: lastMsg ? lastMsg.timestamp : 0,
+                        unreadCount: unread,
+                        isCloseFriend: state.closeFriends.includes(contactUID),
+                        isBlocked: state.blocked.includes(contactUID),
+                    };
                 });
+            });
+
+            Promise.all(promises).then((results) => {
+                const validChats = results.filter(c => c !== null);
+                state.chats = validChats;
+                state.chats.sort((a, b) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
+                renderChatList();
             });
         }
 
@@ -1814,13 +1823,11 @@
         }
 
         console.log('🚀 Stardust X - Chat Page (Complete Fix)');
-        console.log('✅ Accepts UID from URL via contacts page');
-        console.log('✅ Opens chat only for contacts');
-        console.log('✅ Contact persists in list');
+        console.log('✅ Deterministic chat list building');
+        console.log('✅ Proper contact sync with Firebase');
+        console.log('✅ Opens chat from contacts with UID');
         console.log('✅ Chat appears after messaging');
-        console.log('✅ WhatsApp-style chat list');
-        console.log('✅ Real-time messaging');
-        console.log('✅ Dark mode works');
+        console.log('✅ Real-time updates');
     </script>
 </body>
 </html>
