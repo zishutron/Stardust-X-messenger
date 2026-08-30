@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Contacts - Stardust X</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
         /* ================================================================
-           CONTACTS PAGE STYLES
+           CONTACTS PAGE STYLES - With Dark Mode Support
            ================================================================ */
         :root {
             --primary: #00A86B;
@@ -30,6 +28,17 @@
             --radius-sm: 10px;
             --transition: all 0.25s ease;
             --danger: #EF4444;
+        }
+
+        .dark-mode {
+            --bg-primary: #1A1A2E;
+            --bg-secondary: #0F0F1A;
+            --bg-surface: #2A2A44;
+            --bg-input: #22223A;
+            --text-primary: #F0F0F5;
+            --text-secondary: #B0B0C8;
+            --text-muted: #7A7A94;
+            --border-color: #33334A;
         }
 
         * {
@@ -185,7 +194,8 @@
             padding: 4px 0;
             background: var(--bg-primary);
         }
-        .list-item {
+
+        .contact-item {
             display: flex;
             align-items: center;
             padding: 12px 16px;
@@ -196,8 +206,8 @@
             margin: 2px 8px;
             position: relative;
         }
-        .list-item:active { background: var(--bg-surface); transform: scale(0.98); }
-        .list-item .avatar {
+        .contact-item:active { background: var(--bg-surface); transform: scale(0.98); }
+        .contact-item .avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
@@ -206,14 +216,14 @@
             border: 2px solid var(--border-color);
             background: var(--bg-surface);
         }
-        .list-item .avatar.online { border-color: var(--primary); }
-        .list-item .info { flex: 1; min-width: 0; }
-        .list-item .info .name-row {
+        .contact-item .avatar.online { border-color: var(--primary); }
+        .contact-item .info { flex: 1; min-width: 0; }
+        .contact-item .info .name-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .list-item .info .name-row .name {
+        .contact-item .info .name-row .name {
             font-weight: 600;
             font-size: 15px;
             color: var(--text-primary);
@@ -221,19 +231,33 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .list-item .info .msg-row {
+        .contact-item .info .msg-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-top: 2px;
         }
-        .list-item .info .msg-row .sub {
+        .contact-item .info .msg-row .sub {
             font-size: 13px;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             flex: 1;
+        }
+        .contact-item .item-menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .contact-item .item-menu-btn:active {
+            background: var(--bg-surface);
+            color: var(--primary);
         }
 
         .empty-state {
@@ -399,53 +423,63 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
         }
-
-        /* Profile Card in Modal */
-        .profile-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: var(--bg-surface);
+        .modal-box .btn-primary {
+            width: 100%;
+            margin-top: 4px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--border-color);
-            margin-bottom: 16px;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            font-size: 15px;
         }
-        .profile-card:active {
-            transform: scale(0.98);
-            background: var(--bg-input);
-        }
-        .profile-card .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-            background: var(--bg-surface);
-        }
-        .profile-card .info { flex: 1; }
-        .profile-card .info .name {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .profile-card .info .uid {
-            font-size: 14px;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-        .profile-card .info .bio {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-        .profile-card .tap-hint {
+        .modal-box .btn-primary:active { transform: scale(0.98); }
+        .modal-box .btn-secondary {
+            width: 100%;
+            margin-top: 8px;
+            background: transparent;
             color: var(--primary);
-            font-size: 12px;
+            border: 1px solid var(--primary);
+            padding: 12px;
+            border-radius: var(--radius-sm);
             font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 15px;
         }
+        .modal-box .btn-secondary:active { background: var(--bg-surface); }
+
+        /* Contact Context Menu */
+        .contact-context-menu {
+            position: fixed;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            z-index: 45;
+            min-width: 170px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.15s ease-out;
+        }
+        .contact-context-menu button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        .contact-context-menu button:active { background: var(--bg-surface); }
+        .contact-context-menu .danger { color: var(--danger); }
 
         @media (max-width: 430px) { #app { max-width: 100%; border-radius: 0; } }
         @media (max-width: 380px) {
@@ -508,38 +542,27 @@
             <!-- Rendered by JS -->
         </div>
 
-        <!-- Add Contact Modal - No Add Button, Only Profile Card -->
+        <!-- Add Contact Modal -->
         <div id="add-contact-modal" class="modal-overlay hidden">
             <div class="modal-box">
                 <div class="modal-header">
-                    <h3>Find User</h3>
+                    <h3>Add New Contact</h3>
                     <button onclick="closeModal('add-contact-modal')">✕</button>
                 </div>
-                <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">Enter the 6-digit UID of the user you want to find.</p>
+                <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">Enter the 6-digit UID of the user you want to add.</p>
                 <input type="text" id="add-contact-uid" placeholder="Enter 6-digit UID" maxlength="6" style="text-align:center;letter-spacing:4px;font-size:20px;font-weight:600;" />
-                <button class="btn-primary" style="width:100%;margin-top:4px;background:var(--primary);color:white;border:none;padding:12px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;transition:var(--transition);font-size:15px;" onclick="searchContact()">Search</button>
-
-                <!-- Profile Card (shown when user found) -->
-                <div id="contact-profile-card" style="display:none;margin-top:16px;">
-                    <div class="profile-card" id="profile-card-click" onclick="startChatFromSearch()">
-                        <img id="search-avatar" src="" alt="Avatar" class="avatar" />
-                        <div class="info">
-                            <div class="name" id="search-name">User Name</div>
-                            <div class="uid" id="search-uid">@000000</div>
-                            <div class="bio" id="search-bio">Hey there!</div>
+                <div id="contact-preview" style="display:none;margin-top:12px;padding:12px;background:var(--bg-surface);border-radius:var(--radius-sm);border:1px solid var(--border-color);">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <img id="preview-avatar" src="" alt="Avatar" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border-color);" />
+                        <div style="flex:1;">
+                            <div id="preview-name" style="font-weight:600;font-size:15px;">Name</div>
+                            <div id="preview-uid" style="font-size:12px;color:var(--text-muted);">@000000</div>
                         </div>
-                        <div class="tap-hint">Tap to chat →</div>
+                        <button class="btn-primary" style="margin:0;padding:6px 16px;width:auto;" onclick="confirmAddContact()">Add</button>
+                        <button class="btn-secondary" style="margin:0;padding:6px 16px;width:auto;" onclick="closeModal('add-contact-modal')">Cancel</button>
                     </div>
-                    <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:8px;">
-                        Tap on the profile to start chatting
-                    </p>
                 </div>
-
-                <!-- Not Found Message -->
-                <div id="user-not-found" style="display:none;text-align:center;padding:20px;color:var(--text-muted);">
-                    <p>User not found</p>
-                    <p style="font-size:13px;">Please check the UID and try again</p>
-                </div>
+                <button class="btn-primary" onclick="searchContact()">Search</button>
             </div>
         </div>
 
@@ -591,8 +614,21 @@
             currentUser: null,
             uid: null,
             contacts: [],
-            searchedUser: null,
+            blocked: [],
+            closeFriends: [],
+            pendingContactUID: null,
         };
+
+        // ================================================================
+        // DARK MODE
+        // ================================================================
+        function applyDarkMode() {
+            const saved = localStorage.getItem('stardust-dark-mode');
+            if (saved === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+        applyDarkMode();
 
         // ================================================================
         // TOAST
@@ -636,6 +672,8 @@
                             if (data[k].email === user.email) {
                                 state.currentUser = data[k];
                                 state.uid = k;
+                                state.blocked = data[k].blocked || [];
+                                state.closeFriends = data[k].closeFriends || [];
                                 break;
                             }
                         }
@@ -655,6 +693,16 @@
                 renderContactsList();
             });
 
+            db.ref('users/' + state.uid + '/blocked').on('value', (snap) => {
+                state.blocked = snap.val() || [];
+                renderContactsList();
+            });
+
+            db.ref('users/' + state.uid + '/closeFriends').on('value', (snap) => {
+                state.closeFriends = snap.val() || [];
+                renderContactsList();
+            });
+
             document.getElementById('search-input')?.addEventListener('input', (e) => {
                 filterContactsList(e.target.value);
             });
@@ -664,13 +712,15 @@
         }
 
         // ================================================================
-        // RENDER CONTACTS - With Alphabetical Categories
+        // RENDER CONTACTS
         // ================================================================
         function renderContactsList() {
             const container = document.getElementById('contacts-list');
             container.innerHTML = '';
 
-            if (state.contacts.length === 0) {
+            const contacts = state.contacts.filter(c => !state.blocked.includes(c));
+
+            if (contacts.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">
@@ -679,166 +729,237 @@
                             </svg>
                         </div>
                         <div class="title">No Contacts</div>
-                        <div class="subtitle">Search for users using the + button</div>
+                        <div class="subtitle">Add contacts using the + button</div>
                     </div>
                 `;
                 return;
             }
 
-            // Sort contacts alphabetically
-            const sortedContacts = [];
-            const contactPromises = state.contacts.map(uid => {
-                return db.ref('users/' + uid).once('value').then((snap) => {
+            contacts.forEach(uid => {
+                db.ref('users/' + uid).once('value').then((snap) => {
                     const contact = snap.val();
-                    if (contact) {
-                        sortedContacts.push({ uid, ...contact });
-                    }
-                });
-            });
+                    if (!contact) return;
 
-            Promise.all(contactPromises).then(() => {
-                sortedContacts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    const isCloseFriend = state.closeFriends.includes(uid);
 
-                // Group by first letter
-                const groups = {};
-                sortedContacts.forEach(contact => {
-                    const letter = (contact.name || 'Unknown')[0].toUpperCase();
-                    if (!groups[letter]) groups[letter] = [];
-                    groups[letter].push(contact);
-                });
+                    const div = document.createElement('div');
+                    div.className = 'contact-item';
 
-                // Render groups
-                const sortedLetters = Object.keys(groups).sort();
-                sortedLetters.forEach(letter => {
-                    // Letter header
-                    const header = document.createElement('div');
-                    header.style.cssText = `
-                        padding: 8px 16px;
-                        font-size: 14px;
-                        font-weight: 700;
-                        color: var(--text-secondary);
-                        background: var(--bg-secondary);
-                        margin: 4px 0;
-                    `;
-                    header.textContent = letter;
-                    container.appendChild(header);
+                    // Click opens chat
+                    const mainClick = () => {
+                        window.location.href = 'chat.html?uid=' + uid;
+                    };
+                    div.addEventListener('click', mainClick);
 
-                    // Contacts in this group
-                    groups[letter].forEach(contact => {
-                        const div = document.createElement('div');
-                        div.className = 'list-item';
-                        div.onclick = () => {
-                            // Directly open chat
-                            window.location.href = 'chat.html?uid=' + contact.uid;
-                        };
-
-                        div.innerHTML = `
-                            <img src="${contact.pfp}" alt="${contact.name}" class="avatar ${contact.online ? 'online' : ''}" />
-                            <div class="info">
-                                <div class="name-row">
-                                    <span class="name">${contact.name}</span>
-                                </div>
-                                <div class="msg-row">
-                                    <span class="sub">${contact.bio || 'Hey there!'}</span>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(div);
+                    // Long press for context menu
+                    let longPressTimer;
+                    div.addEventListener('touchstart', () => {
+                        longPressTimer = setTimeout(() => {
+                            showContactContextMenu(0, 0, uid, contact.name);
+                        }, 600);
                     });
+                    div.addEventListener('touchend', () => clearTimeout(longPressTimer));
+                    div.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+                    div.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        showContactContextMenu(e.clientX, e.clientY, uid, contact.name);
+                    });
+
+                    div.innerHTML = `
+                        <img src="${contact.pfp}" alt="${contact.name}" class="avatar ${contact.online ? 'online' : ''}" />
+                        <div class="info">
+                            <div class="name-row">
+                                <span class="name">${contact.name} ${isCloseFriend ? '⭐' : ''}</span>
+                            </div>
+                            <div class="msg-row">
+                                <span class="sub">UID: ${uid} · ${contact.online ? 'Online' : 'Offline'}</span>
+                            </div>
+                        </div>
+                        <button class="item-menu-btn" onclick="event.stopPropagation();openContactMenu('${uid}')">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                            </svg>
+                        </button>
+                    `;
+                    container.appendChild(div);
                 });
             });
         }
 
         function filterContactsList(query) {
-            const items = document.querySelectorAll('#contacts-list .list-item');
+            const items = document.querySelectorAll('#contacts-list .contact-item');
             const q = query.toLowerCase().trim();
             items.forEach(item => {
                 const name = item.querySelector('.name')?.textContent?.toLowerCase() || '';
-                item.style.display = name.includes(q) ? 'flex' : 'none';
+                const uid = item.querySelector('.sub')?.textContent?.toLowerCase() || '';
+                item.style.display = name.includes(q) || uid.includes(q) ? 'flex' : 'none';
             });
         }
 
         // ================================================================
-        // SEARCH CONTACT - No Add Button, Only Profile Card
+        // CONTACT CONTEXT MENU (Long press on contact)
+        // ================================================================
+        function showContactContextMenu(x, y, uid, name) {
+            document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+
+            const menu = document.createElement('div');
+            menu.className = 'contact-context-menu';
+
+            if (x === 0) {
+                menu.style.left = '50%';
+                menu.style.top = '50%';
+                menu.style.transform = 'translate(-50%, -50%)';
+            } else {
+                menu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+                menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
+            }
+
+            const isCloseFriend = state.closeFriends.includes(uid);
+
+            menu.innerHTML = `
+                <button onclick="deleteContact('${uid}')" class="danger">🗑️ Delete Contact</button>
+                <button onclick="blockContact('${uid}')">🚫 Block Contact</button>
+                <button onclick="toggleCloseFriendContact('${uid}')">${isCloseFriend ? '⭐ Remove Close Friend' : '⭐ Add to Close Friend'}</button>
+                <button onclick="reportContact('${uid}', '${name}')">⚠️ Report</button>
+            `;
+
+            document.body.appendChild(menu);
+
+            setTimeout(() => {
+                document.addEventListener('click', closeContactContextMenu);
+            }, 10);
+        }
+
+        function closeContactContextMenu(e) {
+            if (!e.target.closest('.contact-context-menu')) {
+                document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+                document.removeEventListener('click', closeContactContextMenu);
+            }
+        }
+
+        // ================================================================
+        // CONTACT ACTIONS
+        // ================================================================
+        function deleteContact(uid) {
+            if (!confirm('Delete this contact permanently?')) return;
+            state.contacts = state.contacts.filter(c => c !== uid);
+            db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+            document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+            showToast('Contact deleted permanently');
+            renderContactsList();
+        }
+
+        function blockContact(uid) {
+            if (!confirm('Block this contact?')) return;
+            if (!state.blocked.includes(uid)) {
+                state.blocked.push(uid);
+                db.ref('users/' + state.uid + '/blocked').set(state.blocked);
+                state.contacts = state.contacts.filter(c => c !== uid);
+                db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+                document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+                showToast('Contact blocked');
+                renderContactsList();
+            }
+        }
+
+        function toggleCloseFriendContact(uid) {
+            if (state.closeFriends.includes(uid)) {
+                state.closeFriends = state.closeFriends.filter(c => c !== uid);
+                showToast('Removed from close friends');
+            } else {
+                state.closeFriends.push(uid);
+                showToast('Added to close friends');
+            }
+            db.ref('users/' + state.uid + '/closeFriends').set(state.closeFriends);
+            document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+            renderContactsList();
+        }
+
+        function reportContact(uid, name) {
+            const reason = prompt(`Please enter the reason for reporting ${name}:`);
+            if (!reason) return;
+
+            const reportRef = db.ref('reports');
+            reportRef.push({
+                reporterUID: state.uid,
+                reporterName: state.currentUser.name,
+                reportedUID: uid,
+                reportedName: name,
+                reason: reason,
+                timestamp: Date.now(),
+                status: 'pending'
+            }).then(() => {
+                document.querySelectorAll('.contact-context-menu').forEach(el => el.remove());
+                showToast('Report submitted to admin');
+            }).catch((err) => {
+                showToast('Error: ' + err.message);
+            });
+        }
+
+        // ================================================================
+        // ADD CONTACT
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
             document.getElementById('add-contact-uid').value = '';
-            document.getElementById('contact-profile-card').style.display = 'none';
-            document.getElementById('user-not-found').style.display = 'none';
-            state.searchedUser = null;
+            document.getElementById('contact-preview').style.display = 'none';
         };
 
         window.searchContact = function() {
             const uid = document.getElementById('add-contact-uid').value.trim();
-            const profileCard = document.getElementById('contact-profile-card');
-            const notFound = document.getElementById('user-not-found');
-
-            profileCard.style.display = 'none';
-            notFound.style.display = 'none';
-
             if (!uid || uid.length !== 6) {
                 showToast('Please enter a valid 6-digit UID');
                 return;
             }
 
             if (uid === state.uid) {
-                showToast('This is your own UID');
+                showToast('You cannot add yourself');
+                return;
+            }
+
+            if (state.contacts.includes(uid)) {
+                showToast('Already in contacts');
+                closeModal('add-contact-modal');
+                return;
+            }
+
+            if (state.blocked.includes(uid)) {
+                showToast('This user is blocked');
                 return;
             }
 
             db.ref('users/' + uid).once('value').then((snap) => {
                 const user = snap.val();
                 if (!user) {
-                    notFound.style.display = 'block';
+                    showToast('User not found');
                     return;
                 }
 
-                state.searchedUser = user;
-
-                document.getElementById('search-avatar').src = user.pfp ||
+                state.pendingContactUID = uid;
+                document.getElementById('preview-avatar').src = user.pfp ||
                     'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
                     '&background=00A86B&color=fff&size=72';
-                document.getElementById('search-name').textContent = user.name;
-                document.getElementById('search-uid').textContent = '@' + uid;
-                document.getElementById('search-bio').textContent = user.bio || 'Hey there!';
-
-                profileCard.style.display = 'block';
-
-                // Auto-add to contacts when profile is viewed
-                if (!state.contacts.includes(uid)) {
-                    state.contacts.push(uid);
-                    db.ref('users/' + state.uid + '/contacts').set(state.contacts);
-                    showToast('Added ' + user.name + ' to contacts');
-                }
-            }).catch((err) => {
-                showToast('Error: ' + err.message);
+                document.getElementById('preview-name').textContent = user.name;
+                document.getElementById('preview-uid').textContent = '@' + uid;
+                document.getElementById('contact-preview').style.display = 'block';
             });
         };
 
-        window.startChatFromSearch = function() {
-            if (state.searchedUser) {
-                closeModal('add-contact-modal');
-                window.location.href = 'chat.html?uid=' + state.searchedUser.uid;
-            }
+        window.confirmAddContact = function() {
+            const uid = state.pendingContactUID;
+            if (!uid) return;
+
+            state.contacts.push(uid);
+            db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+            closeModal('add-contact-modal');
+            showToast('Contact added!');
+            window.location.href = 'chat.html?uid=' + uid;
         };
 
-        // Check if coming from search
-        document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const uid = params.get('uid');
-            if (uid) {
-                // Open chat with this UID
-                setTimeout(() => {
-                    window.location.href = 'chat.html?uid=' + uid;
-                }, 100);
-            }
-        });
-
         console.log('🚀 Stardust X - Contacts Page (Fixed)');
-        console.log('✅ No Add button - tap profile to chat');
-        console.log('✅ Auto-adds contact when viewed');
-        console.log('✅ Alphabetical categories');
+        console.log('✅ Report button in contact menu');
+        console.log('✅ Long press contact: Delete, Block, Close Friend, Report');
+        console.log('✅ Dark mode works');
     </script>
 </body>
 </html>
