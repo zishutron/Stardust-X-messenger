@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Edit Profile - Stardust X</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <!-- No Firebase Storage -->
     <style>
         /* ================================================================
-           PROFILE PAGE STYLES - With Dark Mode Support
+           PROFILE PAGE STYLES - ImgBB Only
            ================================================================ */
         :root {
             --primary: #00A86B;
@@ -43,11 +42,7 @@
             --border-color: #33334A;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-secondary);
@@ -324,7 +319,7 @@
 
     <script>
         // ================================================================
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG - No Storage
         // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
@@ -340,7 +335,34 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        const storage = firebase.storage();
+        // NO Firebase Storage
+
+        // ================================================================
+        // IMGBB API
+        // ================================================================
+        const IMGBB_API_KEY = '94dc61c3580abc8c9218268d0c773961';
+
+        async function uploadToImgBB(file) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('key', IMGBB_API_KEY);
+
+                fetch('https://api.imgbb.com/1/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        resolve(data.data.url);
+                    } else {
+                        reject(new Error(data.error?.message || 'Upload failed'));
+                    }
+                })
+                .catch(reject);
+            });
+        }
 
         // ================================================================
         // STATE
@@ -349,6 +371,7 @@
         let userUID = null;
         let userKey = null;
         let tempPfpFile = null;
+        let tempPfpPreview = null;
 
         // ================================================================
         // TOAST
@@ -364,7 +387,7 @@
         }
 
         // ================================================================
-        // DARK MODE - Apply on all pages
+        // DARK MODE
         // ================================================================
         function applyDarkMode() {
             const saved = localStorage.getItem('stardust-dark-mode');
@@ -483,15 +506,16 @@
 
             document.getElementById('profile-bio').value = currentUser.bio || '';
 
-            // PFP upload handler - FIXED PERMISSION
+            // PFP upload handler - uses ImgBB
             document.getElementById('pfp-input')?.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     tempPfpFile = file;
                     const reader = new FileReader();
                     reader.onload = (ev) => {
-                        document.getElementById('profile-avatar').src = ev.target.result;
-                        showToast('Photo selected. Click Save to update.');
+                        tempPfpPreview = ev.target.result;
+                        document.getElementById('profile-avatar').src = tempPfpPreview;
+                        showToast('Photo selected. Click Save to upload to ImgBB.');
                     };
                     reader.readAsDataURL(file);
                 }
@@ -499,7 +523,7 @@
         }
 
         // ================================================================
-        // SAVE PROFILE - FIXED PERMISSION WITH STORAGE
+        // SAVE PROFILE - ImgBB Only
         // ================================================================
         function saveProfile() {
             const name = document.getElementById('profile-name').value.trim();
@@ -512,12 +536,10 @@
             }
 
             btn.disabled = true;
-            btn.textContent = 'Saving...';
+            btn.textContent = 'Uploading...';
 
-            const updates = { name, bio };
-
-            // Handle profile picture upload to Firebase Storage
-            const saveWithPFP = (pfpUrl) => {
+            const updateProfile = (pfpUrl) => {
+                const updates = { name, bio };
                 if (pfpUrl) {
                     updates.pfp = pfpUrl;
                 }
@@ -533,7 +555,7 @@
                         }
                         btn.textContent = 'Save Changes';
                         btn.disabled = false;
-                        showToast('Profile updated successfully!');
+                        showToast('✅ Profile updated successfully!');
                         setTimeout(() => {
                             window.location.href = 'settings.html';
                         }, 1000);
@@ -542,36 +564,25 @@
                         btn.textContent = 'Save Changes';
                         btn.disabled = false;
                         console.error('Save error:', err);
-                        if (err.code === 'PERMISSION_DENIED') {
-                            showToast('Permission denied. Please check Firebase rules.');
-                        } else {
-                            showToast('Error: ' + err.message);
-                        }
+                        showToast('Error: ' + err.message);
                     });
             };
 
             if (tempPfpFile) {
-                // Upload to Firebase Storage
-                const storageRef = storage.ref('profiles/' + userKey + '/' + Date.now() + '_' + tempPfpFile.name);
-                storageRef.put(tempPfpFile)
-                    .then((snapshot) => {
-                        return snapshot.ref.getDownloadURL();
-                    })
-                    .then((downloadURL) => {
-                        saveWithPFP(downloadURL);
+                // Upload to ImgBB
+                uploadToImgBB(tempPfpFile)
+                    .then((url) => {
+                        updateProfile(url);
+                        tempPfpFile = null;
+                        tempPfpPreview = null;
                     })
                     .catch((err) => {
                         btn.textContent = 'Save Changes';
                         btn.disabled = false;
-                        console.error('Upload error:', err);
-                        if (err.code === 'storage/unauthorized') {
-                            showToast('Storage permission denied. Please check Firebase Storage rules.');
-                        } else {
-                            showToast('Upload error: ' + err.message);
-                        }
+                        showToast('❌ ImgBB upload failed: ' + err.message);
                     });
             } else {
-                saveWithPFP(null);
+                updateProfile(null);
             }
         }
 
@@ -587,9 +598,9 @@
             }
         });
 
-        console.log('🚀 Stardust X - Profile Page (Fully Fixed)');
+        console.log('🚀 Stardust X - Profile Page (ImgBB Only)');
+        console.log('✅ All images via ImgBB - No Firebase Storage');
         console.log('✅ UID displays correctly');
-        console.log('✅ Permission denied fixed - using Firebase Storage');
         console.log('✅ Copy UID button working');
         console.log('✅ Dark Mode persistent');
     </script>
