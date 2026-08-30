@@ -41,11 +41,7 @@
             --border-color: #33334A;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-secondary);
@@ -341,7 +337,6 @@
         .fab:active { transform: scale(0.92); }
         .fab svg { width: 26px; height: 26px; }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -653,11 +648,8 @@
         function initializeApp() {
             // Listen for contacts - REAL-TIME
             db.ref('users/' + state.uid + '/contacts').on('value', (snap) => {
-                // Only update if not in the middle of adding
-                if (!state.isAddingContact) {
-                    state.contacts = snap.val() || [];
-                    renderContactsList();
-                }
+                state.contacts = snap.val() || [];
+                renderContactsList();
             });
 
             db.ref('users/' + state.uid + '/blocked').on('value', (snap) => {
@@ -702,7 +694,6 @@
                 return;
             }
 
-            // Sort contacts alphabetically
             const sortedContacts = [];
             const promises = contacts.map(uid => {
                 return db.ref('users/' + uid).once('value').then((snap) => {
@@ -722,7 +713,6 @@
                     const div = document.createElement('div');
                     div.className = 'contact-item';
 
-                    // Click opens chat - PASS UID IN URL
                     const mainClick = () => {
                         window.location.href = 'chat.html?uid=' + contact.uid;
                     };
@@ -755,7 +745,7 @@
         }
 
         // ================================================================
-        // ADD CONTACT - FIXED: Proper Firebase save with error handling
+        // ADD CONTACT - FIXED: Proper Firebase save
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
@@ -810,31 +800,26 @@
             const uid = state.pendingContactUID;
             if (!uid) return;
 
-            // Check if already in contacts
             if (state.contacts.includes(uid)) {
                 showToast('Already in contacts', true);
                 closeModal('add-contact-modal');
                 return;
             }
 
-            // Prevent double adding
             if (state.isAddingContact) return;
             state.isAddingContact = true;
 
-            // Create new contacts array
             const newContacts = [...state.contacts, uid];
 
-            // Show loading
             const btn = document.querySelector('#contact-preview .btn-primary');
             const originalText = btn.textContent;
             btn.textContent = 'Adding...';
             btn.disabled = true;
 
-            // Save to Firebase
+            // ===== FIXED: Save to Firebase with proper path =====
             db.ref('users/' + state.uid + '/contacts')
                 .set(newContacts)
                 .then(() => {
-                    // Success - update local state
                     state.contacts = newContacts;
                     state.isAddingContact = false;
                     closeModal('add-contact-modal');
@@ -857,7 +842,6 @@
                     btn.disabled = false;
                 })
                 .catch((err) => {
-                    // Error - revert
                     state.isAddingContact = false;
                     showToast('❌ Unable to add contact: ' + err.message, true);
                     btn.textContent = originalText;
@@ -868,7 +852,6 @@
 
         console.log('🚀 Stardust X - Contacts Page (Complete Fix)');
         console.log('✅ Proper Firebase save with error handling');
-        console.log('✅ No fake UI updates on failed save');
         console.log('✅ Contact persists after refresh');
         console.log('✅ Opens chat with UID in URL');
     </script>
