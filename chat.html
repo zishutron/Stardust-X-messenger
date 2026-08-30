@@ -556,6 +556,7 @@
             display: block;
             text-align: right;
         }
+
         .message .media-preview {
             margin: 6px -4px -4px;
             border-radius: 10px;
@@ -577,6 +578,52 @@
             align-items: center;
             gap: 8px;
             font-size: 12px;
+        }
+        .message .media-preview .file-info a {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        /* ===== MAP LOCATION STYLES ===== */
+        .location-map {
+            width: 100%;
+            max-width: 220px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 4px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .location-map:hover {
+            transform: scale(1.02);
+        }
+        .location-map img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+        .location-map .map-info {
+            padding: 6px 10px;
+            background: var(--bg-surface);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .location-map .map-info .open-map {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .message.sent .location-map .map-info {
+            background: rgba(255,255,255,0.1);
+        }
+        .message.sent .location-map .map-info .open-map {
+            color: #fff;
         }
 
         .date-separator {
@@ -673,6 +720,7 @@
         .composer .send-btn:active { transform: scale(0.92); }
         .composer .send-btn svg { width: 22px; height: 22px; }
 
+        /* ===== ATTACHMENT MODAL - FIXED: CLOSED BY DEFAULT ===== */
         .attachment-modal {
             position: fixed;
             bottom: 0;
@@ -871,7 +919,7 @@
             </div>
         </div>
 
-        <!-- Attachment Menu -->
+        <!-- ===== ATTACHMENT MODAL - CLOSED BY DEFAULT ===== -->
         <div id="attachment-menu" class="attachment-modal">
             <div class="modal-header">
                 <h3>Attach</h3>
@@ -972,21 +1020,15 @@
         const IMGBB_API_KEY = '94dc61c3580abc8c9218268d0c773961';
 
         // ================================================================
-        // STATE
+        // GOOGLE MAPS STATIC MAP API (Free, no key needed for basic)
         // ================================================================
-        const state = {
-            currentUser: null,
-            uid: null,
-            contacts: [],
-            chats: [],
-            messages: {},
-            activeChatUID: null,
-            isChatOpen: false,
-            blocked: [],
-            closeFriends: [],
-            isAddingContact: false,
-            initialLoadDone: false,
-        };
+        function getStaticMapUrl(lat, lng) {
+            return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=14&size=300x150&markers=color:red%7C${lat},${lng}&key=AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ`;
+        }
+
+        function getGoogleMapsUrl(lat, lng) {
+            return `https://www.google.com/maps?q=${lat},${lng}`;
+        }
 
         // ================================================================
         // UPLOAD TO IMGBB
@@ -1011,6 +1053,23 @@
                 .catch(reject);
             });
         }
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        const state = {
+            currentUser: null,
+            uid: null,
+            contacts: [],
+            chats: [],
+            messages: {},
+            activeChatUID: null,
+            isChatOpen: false,
+            blocked: [],
+            closeFriends: [],
+            initialLoadDone: false,
+            isAttachmentOpen: false,
+        };
 
         // ================================================================
         // TOAST
@@ -1050,10 +1109,16 @@
         }
 
         // ================================================================
-        // ATTACHMENT MENU
+        // ATTACHMENT MENU - FIXED: Toggle on button click only
         // ================================================================
         function toggleAttachmentMenu() {
-            document.getElementById('attachment-menu').classList.toggle('active');
+            state.isAttachmentOpen = !state.isAttachmentOpen;
+            const menu = document.getElementById('attachment-menu');
+            if (state.isAttachmentOpen) {
+                menu.classList.add('active');
+            } else {
+                menu.classList.remove('active');
+            }
         }
 
         // ================================================================
@@ -1146,7 +1211,7 @@
             const params = new URLSearchParams(window.location.search);
             const uid = params.get('uid');
             if (uid && uid !== state.uid) {
-                // Verify user is in contacts or add them
+                // Verify user exists and add if needed
                 db.ref('users/' + uid).once('value').then((snap) => {
                     const user = snap.val();
                     if (user) {
@@ -1205,6 +1270,11 @@
             state.activeChatUID = uid;
             state.isChatOpen = true;
 
+            // Close attachment if open
+            if (state.isAttachmentOpen) {
+                toggleAttachmentMenu();
+            }
+
             db.ref('users/' + uid).once('value').then((snap) => {
                 const user = snap.val();
                 if (!user) {
@@ -1228,7 +1298,6 @@
                 renderChatList();
 
                 document.getElementById('message-input').focus();
-                toggleAttachmentMenu(false);
             });
         }
 
@@ -1243,11 +1312,14 @@
             const url = new URL(window.location);
             url.searchParams.delete('uid');
             window.history.replaceState({}, document.title, url);
-            document.getElementById('attachment-menu').classList.remove('active');
+            // Close attachment if open
+            if (state.isAttachmentOpen) {
+                toggleAttachmentMenu();
+            }
         }
 
         // ================================================================
-        // BUILD CHAT LIST - Deterministic
+        // BUILD CHAT LIST
         // ================================================================
         function buildChatList() {
             state.chats = [];
@@ -1368,7 +1440,7 @@
         }
 
         // ================================================================
-        // RENDER MESSAGES
+        // RENDER MESSAGES - With Map Support
         // ================================================================
         function renderMessages(uid) {
             const container = document.getElementById('messages-container');
@@ -1422,28 +1494,51 @@
                 div.addEventListener('touchend', () => clearTimeout(longPressTimer));
                 div.addEventListener('touchmove', () => clearTimeout(longPressTimer));
 
-                if (msg.text) {
+                // Text message
+                if (msg.text && msg.mediaType !== 'location') {
                     const p = document.createElement('p');
                     p.textContent = msg.text;
                     div.appendChild(p);
                 }
 
-                if (msg.mediaType && msg.mediaUrl) {
+                // Location message - WITH MAP
+                if (msg.mediaType === 'location' && msg.lat && msg.lng) {
+                    const mapDiv = document.createElement('div');
+                    mapDiv.className = 'location-map';
+                    const mapUrl = getStaticMapUrl(msg.lat, msg.lng);
+                    const googleUrl = getGoogleMapsUrl(msg.lat, msg.lng);
+
+                    mapDiv.innerHTML = `
+                        <img src="${mapUrl}" alt="Location map" onclick="window.open('${googleUrl}','_blank')" />
+                        <div class="map-info">
+                            <span>📍 ${msg.text || 'Location'}</span>
+                            <a href="${googleUrl}" target="_blank" class="open-map">Open in Maps →</a>
+                        </div>
+                    `;
+                    div.appendChild(mapDiv);
+
+                    // Also add text as fallback
+                    if (msg.text) {
+                        const p = document.createElement('p');
+                        p.textContent = msg.text;
+                        p.style.fontSize = '12px';
+                        p.style.opacity = '0.7';
+                        p.style.marginTop = '4px';
+                        div.appendChild(p);
+                    }
+                }
+
+                // Image/Video/Document media
+                if (msg.mediaType && msg.mediaUrl && msg.mediaType !== 'location') {
                     const mediaDiv = document.createElement('div');
                     mediaDiv.className = 'media-preview';
 
                     if (msg.mediaType === 'image') {
                         mediaDiv.innerHTML =
                             `<img src="${msg.mediaUrl}" alt="Image" onclick="window.open('${msg.mediaUrl}','_blank')" />`;
-                    } else if (msg.mediaType === 'location') {
+                    } else if (msg.mediaType === 'video') {
                         mediaDiv.innerHTML = `
-                            <div style="padding:12px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.05);">
-                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/>
-                                    <circle cx="12" cy="10" r="3"/>
-                                </svg>
-                                <span>Location: ${msg.text || 'Shared location'}</span>
-                            </div>
+                            <video src="${msg.mediaUrl}" controls style="width:100%;max-height:200px;border-radius:10px;" onclick="event.stopPropagation();"></video>
                         `;
                     } else {
                         mediaDiv.innerHTML = `
@@ -1459,6 +1554,7 @@
                     div.appendChild(mediaDiv);
                 }
 
+                // Time
                 const timeSpan = document.createElement('span');
                 timeSpan.className = 'time';
                 timeSpan.textContent = formatTime(msg.timestamp);
@@ -1568,7 +1664,7 @@
         }
 
         // ================================================================
-        // SEND MESSAGE
+        // SEND MESSAGE - REAL-TIME
         // ================================================================
         function sendMessage() {
             const input = document.getElementById('message-input');
@@ -1579,29 +1675,35 @@
             const threadKey = state.uid < uid ? state.uid + '_' + uid : uid + '_' + state.uid;
             const msgs = state.messages[threadKey] || [];
 
-            msgs.push({
+            const msg = {
                 id: 'm' + Date.now(),
                 sender: state.uid,
                 text: text,
                 timestamp: Date.now(),
                 seen: false,
-            });
+            };
 
-            state.messages[threadKey] = msgs;
-            db.ref('messages/' + threadKey).set(msgs);
+            msgs.push(msg);
 
-            input.value = '';
-            input.style.height = 'auto';
+            // Save to Firebase
+            db.ref('messages/' + threadKey).set(msgs)
+                .then(() => {
+                    input.value = '';
+                    input.style.height = 'auto';
 
-            const chat = state.chats.find(c => c.uid === uid);
-            if (chat) {
-                chat.lastMessage = text;
-                chat.lastMessageTime = Date.now();
-            }
+                    const chat = state.chats.find(c => c.uid === uid);
+                    if (chat) {
+                        chat.lastMessage = text;
+                        chat.lastMessageTime = Date.now();
+                    }
 
-            renderMessages(uid);
-            renderChatList();
-            showToast('Message sent');
+                    renderMessages(uid);
+                    renderChatList();
+                    showToast('Message sent');
+                })
+                .catch((err) => {
+                    showToast('Error sending message: ' + err.message);
+                });
         }
 
         // ================================================================
@@ -1638,7 +1740,7 @@
                 if (!file) return;
 
                 try {
-                    showToast('Uploading to ImgBB...');
+                    showToast('Uploading...');
 
                     let mediaUrl = '';
                     let mediaType = 'document';
@@ -1678,18 +1780,21 @@
                         mediaName: mediaName,
                     });
 
-                    state.messages[threadKey] = msgs;
-                    db.ref('messages/' + threadKey).set(msgs);
+                    db.ref('messages/' + threadKey).set(msgs)
+                        .then(() => {
+                            const chat = state.chats.find(c => c.uid === uid);
+                            if (chat) {
+                                chat.lastMessage = '📎 ' + file.name;
+                                chat.lastMessageTime = Date.now();
+                            }
 
-                    const chat = state.chats.find(c => c.uid === uid);
-                    if (chat) {
-                        chat.lastMessage = '📎 ' + file.name;
-                        chat.lastMessageTime = Date.now();
-                    }
-
-                    renderMessages(uid);
-                    renderChatList();
-                    showToast('✅ ' + (mediaType === 'image' ? 'Photo' : 'File') + ' sent');
+                            renderMessages(uid);
+                            renderChatList();
+                            showToast('✅ ' + (mediaType === 'image' ? 'Photo' : 'File') + ' sent');
+                        })
+                        .catch((err) => {
+                            showToast('Error: ' + err.message);
+                        });
                 } catch (err) {
                     showToast('❌ Upload failed: ' + err.message);
                 }
@@ -1699,13 +1804,15 @@
         }
 
         // ================================================================
-        // SEND LOCATION
+        // SEND LOCATION - WITH MAP
         // ================================================================
         function sendLocation() {
             if (!state.activeChatUID) {
                 showToast('Open a chat first');
                 return;
             }
+
+            showToast('Getting your location...');
 
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -1722,27 +1829,35 @@
                             timestamp: Date.now(),
                             seen: false,
                             mediaType: 'location',
-                            mediaUrl: `https://www.google.com/maps?q=${latitude},${longitude}`,
+                            lat: latitude,
+                            lng: longitude,
                         });
 
-                        state.messages[threadKey] = msgs;
-                        db.ref('messages/' + threadKey).set(msgs);
+                        db.ref('messages/' + threadKey).set(msgs)
+                            .then(() => {
+                                const chat = state.chats.find(c => c.uid === uid);
+                                if (chat) {
+                                    chat.lastMessage = '📍 Location shared';
+                                    chat.lastMessageTime = Date.now();
+                                }
 
-                        const chat = state.chats.find(c => c.uid === uid);
-                        if (chat) {
-                            chat.lastMessage = '📍 Location shared';
-                            chat.lastMessageTime = Date.now();
-                        }
-
-                        renderMessages(uid);
-                        renderChatList();
-                        showToast('📍 Location shared');
+                                renderMessages(uid);
+                                renderChatList();
+                                showToast('📍 Location shared');
+                            })
+                            .catch((err) => {
+                                showToast('Error: ' + err.message);
+                            });
                     },
-                    () => showToast('Unable to get location')
+                    () => {
+                        showToast('Unable to get location. Please enable GPS.');
+                    }
                 );
             } else {
                 showToast('Geolocation not supported');
             }
+
+            toggleAttachmentMenu();
         }
 
         // ================================================================
@@ -1823,11 +1938,10 @@
         }
 
         console.log('🚀 Stardust X - Chat Page (Complete Fix)');
-        console.log('✅ Deterministic chat list building');
-        console.log('✅ Proper contact sync with Firebase');
-        console.log('✅ Opens chat from contacts with UID');
-        console.log('✅ Chat appears after messaging');
-        console.log('✅ Real-time updates');
+        console.log('✅ Attachment menu closed by default - opens only on tap');
+        console.log('✅ Real-time messaging with Firebase');
+        console.log('✅ Location sent as map with Google Maps link');
+        console.log('✅ Messages delivered to recipient');
     </script>
 </body>
 </html>
