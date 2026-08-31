@@ -724,7 +724,7 @@
         }
 
         // ================================================================
-        // RENDER CONTACTS - With 3-Dot Menu
+        // RENDER CONTACTS - With Working 3-Dot Menu
         // ================================================================
         function renderContactsList() {
             const container = document.getElementById('contacts-list');
@@ -777,7 +777,7 @@
                     // Prevent click on menu button from triggering main click
                     const menuClick = (e) => {
                         e.stopPropagation();
-                        toggleContactMenu(contact.uid, e);
+                        toggleContactMenu(contact.uid);
                     };
 
                     div.innerHTML = `
@@ -790,7 +790,7 @@
                                 <span class="sub">UID: ${contact.uid} · ${contact.online ? 'Online' : 'Offline'}</span>
                             </div>
                         </div>
-                        <button class="contact-menu-btn" onclick="event.stopPropagation();toggleContactMenu('${contact.uid}', event)">
+                        <button class="contact-menu-btn" onclick="event.stopPropagation();toggleContactMenu('${contact.uid}')">
                             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
                             </svg>
@@ -811,9 +811,9 @@
         }
 
         // ================================================================
-        // CONTACT 3-DOT MENU TOGGLE
+        // CONTACT 3-DOT MENU TOGGLE - FIXED
         // ================================================================
-        function toggleContactMenu(uid, event) {
+        function toggleContactMenu(uid) {
             // Close all other menus
             document.querySelectorAll('.contact-dropdown.active').forEach(el => {
                 if (el.id !== 'contact-dropdown-' + uid) {
@@ -840,27 +840,47 @@
         }
 
         // ================================================================
-        // CONTACT ACTIONS
+        // CONTACT ACTIONS - FIXED
         // ================================================================
         function deleteContact(uid) {
             if (!confirm('Delete this contact permanently?')) return;
+
+            // Remove from contacts array
             state.contacts = state.contacts.filter(c => c !== uid);
-            db.ref('users/' + state.uid + '/contacts').set(state.contacts);
-            document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
-            showToast('Contact deleted permanently');
-            renderContactsList();
+
+            // Save to Firebase
+            db.ref('users/' + state.uid + '/contacts').set(state.contacts)
+                .then(() => {
+                    document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                    showToast('Contact deleted permanently');
+                    renderContactsList();
+                })
+                .catch((err) => {
+                    showToast('Error: ' + err.message, true);
+                });
         }
 
         function blockContact(uid) {
             if (!confirm('Block this contact?')) return;
+
             if (!state.blocked.includes(uid)) {
                 state.blocked.push(uid);
-                db.ref('users/' + state.uid + '/blocked').set(state.blocked);
                 state.contacts = state.contacts.filter(c => c !== uid);
-                db.ref('users/' + state.uid + '/contacts').set(state.contacts);
-                document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
-                showToast('Contact blocked');
-                renderContactsList();
+
+                // Save both blocked and contacts
+                const updates = {};
+                updates['/blocked'] = state.blocked;
+                updates['/contacts'] = state.contacts;
+
+                db.ref('users/' + state.uid).update(updates)
+                    .then(() => {
+                        document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                        showToast('Contact blocked');
+                        renderContactsList();
+                    })
+                    .catch((err) => {
+                        showToast('Error: ' + err.message, true);
+                    });
             }
         }
 
@@ -872,9 +892,15 @@
                 state.closeFriends.push(uid);
                 showToast('Added to close friends');
             }
-            db.ref('users/' + state.uid + '/closeFriends').set(state.closeFriends);
-            document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
-            renderContactsList();
+
+            db.ref('users/' + state.uid + '/closeFriends').set(state.closeFriends)
+                .then(() => {
+                    document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                    renderContactsList();
+                })
+                .catch((err) => {
+                    showToast('Error: ' + err.message, true);
+                });
         }
 
         function reportContact(uid, name) {
@@ -1012,9 +1038,10 @@
                 });
         };
 
-        console.log('🚀 Stardust X - Contacts Page (Complete)');
-        console.log('✅ 3-dot menu on each contact');
-        console.log('✅ Block, Close Friend, Report, Delete actions');
+        console.log('🚀 Stardust X - Contacts Page (Complete Fix)');
+        console.log('✅ 3-dot menu working properly');
+        console.log('✅ Delete contact works without refresh');
+        console.log('✅ Block, Close Friend, Report working');
         console.log('✅ Proper Firebase save with error handling');
     </script>
 </body>
