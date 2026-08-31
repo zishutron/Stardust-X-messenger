@@ -557,6 +557,31 @@
             text-align: right;
         }
 
+        /* ===== REACTION DISPLAY ===== */
+        .message .reactions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 4px;
+        }
+        .message .reactions .reaction-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .message.sent .reactions .reaction-badge {
+            background: rgba(255,255,255,0.2);
+        }
+        .message.received .reactions .reaction-badge {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+        }
+
+        /* ===== MEDIA PREVIEW ===== */
         .message .media-preview {
             margin: 6px -4px -4px;
             border-radius: 10px;
@@ -571,13 +596,78 @@
             object-fit: cover;
             display: block;
         }
-        .message .media-preview .file-info {
-            padding: 8px 12px;
-            background: rgba(0,0,0,0.05);
+
+        /* ===== DOCUMENT PREVIEW ===== */
+        .message .document-preview {
+            margin: 6px -4px -4px;
+            border-radius: 10px;
+            overflow: hidden;
+            max-width: 220px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+        }
+        .message.sent .document-preview {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .message .document-preview .doc-header {
+            padding: 10px 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .message .document-preview .doc-header .doc-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .message .document-preview .doc-header .doc-name {
+            flex: 1;
             font-size: 12px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+        .message .document-preview .doc-actions {
+            display: flex;
+            gap: 4px;
+            padding: 6px 10px;
+        }
+        .message .document-preview .doc-actions button {
+            flex: 1;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .message .document-preview .doc-actions button:active { transform: scale(0.95); }
+        .message .document-preview .doc-actions .view-btn {
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        .message .document-preview .doc-actions .view-btn:hover {
+            background: var(--bg-surface);
+        }
+        .message .document-preview .doc-actions .download-btn {
+            background: var(--primary);
+            color: white;
+        }
+        .message .document-preview .doc-actions .download-btn:hover {
+            background: var(--primary-dark);
         }
 
         /* ===== LOCATION MAP ===== */
@@ -608,9 +698,15 @@
             height: 100%;
             object-fit: cover;
         }
-        .location-map .map-container .map-loading {
+        .location-map .map-container .map-placeholder {
             color: var(--text-muted);
             font-size: 12px;
+            text-align: center;
+            padding: 10px;
+        }
+        .location-map .map-container .map-placeholder svg {
+            display: block;
+            margin: 0 auto 4px;
         }
         .location-map .map-info {
             padding: 6px 10px;
@@ -629,63 +725,7 @@
         .message.sent .location-map .map-info {
             background: rgba(255,255,255,0.1);
         }
-        .message.sent .location-map .map-info .open-map {
-            color: #fff;
-        }
-
-        /* ===== PHOTO VIEWER ===== */
-        #photo-viewer {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 70;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        #photo-viewer.active { display: flex; }
-        #photo-viewer .viewer-actions {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            z-index: 5;
-        }
-        #photo-viewer .viewer-actions button {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #photo-viewer .viewer-actions button:active {
-            background: rgba(255,255,255,0.25);
-            transform: scale(0.95);
-        }
-        #photo-viewer .viewer-actions .save-btn {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        #photo-viewer .viewer-actions .save-btn:hover {
-            background: var(--primary-dark);
-        }
-        #photo-viewer img {
-            max-width: 100%;
-            max-height: 80vh;
-            border-radius: 12px;
-            object-fit: contain;
-        }
+        .message.sent .location-map .map-info .open-map { color: #fff; }
 
         .date-separator {
             text-align: center;
@@ -781,7 +821,7 @@
         .composer .send-btn:active { transform: scale(0.92); }
         .composer .send-btn svg { width: 22px; height: 22px; }
 
-        /* ===== ATTACHMENT MODAL - CLOSED BY DEFAULT ===== */
+        /* ===== ATTACHMENT MODAL ===== */
         .attachment-modal {
             position: fixed;
             bottom: 0;
@@ -851,9 +891,9 @@
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
-            padding: 6px;
+            padding: 8px;
             z-index: 45;
-            min-width: 170px;
+            min-width: 180px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             animation: slideUp 0.15s ease-out;
         }
@@ -884,21 +924,21 @@
             position: fixed;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
-            border-radius: 30px;
-            padding: 6px 12px;
-            z-index: 45;
+            border-radius: 16px;
+            padding: 8px 12px;
+            z-index: 46;
             display: flex;
-            gap: 4px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            gap: 2px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             animation: slideUp 0.15s ease-out;
             flex-wrap: wrap;
-            width: 240px;
+            max-width: 280px;
             justify-content: center;
         }
         .reaction-picker button {
             background: transparent;
             border: none;
-            font-size: 28px;
+            font-size: 26px;
             cursor: pointer;
             padding: 4px 6px;
             border-radius: 50%;
@@ -907,6 +947,125 @@
         .reaction-picker button:active {
             transform: scale(1.3);
             background: var(--bg-surface);
+        }
+
+        /* ===== PHOTO VIEWER ===== */
+        #photo-viewer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 70;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #photo-viewer.active { display: flex; }
+        #photo-viewer .viewer-actions {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+        #photo-viewer .viewer-actions button {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #photo-viewer .viewer-actions button:active {
+            background: rgba(255,255,255,0.25);
+            transform: scale(0.95);
+        }
+        #photo-viewer .viewer-actions .save-btn {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        #photo-viewer .viewer-actions .save-btn:hover {
+            background: var(--primary-dark);
+        }
+        #photo-viewer img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            object-fit: contain;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* ===== DOCUMENT VIEWER ===== */
+        #document-viewer {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 70;
+            display: none;
+            flex-direction: column;
+            padding: 60px 20px 20px;
+        }
+        #document-viewer.active { display: flex; }
+        #document-viewer .doc-viewer-header {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+        #document-viewer .doc-viewer-header button {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: var(--transition);
+        }
+        #document-viewer .doc-viewer-header button:active {
+            background: rgba(255,255,255,0.25);
+            transform: scale(0.95);
+        }
+        #document-viewer .doc-viewer-content {
+            flex: 1;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            color: #1A2E24;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 80vh;
+        }
+        #document-viewer .doc-viewer-content .doc-placeholder {
+            text-align: center;
+            color: #8AAA9A;
+            padding: 40px 20px;
+        }
+        #document-viewer .doc-viewer-content .doc-placeholder svg {
+            display: block;
+            margin: 0 auto 12px;
+        }
+        #document-viewer .doc-viewer-content .doc-viewer-loading {
+            text-align: center;
+            color: #8AAA9A;
+            padding: 40px 20px;
         }
 
         /* ===== CALL OVERLAY ===== */
@@ -1039,29 +1198,11 @@
             justify-content: center;
         }
 
-        .composer .voice-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            padding: 8px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: var(--transition);
-            flex-shrink: 0;
-            display: none;
-        }
-        .composer .voice-btn.recording {
-            color: #EF4444;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
         @media (max-width: 430px) {
             #app { max-width: 100%; border-radius: 0; }
             .chat-window { max-width: 100%; }
+            .reaction-picker { max-width: 220px; padding: 6px 10px; }
+            .reaction-picker button { font-size: 20px; padding: 2px 4px; }
         }
         @media (max-width: 380px) {
             .nav-item { min-width: 40px; font-size: 8px; }
@@ -1268,6 +1409,27 @@
             <img id="viewer-image" src="" alt="Photo" />
         </div>
 
+        <!-- Document Viewer -->
+        <div id="document-viewer">
+            <div class="doc-viewer-header">
+                <button onclick="closeDocumentViewer()">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    Close
+                </button>
+                <button onclick="downloadDocument()" class="save-btn" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
+                </button>
+            </div>
+            <div class="doc-viewer-content" id="doc-viewer-content">
+                <div class="doc-viewer-loading">Loading document...</div>
+            </div>
+        </div>
+
         <!-- Call Overlay -->
         <div id="call-overlay" class="call-overlay">
             <div style="text-align:center;">
@@ -1277,7 +1439,6 @@
                 <div class="call-duration" id="call-duration">00:00</div>
             </div>
 
-            <!-- Incoming call actions -->
             <div id="incoming-call-actions" style="display:none;width:100%;justify-content:center;gap:20px;display:none;padding-bottom:20px;">
                 <button class="call-control accept" onclick="acceptCall()">
                     <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -1291,7 +1452,6 @@
                 </button>
             </div>
 
-            <!-- Call controls -->
             <div class="call-bottom-actions" id="call-controls">
                 <button class="call-control" onclick="toggleCallMute()" id="call-mute-btn">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -1393,7 +1553,7 @@
         }
 
         // ================================================================
-        // UPLOAD TO IMGBB - Silently (no toast spam)
+        // UPLOAD TO IMGBB
         // ================================================================
         async function uploadToImgBB(file) {
             return new Promise((resolve, reject) => {
@@ -1431,7 +1591,6 @@
             closeFriends: [],
             initialLoadDone: false,
             isAttachmentOpen: false,
-            // Call state
             isCallActive: false,
             callType: null,
             peer: null,
@@ -1442,6 +1601,9 @@
             isMuted: false,
             isVideoOff: false,
             isSpeakerOn: false,
+            // Document viewer
+            currentDocumentUrl: null,
+            currentDocumentName: null,
         };
 
         // ================================================================
@@ -1577,7 +1739,6 @@
                 }
             });
 
-            // Check for UID from URL
             const params = new URLSearchParams(window.location.search);
             const uid = params.get('uid');
             if (uid && uid !== state.uid) {
@@ -1681,10 +1842,11 @@
             if (state.isAttachmentOpen) {
                 toggleAttachmentMenu();
             }
-            // End call if active
             if (state.isCallActive) {
                 endCall();
             }
+            closePhotoViewer();
+            closeDocumentViewer();
         }
 
         // ================================================================
@@ -1756,7 +1918,6 @@
                 div.className = 'chat-item';
                 div.onclick = () => openChat(chat.uid);
 
-                // Long press for chat context menu
                 div.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     showChatContextMenu(e.clientX, e.clientY, chat.uid);
@@ -1800,7 +1961,7 @@
         }
 
         // ================================================================
-        // CHAT CONTEXT MENU (Long press on chat item)
+        // CHAT CONTEXT MENU
         // ================================================================
         function showChatContextMenu(x, y, uid) {
             document.querySelectorAll('.context-menu').forEach(el => el.remove());
@@ -1929,7 +2090,7 @@
         }
 
         // ================================================================
-        // RENDER MESSAGES
+        // RENDER MESSAGES - With Reactions, Documents, Location
         // ================================================================
         function renderMessages(uid) {
             const container = document.getElementById('messages-container');
@@ -1999,8 +2160,14 @@
 
                     mapDiv.innerHTML = `
                         <div class="map-container">
-                            <img src="${mapUrl}" alt="Location map" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'map-loading\\'>📍 Loading map...</div>'" />
-                            <div class="map-loading" style="display:none;">📍 Loading map...</div>
+                            <img src="${mapUrl}" alt="Location map" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'map-placeholder\\'><svg width=\\'24\\' height=\\'24\\' fill=\\'none\\' stroke=\\'currentColor\\' viewBox=\\'0 0 24 24\\' stroke-width=\\'1.5\\'><path d=\\'M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z\\'/><circle cx=\\'12\\' cy=\\'10\\' r=\\'3\\'/></svg>📍 Loading map...</div>'" />
+                            <div class="map-placeholder" style="display:none;">
+                                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                    <path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/>
+                                    <circle cx="12" cy="10" r="3"/>
+                                </svg>
+                                📍 ${msg.text || 'Location'}
+                            </div>
                         </div>
                         <div class="map-info">
                             <span>📍 ${msg.text || 'Location'}</span>
@@ -2010,30 +2177,72 @@
                     div.appendChild(mapDiv);
                 }
 
-                // Media (Image, Video, Document)
-                if (msg.mediaType && msg.mediaUrl && msg.mediaType !== 'location') {
+                // Image
+                if (msg.mediaType === 'image' && msg.mediaUrl) {
                     const mediaDiv = document.createElement('div');
                     mediaDiv.className = 'media-preview';
-
-                    if (msg.mediaType === 'image') {
-                        mediaDiv.innerHTML =
-                            `<img src="${msg.mediaUrl}" alt="Image" onclick="openPhotoViewer('${msg.mediaUrl}')" />`;
-                    } else if (msg.mediaType === 'video') {
-                        mediaDiv.innerHTML = `
-                            <video src="${msg.mediaUrl}" controls style="width:100%;max-height:200px;border-radius:10px;" onclick="event.stopPropagation();"></video>
-                        `;
-                    } else {
-                        mediaDiv.innerHTML = `
-                            <div class="file-info">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                </svg>
-                                <span>${msg.mediaName || 'Document'}</span>
-                                ${msg.mediaUrl ? `<a href="${msg.mediaUrl}" target="_blank">Download</a>` : ''}
-                            </div>
-                        `;
-                    }
+                    mediaDiv.innerHTML =
+                        `<img src="${msg.mediaUrl}" alt="Image" onclick="openPhotoViewer('${msg.mediaUrl}')" />`;
                     div.appendChild(mediaDiv);
+                }
+
+                // Video
+                if (msg.mediaType === 'video' && msg.mediaUrl) {
+                    const mediaDiv = document.createElement('div');
+                    mediaDiv.className = 'media-preview';
+                    mediaDiv.innerHTML = `
+                        <video src="${msg.mediaUrl}" controls style="width:100%;max-height:200px;border-radius:10px;" onclick="event.stopPropagation();"></video>
+                    `;
+                    div.appendChild(mediaDiv);
+                }
+
+                // Document
+                if (msg.mediaType === 'document' && msg.mediaUrl) {
+                    const docDiv = document.createElement('div');
+                    docDiv.className = 'document-preview';
+
+                    const fileExt = (msg.mediaName || 'file').split('.').pop().toUpperCase();
+                    const icon = fileExt === 'PDF' ? '📄' : fileExt === 'DOC' || fileExt === 'DOCX' ? '📝' : '📎';
+
+                    docDiv.innerHTML = `
+                        <div class="doc-header">
+                            <div class="doc-icon">${icon}</div>
+                            <div class="doc-name">${msg.mediaName || 'Document'}</div>
+                        </div>
+                        <div class="doc-actions">
+                            <button class="view-btn" onclick="event.stopPropagation();openDocumentViewer('${msg.mediaUrl}', '${msg.mediaName || 'Document'}')">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                View
+                            </button>
+                            <button class="download-btn" onclick="event.stopPropagation();downloadDocumentDirect('${msg.mediaUrl}', '${msg.mediaName || 'document'}')">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download
+                            </button>
+                        </div>
+                    `;
+                    div.appendChild(docDiv);
+                }
+
+                // Reactions
+                if (msg.reactions && Object.keys(msg.reactions).length > 0) {
+                    const reactionsDiv = document.createElement('div');
+                    reactionsDiv.className = 'reactions';
+                    const reactionCounts = {};
+                    Object.values(msg.reactions).forEach(r => {
+                        reactionCounts[r] = (reactionCounts[r] || 0) + 1;
+                    });
+                    Object.keys(reactionCounts).forEach(r => {
+                        const badge = document.createElement('span');
+                        badge.className = 'reaction-badge';
+                        badge.textContent = r + (reactionCounts[r] > 1 ? ' ' + reactionCounts[r] : '');
+                        reactionsDiv.appendChild(badge);
+                    });
+                    div.appendChild(reactionsDiv);
                 }
 
                 // Time
@@ -2054,16 +2263,17 @@
         }
 
         // ================================================================
-        // MESSAGE CONTEXT MENU
+        // MESSAGE CONTEXT MENU (Reactions + Actions)
         // ================================================================
         function showMessageContextMenu(x, y, threadKey, msgId, isSent) {
             document.querySelectorAll('.context-menu').forEach(el => el.remove());
+            document.querySelectorAll('.reaction-picker').forEach(el => el.remove());
 
             const msgs = state.messages[threadKey] || [];
             const msg = msgs.find(m => m.id === msgId);
             if (!msg) return;
 
-            // Show reaction picker first
+            // Show reaction picker
             showReactionPicker(x, y, threadKey, msgId, isSent);
         }
 
@@ -2078,40 +2288,43 @@
 
             if (x === 0) {
                 picker.style.left = '50%';
-                picker.style.top = '50%';
+                picker.style.top = '40%';
                 picker.style.transform = 'translate(-50%, -50%)';
             } else {
                 picker.style.left = Math.min(x, window.innerWidth - 240) + 'px';
-                picker.style.top = Math.min(y, window.innerHeight - 60) + 'px';
+                picker.style.top = Math.max(20, y - 40) + 'px';
             }
 
             reactions.forEach(r => {
                 const btn = document.createElement('button');
                 btn.textContent = r;
-                btn.onclick = () => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
                     addReaction(threadKey, msgId, r);
                     picker.remove();
-                    // Show context menu after reaction
-                    showMsgContextMenuAfterReaction(x, y, threadKey, msgId, isSent);
+                    // Show action menu after reaction
+                    showActionMenu(x, y, threadKey, msgId, isSent);
                 };
                 picker.appendChild(btn);
             });
 
             document.body.appendChild(picker);
 
+            // Click outside to show action menu
             setTimeout(() => {
                 document.addEventListener('click', (e) => {
                     if (!e.target.closest('.reaction-picker') && !e.target.closest('.context-menu')) {
                         picker.remove();
-                        // Show context menu if not clicked on reaction
-                        showMsgContextMenuAfterReaction(x, y, threadKey, msgId, isSent);
+                        showActionMenu(x, y, threadKey, msgId, isSent);
                     }
                 }, { once: true });
             }, 10);
         }
 
-        function showMsgContextMenuAfterReaction(x, y, threadKey, msgId, isSent) {
-            // Remove existing menus
+        // ================================================================
+        // ACTION MENU (Copy, Edit, Delete)
+        // ================================================================
+        function showActionMenu(x, y, threadKey, msgId, isSent) {
             document.querySelectorAll('.context-menu').forEach(el => el.remove());
 
             const msgs = state.messages[threadKey] || [];
@@ -2153,15 +2366,28 @@
             }, 10);
         }
 
+        // ================================================================
+        // ADD REACTION
+        // ================================================================
         function addReaction(threadKey, msgId, reaction) {
             const msgs = state.messages[threadKey] || [];
             const msg = msgs.find(m => m.id === msgId);
             if (msg) {
                 if (!msg.reactions) msg.reactions = {};
-                msg.reactions[state.uid] = reaction;
-                db.ref('messages/' + threadKey).set(msgs);
-                renderMessages(state.activeChatUID);
-                showToast('Reaction added');
+                // Toggle reaction if same user already reacted with same emoji
+                if (msg.reactions[state.uid] === reaction) {
+                    delete msg.reactions[state.uid];
+                } else {
+                    msg.reactions[state.uid] = reaction;
+                }
+                db.ref('messages/' + threadKey).set(msgs)
+                    .then(() => {
+                        renderMessages(state.activeChatUID);
+                        showToast('Reaction updated');
+                    })
+                    .catch((err) => {
+                        showToast('Error updating reaction', true);
+                    });
             }
         }
 
@@ -2221,22 +2447,110 @@
         }
 
         function savePhoto() {
-            if (!currentPhotoUrl) return;
+            if (!currentPhotoUrl) {
+                showToast('No photo to save', true);
+                return;
+            }
+
+            // Create a link and trigger download
             const link = document.createElement('a');
             link.href = currentPhotoUrl;
             link.download = 'photo_' + Date.now() + '.jpg';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast('Photo saved');
+            showToast('Photo saved to gallery');
         }
 
-        // Close photo viewer on click outside
         document.getElementById('photo-viewer')?.addEventListener('click', (e) => {
             if (e.target === document.getElementById('photo-viewer')) {
                 closePhotoViewer();
             }
         });
+
+        // ================================================================
+        // DOCUMENT VIEWER
+        // ================================================================
+        let currentDocUrl = '';
+        let currentDocName = '';
+
+        function openDocumentViewer(url, name) {
+            currentDocUrl = url;
+            currentDocName = name || 'Document';
+
+            const viewer = document.getElementById('document-viewer');
+            const content = document.getElementById('doc-viewer-content');
+
+            viewer.classList.add('active');
+            content.innerHTML = '<div class="doc-viewer-loading">Loading document...</div>';
+
+            // Try to fetch and display the document
+            fetch(url)
+                .then(response => response.text())
+                .then(text => {
+                    // Check if it's a PDF, Word, or other binary
+                    const isBinary = text.includes('%PDF') || text.includes('PK');
+                    if (isBinary) {
+                        content.innerHTML = `
+                            <div class="doc-placeholder">
+                                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                                <div style="font-size:16px;font-weight:600;margin-top:8px;">${name || 'Document'}</div>
+                                <div style="font-size:13px;margin-top:4px;">This document cannot be previewed directly.</div>
+                                <button onclick="downloadDocumentDirect('${url}', '${name || 'document'}')" style="margin-top:12px;background:#00A86B;color:white;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:600;">
+                                    Download to view
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        // Text-based document
+                        content.innerHTML = `<pre style="white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:14px;line-height:1.8;">${escapeHtml(text)}</pre>`;
+                    }
+                })
+                .catch((err) => {
+                    content.innerHTML = `
+                        <div class="doc-placeholder">
+                            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div style="font-size:16px;font-weight:600;margin-top:8px;">Unable to preview</div>
+                            <div style="font-size:13px;margin-top:4px;">${err.message || 'Document cannot be loaded'}</div>
+                            <button onclick="downloadDocumentDirect('${url}', '${name || 'document'}')" style="margin-top:12px;background:#00A86B;color:white;border:none;padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:600;">
+                                Download
+                            </button>
+                        </div>
+                    `;
+                });
+        }
+
+        function closeDocumentViewer() {
+            document.getElementById('document-viewer').classList.remove('active');
+            currentDocUrl = '';
+            currentDocName = '';
+        }
+
+        function downloadDocument() {
+            if (currentDocUrl) {
+                downloadDocumentDirect(currentDocUrl, currentDocName || 'document');
+            }
+        }
+
+        function downloadDocumentDirect(url, name) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = name || 'document';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Downloading...');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
         // ================================================================
         // SEND MESSAGE
@@ -2316,10 +2630,8 @@
                 if (type === 'camera') input.capture = 'environment';
             } else if (type === 'video') {
                 input.accept = 'video/*';
-            } else if (type === 'document') {
-                input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx';
-            } else if (type === 'file') {
-                input.accept = '*/*';
+            } else if (type === 'document' || type === 'file') {
+                input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.zip,.rar';
             } else if (type === 'location') {
                 sendLocation();
                 return;
@@ -2477,7 +2789,7 @@
         }
 
         // ================================================================
-        // PEERJS CALL SYSTEM - COMPLETE
+        // PEERJS CALL SYSTEM
         // ================================================================
         let peerInstance = null;
         let callInstance = null;
@@ -2504,7 +2816,6 @@
                 state.callType = type;
                 state.isCallActive = true;
 
-                // Show call overlay
                 document.getElementById('call-overlay').classList.add('active');
                 document.getElementById('call-avatar').src = user.pfp ||
                     'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
@@ -2514,7 +2825,6 @@
                 document.getElementById('incoming-call-actions').style.display = 'none';
                 document.getElementById('call-controls').style.display = 'flex';
 
-                // Initialize PeerJS
                 if (!peerInstance) {
                     peerInstance = new Peer(getPeerId(state.uid));
                 }
@@ -2529,7 +2839,6 @@
                     endCall();
                 });
 
-                // Get local media
                 const constraints = {
                     audio: true,
                     video: type === 'video'
@@ -2547,7 +2856,6 @@
                             document.getElementById('call-status').textContent = '🔴 Connected';
                             showToast('Call connected');
                             startCallTimer();
-                            // Show floating call
                             document.getElementById('floating-call').classList.add('active');
                             document.getElementById('floating-call-name').textContent = user.name;
                         });
@@ -2571,9 +2879,6 @@
             });
         }
 
-        // ================================================================
-        // INCOMING CALL HANDLER
-        // ================================================================
         function setupIncomingCallListener() {
             if (!peerInstance) {
                 peerInstance = new Peer(getPeerId(state.uid));
@@ -2591,7 +2896,6 @@
                     callInstance = incomingCall;
                     state.call = incomingCall;
 
-                    // Show incoming call screen
                     document.getElementById('call-overlay').classList.add('active');
                     document.getElementById('call-avatar').src = user.pfp ||
                         'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
@@ -2601,15 +2905,11 @@
                     document.getElementById('call-controls').style.display = 'none';
                     document.getElementById('incoming-call-actions').style.display = 'flex';
 
-                    // Ring effect
                     showToast('📞 Incoming call from ' + user.name);
                 });
             });
         }
 
-        // ================================================================
-        // ACCEPT CALL
-        // ================================================================
         function acceptCall() {
             if (!callInstance) return;
 
@@ -2652,9 +2952,6 @@
                 });
         }
 
-        // ================================================================
-        // REJECT CALL
-        // ================================================================
         function rejectCall() {
             if (callInstance) {
                 callInstance.close();
@@ -2663,9 +2960,6 @@
             endCall();
         }
 
-        // ================================================================
-        // CALL CONTROLS
-        // ================================================================
         function startCallTimer() {
             state.callDuration = 0;
             if (state.callInterval) clearInterval(state.callInterval);
@@ -2711,9 +3005,6 @@
             document.getElementById('call-overlay').classList.add('active');
         }
 
-        // ================================================================
-        // END CALL
-        // ================================================================
         function endCall() {
             if (callInstance) {
                 callInstance.close();
@@ -2797,13 +3088,11 @@
         }, 2000);
 
         console.log('🚀 Stardust X - Complete Working Chat');
-        console.log('✅ Long press chat: Delete, Block, Close Friend, Report');
-        console.log('✅ Long press message: React, Edit, Copy, Delete');
-        console.log('✅ Photo viewer with Save button');
-        console.log('✅ Location as map with Open in Maps');
-        console.log('✅ PeerJS audio/video calls');
-        console.log('✅ Incoming call with accept/reject');
-        console.log('✅ Floating call window');
+        console.log('✅ Reactions show on messages');
+        console.log('✅ Photo save works properly');
+        console.log('✅ Document View + Download');
+        console.log('✅ Location map preview');
+        console.log('✅ Contact menu working');
     </script>
 </body>
 </html>
