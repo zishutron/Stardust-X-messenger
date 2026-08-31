@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Settings - Stardust X</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
     <style>
         :root {
             --primary: #00A86B;
@@ -29,7 +27,6 @@
             --danger: #EF4444;
         }
 
-        /* Dark Mode Variables */
         .dark-mode {
             --bg-primary: #1A1A2E;
             --bg-secondary: #0F0F1A;
@@ -244,6 +241,135 @@
         }
         #loading .brand .x { color: var(--primary); }
 
+        /* ===== MODAL STYLES ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 20px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-overlay.hidden { display: none; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .modal-box {
+            background: var(--bg-primary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-box .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-box .modal-header button {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: var(--transition);
+            font-size: 18px;
+        }
+        .modal-box .modal-header button:active { background: var(--bg-surface); }
+
+        .modal-box .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+        .modal-box .contact-item:active { background: var(--bg-surface); }
+        .modal-box .contact-item .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background: var(--bg-surface);
+            flex-shrink: 0;
+        }
+        .modal-box .contact-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .modal-box .contact-item .info .name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .modal-box .contact-item .info .uid {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+        .modal-box .contact-item .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .modal-box .contact-item .btn-action:active { transform: scale(0.95); }
+        .modal-box .contact-item .btn-action.danger {
+            background: var(--danger);
+        }
+        .modal-box .contact-item .btn-action.danger:hover {
+            background: #DC2626;
+        }
+
+        .empty-state-modal {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state-modal .icon {
+            font-size: 40px;
+            opacity: 0.3;
+            margin-bottom: 8px;
+        }
+        .empty-state-modal .title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .empty-state-modal .sub {
+            font-size: 13px;
+        }
+
         @media (max-width: 430px) { #app { max-width: 100%; border-radius: 0; } }
         @media (max-width: 380px) {
             .nav-item { min-width: 40px; font-size: 8px; }
@@ -292,13 +418,18 @@
                 <span class="label">Edit Profile</span>
                 <span class="arrow">›</span>
             </button>
-            <button class="settings-item" onclick="showToast('Blocked contacts')">
-                <span class="icon">X</span>
+            <button class="settings-item" onclick="openBlockedContacts()">
+                <span class="icon">🚫</span>
                 <span class="label">Blocked Contacts</span>
                 <span class="arrow">›</span>
             </button>
+            <button class="settings-item" onclick="openCloseFriends()">
+                <span class="icon">⭐</span>
+                <span class="label">Close Friends</span>
+                <span class="arrow">›</span>
+            </button>
             <button class="settings-item" onclick="toggleDarkMode()">
-                <span class="icon">●</span>
+                <span class="icon">🌓</span>
                 <span class="label" id="dark-mode-label">Dark Mode</span>
                 <span class="arrow">›</span>
             </button>
@@ -336,6 +467,32 @@
             </button>
         </div>
 
+        <!-- Blocked Contacts Modal -->
+        <div id="blocked-contacts-modal" class="modal-overlay hidden">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3>Blocked Contacts</h3>
+                    <button onclick="closeModal('blocked-contacts-modal')">✕</button>
+                </div>
+                <div id="blocked-list">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Close Friends Modal -->
+        <div id="close-friends-modal" class="modal-overlay hidden">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3>Close Friends</h3>
+                    <button onclick="closeModal('close-friends-modal')">✕</button>
+                </div>
+                <div id="close-friends-list">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </div>
+
         <nav class="bottom-nav">
             <button class="nav-item" data-tab="chats" onclick="window.location.href='chat.html'">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -371,63 +528,68 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // ================================================================
+        // STATE
+        // ================================================================
+        let currentUser = null;
+        let uid = null;
         let darkMode = false;
+        let blockedList = [];
+        let closeFriendsList = [];
 
         // ================================================================
         // TOAST
         // ================================================================
-        function showToast(message) {
+        function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
-            document.getElementById('toast-message').textContent = message;
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            toast.style.background = isError ? '#EF4444' : 'var(--text-primary)';
+            toast.style.color = 'white';
             toast.classList.add('active');
             if (window.toastTimeout) clearTimeout(window.toastTimeout);
             window.toastTimeout = setTimeout(() => {
                 toast.classList.remove('active');
-            }, 3000);
+                toast.style.background = 'var(--text-primary)';
+            }, 4000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
         }
 
         // ================================================================
-        // CUSTOMER SUPPORT - Opens Gmail
+        // DARK MODE
+        // ================================================================
+        function applyDarkMode() {
+            const saved = localStorage.getItem('stardust-dark-mode');
+            if (saved === 'true') {
+                darkMode = true;
+                document.body.classList.add('dark-mode');
+                document.getElementById('dark-mode-label').textContent = 'Dark Mode (On)';
+            }
+        }
+        applyDarkMode();
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode', darkMode);
+            localStorage.setItem('stardust-dark-mode', darkMode ? 'true' : 'false');
+            const label = document.getElementById('dark-mode-label');
+            label.textContent = darkMode ? 'Dark Mode (On)' : 'Dark Mode';
+            showToast(darkMode ? 'Dark mode enabled' : 'Light mode enabled');
+        }
+
+        // ================================================================
+        // CUSTOMER SUPPORT
         // ================================================================
         function openCustomerSupport() {
             const email = 'support.stardustofficial@gmail.com';
             const subject = 'Stardust X Support Request';
             const body = 'Hello Stardust X Team,\n\nI need help with...\n\nRegards,\n[Your Name]';
-            window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+            window.location.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(
+                body);
         }
-
-        // ================================================================
-        // DARK MODE - PERSISTENT
-        // ================================================================
-        function toggleDarkMode() {
-            darkMode = !darkMode;
-            document.body.classList.toggle('dark-mode', darkMode);
-
-            // Save preference
-            localStorage.setItem('stardust-dark-mode', darkMode ? 'true' : 'false');
-
-            const label = document.getElementById('dark-mode-label');
-            label.textContent = darkMode ? 'Dark Mode (On)' : 'Dark Mode';
-
-            showToast(darkMode ? 'Dark mode enabled' : 'Light mode enabled');
-        }
-
-        // Load dark mode preference on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('stardust-dark-mode');
-            if (saved === 'true') {
-                darkMode = true;
-                document.body.classList.add('dark-mode');
-                const label = document.getElementById('dark-mode-label');
-                if (label) label.textContent = 'Dark Mode (On)';
-            }
-
-            // Apply dark mode to all pages when navigating
-            // Check if dark mode is enabled and apply to body
-            if (darkMode) {
-                document.body.classList.add('dark-mode');
-            }
-        });
 
         // ================================================================
         // AUTH CHECK
@@ -440,8 +602,245 @@
                 return;
             }
 
-            showToast('Welcome to Settings');
+            db.ref('users').orderByChild('email').equalTo(user.email)
+                .once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            if (data[k].email === user.email) {
+                                currentUser = data[k];
+                                uid = k;
+                                blockedList = data[k].blocked || [];
+                                closeFriendsList = data[k].closeFriends || [];
+                                break;
+                            }
+                        }
+                    }
+                    if (currentUser) {
+                        showToast('Welcome to Settings');
+                    }
+                });
         });
+
+        // ================================================================
+        // OPEN BLOCKED CONTACTS - FIXED
+        // ================================================================
+        function openBlockedContacts() {
+            const container = document.getElementById('blocked-list');
+            container.innerHTML = '';
+
+            // Get fresh data
+            db.ref('users/' + uid + '/blocked').once('value')
+                .then((snap) => {
+                    blockedList = snap.val() || [];
+
+                    if (blockedList.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state-modal">
+                                <div class="icon">🚫</div>
+                                <div class="title">No Blocked Contacts</div>
+                                <div class="sub">You haven't blocked anyone yet</div>
+                            </div>
+                        `;
+                        document.getElementById('blocked-contacts-modal').classList.remove('hidden');
+                        return;
+                    }
+
+                    let loadedCount = 0;
+                    blockedList.forEach(blockedUID => {
+                        db.ref('users/' + blockedUID).once('value').then((snap) => {
+                            const user = snap.val();
+                            if (!user) {
+                                loadedCount++;
+                                if (loadedCount === blockedList.length) {
+                                    if (container.children.length === 0) {
+                                        container.innerHTML = `
+                                            <div class="empty-state-modal">
+                                                <div class="icon">🚫</div>
+                                                <div class="title">No Blocked Contacts</div>
+                                                <div class="sub">You haven't blocked anyone yet</div>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                return;
+                            }
+
+                            const div = document.createElement('div');
+                            div.className = 'contact-item';
+                            div.innerHTML = `
+                                <img src="${user.pfp}" class="avatar" />
+                                <div class="info">
+                                    <div class="name">${user.name}</div>
+                                    <div class="uid">@${user.uid}</div>
+                                </div>
+                                <button class="btn-action" onclick="unblockUser('${blockedUID}')">Unblock</button>
+                            `;
+                            container.appendChild(div);
+
+                            loadedCount++;
+                            if (loadedCount === blockedList.length && container.children.length === 0) {
+                                container.innerHTML = `
+                                    <div class="empty-state-modal">
+                                        <div class="icon">🚫</div>
+                                        <div class="title">No Blocked Contacts</div>
+                                        <div class="sub">You haven't blocked anyone yet</div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    });
+                })
+                .catch((err) => {
+                    showToast('Error loading blocked contacts: ' + err.message, true);
+                    container.innerHTML = `
+                        <div class="empty-state-modal">
+                            <div class="icon">❌</div>
+                            <div class="title">Error Loading</div>
+                            <div class="sub">${err.message}</div>
+                        </div>
+                    `;
+                });
+
+            document.getElementById('blocked-contacts-modal').classList.remove('hidden');
+        }
+
+        // ================================================================
+        // UNBLOCK USER - FIXED
+        // ================================================================
+        function unblockUser(blockedUID) {
+            if (!confirm('Unblock this user?')) return;
+
+            // Remove from blocked list
+            const newBlocked = blockedList.filter(uid => uid !== blockedUID);
+
+            db.ref('users/' + uid + '/blocked').set(newBlocked)
+                .then(() => {
+                    blockedList = newBlocked;
+                    showToast('User unblocked successfully');
+                    // Refresh the blocked list
+                    openBlockedContacts();
+                    // Also update contacts - add back if needed
+                    db.ref('users/' + uid + '/contacts').once('value').then((snap) => {
+                        const contacts = snap.val() || [];
+                        if (!contacts.includes(blockedUID)) {
+                            contacts.push(blockedUID);
+                            db.ref('users/' + uid + '/contacts').set(contacts);
+                        }
+                    });
+                })
+                .catch((err) => {
+                    showToast('Error: ' + err.message, true);
+                });
+        }
+
+        // ================================================================
+        // OPEN CLOSE FRIENDS - FIXED
+        // ================================================================
+        function openCloseFriends() {
+            const container = document.getElementById('close-friends-list');
+            container.innerHTML = '';
+
+            // Get fresh data
+            db.ref('users/' + uid + '/closeFriends').once('value')
+                .then((snap) => {
+                    closeFriendsList = snap.val() || [];
+
+                    if (closeFriendsList.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state-modal">
+                                <div class="icon">⭐</div>
+                                <div class="title">No Close Friends</div>
+                                <div class="sub">Add people to your close friends list</div>
+                            </div>
+                        `;
+                        document.getElementById('close-friends-modal').classList.remove('hidden');
+                        return;
+                    }
+
+                    let loadedCount = 0;
+                    closeFriendsList.forEach(friendUID => {
+                        db.ref('users/' + friendUID).once('value').then((snap) => {
+                            const user = snap.val();
+                            if (!user) {
+                                loadedCount++;
+                                if (loadedCount === closeFriendsList.length) {
+                                    if (container.children.length === 0) {
+                                        container.innerHTML = `
+                                            <div class="empty-state-modal">
+                                                <div class="icon">⭐</div>
+                                                <div class="title">No Close Friends</div>
+                                                <div class="sub">Add people to your close friends list</div>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                return;
+                            }
+
+                            const div = document.createElement('div');
+                            div.className = 'contact-item';
+                            div.onclick = () => {
+                                closeModal('close-friends-modal');
+                                window.location.href = 'chat.html?uid=' + friendUID;
+                            };
+                            div.innerHTML = `
+                                <img src="${user.pfp}" class="avatar" />
+                                <div class="info">
+                                    <div class="name">${user.name} ⭐</div>
+                                    <div class="uid">@${user.uid}</div>
+                                </div>
+                                <button class="btn-action danger" onclick="event.stopPropagation();removeCloseFriend('${friendUID}')">Remove</button>
+                            `;
+                            container.appendChild(div);
+
+                            loadedCount++;
+                            if (loadedCount === closeFriendsList.length && container.children.length === 0) {
+                                container.innerHTML = `
+                                    <div class="empty-state-modal">
+                                        <div class="icon">⭐</div>
+                                        <div class="title">No Close Friends</div>
+                                        <div class="sub">Add people to your close friends list</div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    });
+                })
+                .catch((err) => {
+                    showToast('Error loading close friends: ' + err.message, true);
+                    container.innerHTML = `
+                        <div class="empty-state-modal">
+                            <div class="icon">❌</div>
+                            <div class="title">Error Loading</div>
+                            <div class="sub">${err.message}</div>
+                        </div>
+                    `;
+                });
+
+            document.getElementById('close-friends-modal').classList.remove('hidden');
+        }
+
+        // ================================================================
+        // REMOVE CLOSE FRIEND - FIXED
+        // ================================================================
+        function removeCloseFriend(friendUID) {
+            if (!confirm('Remove this user from close friends?')) return;
+
+            const newCloseFriends = closeFriendsList.filter(uid => uid !== friendUID);
+
+            db.ref('users/' + uid + '/closeFriends').set(newCloseFriends)
+                .then(() => {
+                    closeFriendsList = newCloseFriends;
+                    showToast('Removed from close friends');
+                    openCloseFriends();
+                })
+                .catch((err) => {
+                    showToast('Error: ' + err.message, true);
+                });
+        }
 
         // ================================================================
         // LOGOUT & DELETE
@@ -460,25 +859,7 @@
             const user = auth.currentUser;
             if (!user) return;
 
-            db.ref('users').orderByChild('email').equalTo(user.email)
-                .once('value')
-                .then((snap) => {
-                    const data = snap.val();
-                    let uid = null;
-                    if (data) {
-                        const keys = Object.keys(data);
-                        for (let k of keys) {
-                            if (data[k].email === user.email) {
-                                uid = k;
-                                break;
-                            }
-                        }
-                    }
-                    if (uid) {
-                        return db.ref('users/' + uid).remove();
-                    }
-                    return Promise.resolve();
-                })
+            db.ref('users/' + uid).remove()
                 .then(() => {
                     return user.delete();
                 })
@@ -487,14 +868,24 @@
                     window.location.href = 'auth.html';
                 })
                 .catch((err) => {
-                    showToast('Error: ' + err.message);
+                    showToast('Error: ' + err.message, true);
                 });
         }
 
-        console.log('🚀 Stardust X - Settings Page (Fixed)');
-        console.log('✅ Dark Mode persistent');
-        console.log('✅ Customer Support opens Gmail');
-        console.log('✅ About Us button added');
+        // ================================================================
+        // CLICK OUTSIDE MODALS
+        // ================================================================
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.add('hidden');
+            }
+        });
+
+        console.log('🚀 Stardust X - Settings Page (Complete Fix)');
+        console.log('✅ Blocked Contacts opens properly');
+        console.log('✅ Close Friends opens properly');
+        console.log('✅ Unblock works');
+        console.log('✅ Remove Close Friend works');
     </script>
 </body>
 </html>
