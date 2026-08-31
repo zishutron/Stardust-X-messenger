@@ -242,6 +242,60 @@
             flex: 1;
         }
 
+        /* ===== 3-DOT MENU BUTTON ===== */
+        .contact-menu-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .contact-menu-btn:active {
+            background: var(--bg-surface);
+            color: var(--primary);
+        }
+
+        /* ===== CONTACT 3-DOT DROPDOWN ===== */
+        .contact-dropdown {
+            position: absolute;
+            right: 8px;
+            top: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            min-width: 170px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 35;
+            display: none;
+            animation: slideUp 0.2s ease-out;
+        }
+        .contact-dropdown.active { display: block; }
+        .contact-dropdown button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        .contact-dropdown button:active { background: var(--bg-surface); }
+        .contact-dropdown .danger { color: var(--danger); }
+        .contact-dropdown .divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 4px 8px;
+        }
+
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -646,7 +700,6 @@
         // INITIALIZE
         // ================================================================
         function initializeApp() {
-            // Listen for contacts - REAL-TIME
             db.ref('users/' + state.uid + '/contacts').on('value', (snap) => {
                 state.contacts = snap.val() || [];
                 renderContactsList();
@@ -671,7 +724,7 @@
         }
 
         // ================================================================
-        // RENDER CONTACTS - Sorted Alphabetically
+        // RENDER CONTACTS - With 3-Dot Menu
         // ================================================================
         function renderContactsList() {
             const container = document.getElementById('contacts-list');
@@ -709,14 +762,23 @@
 
                 sortedContacts.forEach(contact => {
                     const isCloseFriend = state.closeFriends.includes(contact.uid);
+                    const isBlocked = state.blocked.includes(contact.uid);
 
                     const div = document.createElement('div');
                     div.className = 'contact-item';
+                    div.style.position = 'relative';
 
+                    // Click on main area opens chat
                     const mainClick = () => {
                         window.location.href = 'chat.html?uid=' + contact.uid;
                     };
                     div.addEventListener('click', mainClick);
+
+                    // Prevent click on menu button from triggering main click
+                    const menuClick = (e) => {
+                        e.stopPropagation();
+                        toggleContactMenu(contact.uid, e);
+                    };
 
                     div.innerHTML = `
                         <img src="${contact.pfp}" alt="${contact.name}" class="avatar ${contact.online ? 'online' : ''}" />
@@ -728,9 +790,111 @@
                                 <span class="sub">UID: ${contact.uid} · ${contact.online ? 'Online' : 'Offline'}</span>
                             </div>
                         </div>
+                        <button class="contact-menu-btn" onclick="event.stopPropagation();toggleContactMenu('${contact.uid}', event)">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                            </svg>
+                        </button>
+                        <div class="contact-dropdown" id="contact-dropdown-${contact.uid}">
+                            ${!isBlocked ? `
+                                <button onclick="event.stopPropagation();blockContact('${contact.uid}')">🚫 Block Contact</button>
+                                <button onclick="event.stopPropagation();toggleCloseFriend('${contact.uid}')">${isCloseFriend ? '⭐ Remove Close Friend' : '⭐ Add to Close Friend'}</button>
+                            ` : ''}
+                            <button onclick="event.stopPropagation();reportContact('${contact.uid}', '${contact.name}')">⚠️ Report</button>
+                            <div class="divider"></div>
+                            <button class="danger" onclick="event.stopPropagation();deleteContact('${contact.uid}')">🗑️ Delete Contact</button>
+                        </div>
                     `;
                     container.appendChild(div);
                 });
+            });
+        }
+
+        // ================================================================
+        // CONTACT 3-DOT MENU TOGGLE
+        // ================================================================
+        function toggleContactMenu(uid, event) {
+            // Close all other menus
+            document.querySelectorAll('.contact-dropdown.active').forEach(el => {
+                if (el.id !== 'contact-dropdown-' + uid) {
+                    el.classList.remove('active');
+                }
+            });
+
+            const dropdown = document.getElementById('contact-dropdown-' + uid);
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', closeContactDropdown);
+            }, 10);
+        }
+
+        function closeContactDropdown(e) {
+            if (!e.target.closest('.contact-dropdown') && !e.target.closest('.contact-menu-btn')) {
+                document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                document.removeEventListener('click', closeContactDropdown);
+            }
+        }
+
+        // ================================================================
+        // CONTACT ACTIONS
+        // ================================================================
+        function deleteContact(uid) {
+            if (!confirm('Delete this contact permanently?')) return;
+            state.contacts = state.contacts.filter(c => c !== uid);
+            db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+            document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+            showToast('Contact deleted permanently');
+            renderContactsList();
+        }
+
+        function blockContact(uid) {
+            if (!confirm('Block this contact?')) return;
+            if (!state.blocked.includes(uid)) {
+                state.blocked.push(uid);
+                db.ref('users/' + state.uid + '/blocked').set(state.blocked);
+                state.contacts = state.contacts.filter(c => c !== uid);
+                db.ref('users/' + state.uid + '/contacts').set(state.contacts);
+                document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                showToast('Contact blocked');
+                renderContactsList();
+            }
+        }
+
+        function toggleCloseFriend(uid) {
+            if (state.closeFriends.includes(uid)) {
+                state.closeFriends = state.closeFriends.filter(c => c !== uid);
+                showToast('Removed from close friends');
+            } else {
+                state.closeFriends.push(uid);
+                showToast('Added to close friends');
+            }
+            db.ref('users/' + state.uid + '/closeFriends').set(state.closeFriends);
+            document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+            renderContactsList();
+        }
+
+        function reportContact(uid, name) {
+            const reason = prompt(`Please enter the reason for reporting ${name}:`);
+            if (!reason) return;
+
+            const reportRef = db.ref('reports');
+            reportRef.push({
+                reporterUID: state.uid,
+                reporterName: state.currentUser.name,
+                reportedUID: uid,
+                reportedName: name,
+                reason: reason,
+                timestamp: Date.now(),
+                status: 'pending'
+            }).then(() => {
+                document.querySelectorAll('.contact-dropdown.active').forEach(el => el.classList.remove('active'));
+                showToast('Report submitted to admin');
+            }).catch((err) => {
+                showToast('Error: ' + err.message, true);
             });
         }
 
@@ -745,7 +909,7 @@
         }
 
         // ================================================================
-        // ADD CONTACT - FIXED
+        // ADD CONTACT
         // ================================================================
         window.openAddContact = function() {
             document.getElementById('add-contact-modal').classList.remove('hidden');
@@ -825,7 +989,6 @@
                     showToast('✅ Contact added successfully!');
                     renderContactsList();
 
-                    // Send notification to the added user
                     const notifRef = db.ref('notifications/' + uid);
                     notifRef.push({
                         id: 'notif_' + Date.now(),
@@ -849,11 +1012,10 @@
                 });
         };
 
-        console.log('🚀 Stardust X - Contacts Page (Complete Fix)');
+        console.log('🚀 Stardust X - Contacts Page (Complete)');
+        console.log('✅ 3-dot menu on each contact');
+        console.log('✅ Block, Close Friend, Report, Delete actions');
         console.log('✅ Proper Firebase save with error handling');
-        console.log('✅ Contact persists after refresh');
-        console.log('✅ Opens chat with UID in URL');
-        console.log('✅ No permission denied errors');
     </script>
 </body>
 </html>
