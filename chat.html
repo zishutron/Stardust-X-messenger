@@ -610,10 +610,6 @@
             border: 1px solid var(--border-color);
             background: var(--bg-surface);
         }
-        .message.sent .document-preview {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.2);
-        }
         .message .document-preview .doc-header {
             padding: 10px 12px;
             display: flex;
@@ -668,7 +664,7 @@
             color: white;
         }
 
-        /* ===== LOCATION MAP - FIXED ===== */
+        /* ===== LOCATION MAP ===== */
         .location-map {
             width: 100%;
             max-width: 220px;
@@ -720,10 +716,6 @@
             font-weight: 600;
             text-decoration: none;
         }
-        .message.sent .location-map .map-info {
-            background: rgba(255,255,255,0.1);
-        }
-        .message.sent .location-map .map-info .open-map { color: #fff; }
 
         .date-separator {
             text-align: center;
@@ -941,11 +933,6 @@
         }
         .context-menu .action-row button:active { background: var(--bg-surface); }
         .context-menu .action-row .danger { color: var(--danger); }
-        .context-menu .action-row .divider {
-            height: 1px;
-            background: var(--border-color);
-            margin: 2px 8px;
-        }
 
         /* ===== PHOTO VIEWER ===== */
         #photo-viewer {
@@ -996,8 +983,6 @@
             max-height: 80vh;
             border-radius: 12px;
             object-fit: contain;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         /* ===== DOCUMENT VIEWER ===== */
@@ -1122,7 +1107,6 @@
             width: 64px;
             height: 64px;
         }
-        /* Hide video button for audio calls */
         .call-overlay .call-bottom-actions .call-control.video-hidden {
             display: none !important;
         }
@@ -1188,7 +1172,7 @@
             justify-content: center;
         }
 
-        /* ===== VIDEO CALL - LOCAL PREVIEW ===== */
+        /* ===== VIDEO CALL ===== */
         .local-video-preview {
             position: absolute;
             bottom: 120px;
@@ -1451,7 +1435,7 @@
                     </svg>
                     Close
                 </button>
-                <button onclick="downloadDocument()" class="save-btn" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">
+                <button onclick="downloadDocument()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">
                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
@@ -1466,15 +1450,12 @@
         <!-- Call Overlay -->
         <div id="call-overlay" class="call-overlay">
             <div style="text-align:center;position:relative;width:100%;">
-                <!-- Remote Video -->
                 <div class="remote-video-container" id="remote-video-container">
                     <video id="remote-video" autoplay playsinline></video>
                 </div>
-                <!-- Local Video Preview -->
                 <div class="local-video-preview" id="local-video-preview">
                     <video id="local-video" autoplay playsinline muted></video>
                 </div>
-                <!-- Avatar (shown when no video) -->
                 <img id="call-avatar" src="" alt="Caller" class="call-avatar" style="display:block;margin:0 auto;" />
                 <div class="call-name" id="call-name">User</div>
                 <div class="call-status" id="call-status">Connecting...</div>
@@ -1501,7 +1482,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
                     </svg>
                 </button>
-                <button class="call-control" onclick="toggleCallVideo()" id="call-video-btn">
+                <button class="call-control video-hidden" onclick="toggleCallVideo()" id="call-video-btn">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                     </svg>
@@ -1585,7 +1566,7 @@
         }
 
         // ================================================================
-        // GOOGLE MAPS - FIXED
+        // GOOGLE MAPS
         // ================================================================
         function getStaticMapUrl(lat, lng) {
             return `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=14&size=300x150&markers=color:red%7C${lat},${lng}&key=AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ`;
@@ -1620,25 +1601,45 @@
         }
 
         // ================================================================
-        // DOWNLOAD FILE - FIXED
+        // DOWNLOAD FILE - FIXED: Uses fetch + blob for proper download
         // ================================================================
-        function downloadFile(url, filename) {
-            // Create a temporary anchor element
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename || 'download';
-            link.target = '_blank';
-            document.body.appendChild(link);
+        async function downloadFile(url, filename) {
+            try {
+                showToast('Downloading...');
 
-            // Trigger download
-            link.click();
+                // Fetch the file
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch file');
+                }
 
-            // Clean up
-            setTimeout(() => {
-                document.body.removeChild(link);
-            }, 100);
+                // Get the blob
+                const blob = await response.blob();
 
-            showToast('Downloading...');
+                // Create a blob URL
+                const blobUrl = URL.createObjectURL(blob);
+
+                // Create download link
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename || 'download';
+                document.body.appendChild(link);
+
+                // Trigger download
+                link.click();
+
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                }, 500);
+
+                showToast('Download complete ✅');
+
+            } catch (err) {
+                console.error('Download error:', err);
+                showToast('Download failed: ' + err.message, true);
+            }
         }
 
         // ================================================================
@@ -1669,6 +1670,8 @@
             currentDocumentUrl: null,
             currentDocumentName: null,
             isVideoCall: false,
+            isIncomingCall: false,
+            peerId: null,
         };
 
         // ================================================================
@@ -1849,6 +1852,9 @@
             buildChatList();
             renderChatList();
             showToast('Welcome, ' + state.currentUser.name + '!');
+
+            // Setup peer listener
+            setupIncomingCallListener();
         }
 
         // ================================================================
@@ -2155,7 +2161,7 @@
         }
 
         // ================================================================
-        // RENDER MESSAGES - With Read Receipts (✓ and ✓✓)
+        // RENDER MESSAGES - With Read Receipts
         // ================================================================
         function renderMessages(uid) {
             const container = document.getElementById('messages-container');
@@ -2216,7 +2222,7 @@
                     div.appendChild(p);
                 }
 
-                // Location - FIXED: Shows map preview
+                // Location
                 if (msg.mediaType === 'location' && msg.lat && msg.lng) {
                     const mapDiv = document.createElement('div');
                     mapDiv.className = 'location-map';
@@ -2311,7 +2317,7 @@
                     div.appendChild(reactionsDiv);
                 }
 
-                // Time with Read Receipts - FIXED: ✓ for sent, ✓✓ for seen
+                // Time with Read Receipts
                 const timeSpan = document.createElement('span');
                 timeSpan.className = 'time';
                 let timeText = formatTime(msg.timestamp);
@@ -2719,7 +2725,7 @@
         }
 
         // ================================================================
-        // SEND LOCATION - FIXED
+        // SEND LOCATION
         // ================================================================
         function sendLocation() {
             if (!state.activeChatUID) {
@@ -2795,10 +2801,70 @@
         let peerInstance = null;
         let callInstance = null;
         let localStreamInstance = null;
-        let isIncomingCall = false;
 
         function getPeerId(uid) {
             return 'stardust_' + uid;
+        }
+
+        // ================================================================
+        // SETUP INCOMING CALL LISTENER
+        // ================================================================
+        function setupIncomingCallListener() {
+            if (!peerInstance) {
+                peerInstance = new Peer(getPeerId(state.uid));
+            }
+
+            peerInstance.on('open', (id) => {
+                console.log('Peer connected:', id);
+                state.peerId = id;
+            });
+
+            peerInstance.on('call', (incomingCall) => {
+                const senderUID = incomingCall.peer.replace('stardust_', '');
+
+                // Check if sender is in contacts
+                if (!state.contacts.includes(senderUID)) {
+                    incomingCall.close();
+                    showToast('Call from unknown user', true);
+                    return;
+                }
+
+                db.ref('users/' + senderUID).once('value').then((snap) => {
+                    const user = snap.val();
+                    if (!user) return;
+
+                    state.isIncomingCall = true;
+                    state.isVideoCall = false;
+                    state.callType = 'audio';
+                    state.isCallActive = true;
+                    callInstance = incomingCall;
+                    state.call = incomingCall;
+
+                    // Show incoming call screen
+                    document.getElementById('call-overlay').classList.add('active');
+                    document.getElementById('call-avatar').src = user.pfp ||
+                        'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
+                        '&background=00A86B&color=fff&size=120';
+                    document.getElementById('call-name').textContent = user.name;
+                    document.getElementById('call-status').textContent = '📞 Incoming call...';
+                    document.getElementById('call-duration').textContent = '00:00';
+                    document.getElementById('call-controls').style.display = 'none';
+                    document.getElementById('incoming-call-actions').style.display = 'flex';
+                    document.getElementById('call-avatar').style.display = 'block';
+                    document.getElementById('remote-video-container').classList.remove('active');
+                    document.getElementById('local-video-preview').classList.remove('active');
+                    document.getElementById('call-video-btn').classList.add('video-hidden');
+
+                    showToast('📞 Incoming call from ' + user.name);
+                });
+            });
+
+            peerInstance.on('error', (err) => {
+                console.error('Peer error:', err);
+                if (err.type !== 'unavailable-id') {
+                    showToast('Connection error: ' + err.message, true);
+                }
+            });
         }
 
         // ================================================================
@@ -2817,6 +2883,9 @@
                 return;
             }
 
+            // Check if peer is available
+            const targetPeerId = getPeerId(uid);
+
             db.ref('users/' + uid).once('value').then((snap) => {
                 const user = snap.val();
                 if (!user) {
@@ -2824,9 +2893,16 @@
                     return;
                 }
 
+                // Check if already in a call
+                if (state.isCallActive) {
+                    showToast('Already in a call', true);
+                    return;
+                }
+
                 state.isVideoCall = type === 'video';
                 state.callType = type;
                 state.isCallActive = true;
+                state.isIncomingCall = false;
 
                 // Show call overlay
                 document.getElementById('call-overlay').classList.add('active');
@@ -2858,21 +2934,6 @@
                     document.getElementById('call-avatar').style.display = 'block';
                 }
 
-                // Initialize PeerJS
-                if (!peerInstance) {
-                    peerInstance = new Peer(getPeerId(state.uid));
-                }
-
-                peerInstance.on('open', (id) => {
-                    console.log('Peer connected:', id);
-                });
-
-                peerInstance.on('error', (err) => {
-                    console.error('Peer error:', err);
-                    showToast('Connection error: ' + err.message, true);
-                    endCall();
-                });
-
                 // Get local media
                 const constraints = {
                     audio: true,
@@ -2891,37 +2952,52 @@
                             localVideo.play();
                         }
 
-                        const targetPeerId = getPeerId(uid);
-                        const call = peerInstance.call(targetPeerId, stream);
+                        // Ensure peer is ready
+                        if (!peerInstance) {
+                            peerInstance = new Peer(getPeerId(state.uid));
+                            setupIncomingCallListener();
+                        }
 
-                        call.on('stream', (remoteStream) => {
-                            document.getElementById('call-status').textContent = '🔴 Connected';
-                            showToast('Call connected');
-                            startCallTimer();
+                        // Wait for peer to be open
+                        const makeCall = () => {
+                            const call = peerInstance.call(targetPeerId, stream);
 
-                            // Show remote video
-                            if (type === 'video') {
-                                const remoteVideo = document.getElementById('remote-video');
-                                remoteVideo.srcObject = remoteStream;
-                                remoteVideo.play();
-                                document.getElementById('call-avatar').style.display = 'none';
-                            }
+                            call.on('stream', (remoteStream) => {
+                                document.getElementById('call-status').textContent = '🔴 Connected';
+                                showToast('Call connected');
+                                startCallTimer();
 
-                            document.getElementById('floating-call').classList.add('active');
-                            document.getElementById('floating-call-name').textContent = user.name;
-                        });
+                                if (type === 'video') {
+                                    const remoteVideo = document.getElementById('remote-video');
+                                    remoteVideo.srcObject = remoteStream;
+                                    remoteVideo.play();
+                                    document.getElementById('call-avatar').style.display = 'none';
+                                }
 
-                        call.on('close', () => {
-                            endCall();
-                        });
+                                document.getElementById('floating-call').classList.add('active');
+                                document.getElementById('floating-call-name').textContent = user.name;
+                            });
 
-                        call.on('error', (err) => {
-                            showToast('Call error: ' + err.message, true);
-                            endCall();
-                        });
+                            call.on('close', () => {
+                                endCall();
+                            });
 
-                        callInstance = call;
-                        state.call = call;
+                            call.on('error', (err) => {
+                                showToast('Call error: ' + err.message, true);
+                                endCall();
+                            });
+
+                            callInstance = call;
+                            state.call = call;
+                        };
+
+                        if (peerInstance.open) {
+                            makeCall();
+                        } else {
+                            peerInstance.on('open', () => {
+                                makeCall();
+                            });
+                        }
                     })
                     .catch((err) => {
                         showToast('Microphone/Camera access denied: ' + err.message, true);
@@ -2931,66 +3007,17 @@
         }
 
         // ================================================================
-        // INCOMING CALL LISTENER
-        // ================================================================
-        function setupIncomingCallListener() {
-            if (!peerInstance) {
-                peerInstance = new Peer(getPeerId(state.uid));
-            }
-
-            peerInstance.on('call', (incomingCall) => {
-                const senderUID = incomingCall.peer.replace('stardust_', '');
-
-                if (!state.contacts.includes(senderUID)) {
-                    incomingCall.close();
-                    showToast('Call from unknown user', true);
-                    return;
-                }
-
-                db.ref('users/' + senderUID).once('value').then((snap) => {
-                    const user = snap.val();
-                    if (!user) return;
-
-                    isIncomingCall = true;
-                    state.isVideoCall = true; // Default to video, will check
-                    state.callType = 'audio';
-                    state.isCallActive = true;
-                    callInstance = incomingCall;
-                    state.call = incomingCall;
-
-                    // Show incoming call screen
-                    document.getElementById('call-overlay').classList.add('active');
-                    document.getElementById('call-avatar').src = user.pfp ||
-                        'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) +
-                        '&background=00A86B&color=fff&size=120';
-                    document.getElementById('call-name').textContent = user.name;
-                    document.getElementById('call-status').textContent = '📞 Incoming call...';
-                    document.getElementById('call-duration').textContent = '00:00';
-                    document.getElementById('call-controls').style.display = 'none';
-                    document.getElementById('incoming-call-actions').style.display = 'flex';
-                    document.getElementById('call-avatar').style.display = 'block';
-                    document.getElementById('remote-video-container').classList.remove('active');
-                    document.getElementById('local-video-preview').classList.remove('active');
-                    document.getElementById('call-video-btn').classList.add('video-hidden');
-
-                    showToast('📞 Incoming call from ' + user.name);
-                });
-            });
-        }
-
-        // ================================================================
         // ACCEPT CALL
         // ================================================================
         function acceptCall() {
-            if (!callInstance) return;
+            if (!callInstance) {
+                showToast('No incoming call', true);
+                return;
+            }
 
             document.getElementById('incoming-call-actions').style.display = 'none';
             document.getElementById('call-controls').style.display = 'flex';
             document.getElementById('call-status').textContent = 'Connecting...';
-
-            // Check if it's a video call by looking at the call type
-            // For now, assume audio, but we can detect
-            const isVideo = false; // Will be detected from call
 
             const constraints = {
                 audio: true,
@@ -3021,9 +3048,11 @@
                         showToast('Call error: ' + err.message, true);
                         endCall();
                     });
+
+                    state.isIncomingCall = false;
                 })
                 .catch((err) => {
-                    showToast('Microphone access denied', true);
+                    showToast('Microphone access denied: ' + err.message, true);
                     endCall();
                 });
         }
@@ -3035,7 +3064,7 @@
             if (callInstance) {
                 callInstance.close();
             }
-            isIncomingCall = false;
+            state.isIncomingCall = false;
             showToast('Call declined');
             endCall();
         }
@@ -3091,41 +3120,59 @@
         }
 
         // ================================================================
-        // END CALL - FIXED: Closes for both users
+        // END CALL - COMPLETE FIX
         // ================================================================
         function endCall() {
+            // Close peer call
             if (callInstance) {
-                callInstance.close();
+                try {
+                    callInstance.close();
+                } catch (e) {}
                 callInstance = null;
             }
+
+            // Stop local stream
             if (localStreamInstance) {
-                localStreamInstance.getTracks().forEach(track => track.stop());
+                try {
+                    localStreamInstance.getTracks().forEach(track => track.stop());
+                } catch (e) {}
                 localStreamInstance = null;
             }
+
+            // Stop remote video
+            const remoteVideo = document.getElementById('remote-video');
+            if (remoteVideo.srcObject) {
+                try {
+                    remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+                } catch (e) {}
+                remoteVideo.srcObject = null;
+            }
+
+            // Stop local video
+            const localVideo = document.getElementById('local-video');
+            if (localVideo.srcObject) {
+                try {
+                    localVideo.srcObject.getTracks().forEach(track => track.stop());
+                } catch (e) {}
+                localVideo.srcObject = null;
+            }
+
+            // Clear interval
             if (state.callInterval) {
                 clearInterval(state.callInterval);
                 state.callInterval = null;
             }
 
-            // Stop video streams
-            const remoteVideo = document.getElementById('remote-video');
-            if (remoteVideo.srcObject) {
-                remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-                remoteVideo.srcObject = null;
-            }
-            const localVideo = document.getElementById('local-video');
-            if (localVideo.srcObject) {
-                localVideo.srcObject.getTracks().forEach(track => track.stop());
-                localVideo.srcObject = null;
-            }
-
+            // Reset state
             state.isCallActive = false;
+            state.isIncomingCall = false;
             state.callDuration = 0;
             state.isMuted = false;
             state.isVideoOff = false;
             state.isSpeakerOn = false;
-            isIncomingCall = false;
+            state.isVideoCall = false;
 
+            // Hide UI
             document.getElementById('call-overlay').classList.remove('active');
             document.getElementById('floating-call').classList.remove('active');
             document.getElementById('call-mute-btn').classList.remove('active');
@@ -3142,22 +3189,23 @@
         }
 
         // ================================================================
-        // MARK MESSAGES AS SEEN - FIXED: Updates seen status
+        // MARK MESSAGES AS SEEN - FIXED
         // ================================================================
         function markMessagesAsSeen(uid) {
             const threadKey = getConversationId(state.uid, uid);
             const msgs = state.messages[threadKey] || [];
             let updated = false;
 
-            msgs.forEach(msg => {
+            const updatedMsgs = msgs.map(msg => {
                 if (msg.sender !== state.uid && !msg.seen) {
-                    msg.seen = true;
                     updated = true;
+                    return { ...msg, seen: true };
                 }
+                return msg;
             });
 
             if (updated) {
-                db.ref('messages/' + threadKey).set(msgs)
+                db.ref('messages/' + threadKey).set(updatedMsgs)
                     .then(() => {
                         renderMessages(uid);
                     })
@@ -3190,16 +3238,8 @@
             return date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
         }
 
-        // ================================================================
-        // INIT CALL LISTENER
-        // ================================================================
-        setTimeout(() => {
-            if (state.uid) {
-                setupIncomingCallListener();
-            }
-        }, 2000);
-
         console.log('🚀 Stardust X - Complete Working Chat');
+        console.log('✅ Calls working with PeerJS');
         console.log('✅ Audio call: Video button hidden');
         console.log('✅ Video call: Both can see each other');
         console.log('✅ Call ends for both users');
