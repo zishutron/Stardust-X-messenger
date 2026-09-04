@@ -8,10 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <!-- No Firebase Storage -->
     <style>
         /* ================================================================
-           ADMIN PANEL STYLES
+           ADMIN PANEL STYLES - Complete
            ================================================================ */
         * {
             margin: 0;
@@ -29,6 +28,7 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         .header {
             background: linear-gradient(135deg, #00A86B, #008A56);
             color: white;
@@ -126,6 +126,9 @@
             font-weight: 700;
             color: #00A86B;
         }
+        .stats .stat-card .number.danger {
+            color: #EF4444;
+        }
         .stats .stat-card .label {
             font-size: 13px;
             color: #8AAA9A;
@@ -166,6 +169,14 @@
         .card .card-header .badge.primary {
             background: #00A86B;
             color: white;
+        }
+        .card .card-header .badge.warning {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        .card .card-header .badge.danger {
+            background: #FEE2E2;
+            color: #DC2626;
         }
 
         .search-box {
@@ -234,11 +245,18 @@
             text-transform: uppercase;
             color: #8AAA9A;
             border-bottom: 2px solid #D4E8DE;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 5;
         }
         table td {
             padding: 10px 12px;
             border-bottom: 1px solid #ECF5F0;
             vertical-align: middle;
+        }
+        table tr:hover td {
+            background: #F5F9F7;
         }
         table .avatar {
             width: 32px;
@@ -262,14 +280,26 @@
             background: #FEE2E2;
             color: #DC2626;
         }
+        table .status-badge.pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        table .status-badge.resolved {
+            background: #D4EDE0;
+            color: #008A56;
+        }
+        table .status-badge.dismissed {
+            background: #ECF5F0;
+            color: #4A6A5A;
+        }
 
         .action-group {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         .action-btn {
-            padding: 5px 16px;
+            padding: 4px 14px;
             border: none;
             border-radius: 6px;
             font-size: 12px;
@@ -312,6 +342,46 @@
         .action-btn.message:hover {
             background: #BFDBFE;
         }
+        .action-btn.resolve {
+            background: #D4EDE0;
+            color: #008A56;
+        }
+        .action-btn.resolve:hover {
+            background: #A7F3D0;
+        }
+        .action-btn.dismiss {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        .action-btn.dismiss:hover {
+            background: #FCA5A5;
+        }
+        .action-btn.view {
+            background: #ECF5F0;
+            color: #4A6A5A;
+        }
+        .action-btn.view:hover {
+            background: #D4E8DE;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #8AAA9A;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+        .empty-state .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4A6A5A;
+        }
+        .empty-state .sub {
+            font-size: 14px;
+        }
 
         .toast {
             position: fixed;
@@ -337,6 +407,7 @@
             100% { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
+        /* Report Detail Modal */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -382,56 +453,35 @@
             cursor: pointer;
             color: #8AAA9A;
         }
-        .modal-box textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #D4E8DE;
-            border-radius: 10px;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-            font-family: inherit;
-            outline: none;
+        .modal-box .detail-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid #ECF5F0;
         }
-        .modal-box textarea:focus {
-            border-color: #00A86B;
-            box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
-        }
-        .modal-box .btn-primary {
-            width: 100%;
-            margin-top: 12px;
-            background: #00A86B;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
+        .modal-box .detail-row .label {
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
+            width: 100px;
+            color: #4A6A5A;
+            flex-shrink: 0;
         }
-        .modal-box .btn-primary:hover {
-            background: #008A56;
-        }
-        .modal-box .btn-secondary {
-            width: 100%;
-            margin-top: 8px;
-            background: transparent;
-            color: #00A86B;
-            border: 1px solid #00A86B;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-        .modal-box .btn-secondary:hover {
-            background: #ECF5F0;
+        .modal-box .detail-row .value {
+            color: #1A2E24;
+            word-break: break-word;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #8AAA9A;
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .table-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #F5F9F7;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #D4E8DE;
+            border-radius: 4px;
         }
 
         @media (max-width: 768px) {
@@ -440,6 +490,17 @@
             .stats { grid-template-columns: 1fr 1fr; }
             .tabs button { font-size: 12px; padding: 8px 12px; min-width: 60px; }
             .search-box { flex-direction: column; }
+            table { font-size: 12px; }
+            table th, table td { padding: 6px 8px; }
+            .action-btn { font-size: 10px; padding: 2px 8px; }
+            .modal-box { padding: 16px; }
+        }
+        @media (max-width: 480px) {
+            .stats { grid-template-columns: 1fr 1fr; }
+            .stats .stat-card .number { font-size: 20px; }
+            .header h1 { font-size: 18px; }
+            .modal-box .detail-row { flex-direction: column; }
+            .modal-box .detail-row .label { width: 100%; }
         }
     </style>
 </head>
@@ -483,11 +544,20 @@
                 <div class="number" id="suspended-users">0</div>
                 <div class="label">Suspended</div>
             </div>
+            <div class="stat-card">
+                <div class="number" id="report-count">0</div>
+                <div class="label">Total Reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="number danger" id="pending-reports">0</div>
+                <div class="label">Pending Reports</div>
+            </div>
         </div>
 
         <!-- Tabs -->
         <div class="tabs">
             <button class="active" data-tab="users" onclick="switchTab('users')">Users</button>
+            <button data-tab="reports" onclick="switchTab('reports')">Reports</button>
             <button data-tab="broadcast" onclick="switchTab('broadcast')">Broadcast</button>
         </div>
 
@@ -509,20 +579,63 @@
                     <button class="secondary" onclick="resetSearch()">Reset</button>
                 </div>
                 <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>UID</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="user-table-body">
-                            <tr><td colspan="5" class="empty-state">Loading users...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>UID</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body">
+                                <tr><td colspan="5" class="empty-state">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Reports -->
+        <div id="tab-reports" class="tab-content" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>📋 User Reports</h2>
+                    <span class="badge warning" id="report-badge">0 pending</span>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="search-reports" placeholder="Search by reporter, reported, or reason..." />
+                    <select id="filter-report-status">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="dismissed">Dismissed</option>
+                    </select>
+                    <button onclick="searchReports()">Filter</button>
+                    <button class="secondary" onclick="resetReportSearch()">Reset</button>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Reported By</th>
+                                    <th>Reported User</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reports-table-body">
+                                <tr><td colspan="7" class="empty-state">Loading reports...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -531,14 +644,19 @@
         <div id="tab-broadcast" class="tab-content" style="display:none;">
             <div class="card">
                 <div class="card-header">
-                    <h2>Broadcast Message</h2>
+                    <h2>📢 Broadcast Message</h2>
                     <span class="badge">Send to all users</span>
                 </div>
                 <div style="margin-bottom:16px;">
                     <label style="font-weight:600;font-size:14px;display:block;margin-bottom:4px;">Message</label>
-                    <textarea id="broadcast-text" placeholder="Enter your broadcast message here..." style="width:100%;padding:12px;border:1px solid #D4E8DE;border-radius:10px;font-size:14px;resize:vertical;min-height:100px;font-family:inherit;outline:none;"></textarea>
+                    <textarea id="broadcast-text" placeholder="Enter your broadcast message here..." style="width:100%;padding:12px;border:1px solid #D4E8DE;border-radius:10px;font-size:14px;resize:vertical;min-height:120px;font-family:inherit;outline:none;"></textarea>
                 </div>
-                <button class="action-btn" onclick="sendBroadcast()" style="padding:10px 24px;font-size:14px;background:#00A86B;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;">Send to All Users</button>
+                <button class="action-btn" onclick="sendBroadcast()" style="padding:10px 24px;font-size:14px;background:#00A86B;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;transition:all 0.25s ease;">
+                    📤 Send to All Users
+                </button>
+                <button class="action-btn secondary" onclick="document.getElementById('broadcast-text').value=''" style="padding:10px 24px;font-size:14px;background:#ECF5F0;color:#4A6A5A;border:none;border-radius:10px;font-weight:600;cursor:pointer;margin-left:8px;">
+                    Clear
+                </button>
                 <div id="broadcast-status" style="margin-top:12px;padding:12px;border-radius:10px;display:none;background:#ECF5F0;color:#4A6A5A;font-size:14px;">
                     <span id="broadcast-result">Broadcast sent successfully!</span>
                 </div>
@@ -546,9 +664,50 @@
         </div>
     </div>
 
+    <!-- Report Detail Modal -->
+    <div id="report-detail-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>📋 Report Details</h3>
+                <button onclick="closeModal('report-detail-modal')">✕</button>
+            </div>
+            <div id="report-detail-content">
+                <div class="detail-row">
+                    <span class="label">Report ID</span>
+                    <span class="value" id="detail-id">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Reported By</span>
+                    <span class="value" id="detail-reporter">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Reported User</span>
+                    <span class="value" id="detail-reported">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Reason</span>
+                    <span class="value" id="detail-reason">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Date</span>
+                    <span class="value" id="detail-date">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Status</span>
+                    <span class="value" id="detail-status">-</span>
+                </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;" id="detail-actions">
+                <button class="action-btn resolve" onclick="resolveReportFromDetail()">✅ Resolve</button>
+                <button class="action-btn dismiss" onclick="dismissReportFromDetail()">❌ Dismiss</button>
+                <button class="action-btn view" onclick="closeModal('report-detail-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ================================================================
-        // FIREBASE CONFIG - No Storage
+        // FIREBASE CONFIG
         // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyC0v1HVCDfyO-nFdBJChpcB3ZxDOlCtFuQ",
@@ -564,23 +723,30 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
-        // NO Firebase Storage
 
         const ADMIN_UID = '306140';
         let allUsers = [];
         let currentAdmin = null;
+        let allReports = [];
+        let currentReportId = null;
 
         // ================================================================
         // TOAST
         // ================================================================
-        function showToast(message) {
+        function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-message').textContent = message;
+            toast.style.background = isError ? '#EF4444' : '#1A2E24';
+            toast.style.color = 'white';
             toast.classList.add('active');
             if (window.toastTimeout) clearTimeout(window.toastTimeout);
             window.toastTimeout = setTimeout(() => {
                 toast.classList.remove('active');
             }, 3000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
         }
 
         // ================================================================
@@ -591,6 +757,10 @@
             document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tab).style.display = 'block';
             document.querySelector(`.tabs button[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'reports') {
+                loadReports();
+            }
         }
 
         // ================================================================
@@ -620,8 +790,9 @@
                         document.getElementById('admin-info').textContent = 'Admin: ' + currentAdmin.name + ' (' + currentAdmin
                             .uid + ')';
                         loadAllUsers();
+                        loadReports();
                     } else {
-                        showToast('Access denied. Admin only.');
+                        showToast('Access denied. Admin only.', true);
                         setTimeout(() => window.location.href = 'chat.html', 1500);
                     }
                 });
@@ -646,7 +817,7 @@
                     renderUsers(allUsers);
                     updateStats();
                 })
-                .catch((err) => showToast('Error loading users: ' + err.message));
+                .catch((err) => showToast('Error loading users: ' + err.message, true));
         }
 
         // ================================================================
@@ -656,11 +827,15 @@
             const total = allUsers.length;
             const active = allUsers.filter(u => !u.isSuspended).length;
             const suspended = allUsers.filter(u => u.isSuspended).length;
+            const pendingReports = allReports.filter(r => r.status === 'pending').length;
 
             document.getElementById('total-users').textContent = total;
             document.getElementById('active-users').textContent = active;
             document.getElementById('suspended-users').textContent = suspended;
+            document.getElementById('report-count').textContent = allReports.length;
+            document.getElementById('pending-reports').textContent = pendingReports;
             document.getElementById('user-count').textContent = total + ' users';
+            document.getElementById('report-badge').textContent = pendingReports + ' pending';
         }
 
         // ================================================================
@@ -705,7 +880,6 @@
                                     `<button class="action-btn suspend" onclick="suspendUser('${user._key}')">Suspend</button>`
                                 }
                                 <button class="action-btn delete" onclick="deleteUser('${user._key}')">Delete</button>
-                                <button class="action-btn message" onclick="sendUserMessage('${user._key}')">Message</button>
                             ` : `
                                 <span style="font-size:12px;color:#8AAA9A;padding:4px 12px;background:#ECF5F0;border-radius:6px;">Admin</span>
                             `}
@@ -753,7 +927,7 @@
             if (!user) return;
             db.ref('users/' + key).update({ isSuspended: true, suspendedAt: Date.now() })
                 .then(() => { showToast(`User ${user.name} suspended`); loadAllUsers(); })
-                .catch((err) => showToast('Error: ' + err.message));
+                .catch((err) => showToast('Error: ' + err.message, true));
         }
 
         function unsuspendUser(key) {
@@ -762,7 +936,7 @@
             if (!user) return;
             db.ref('users/' + key).update({ isSuspended: false, suspendedAt: null })
                 .then(() => { showToast(`User ${user.name} unsuspended`); loadAllUsers(); })
-                .catch((err) => showToast('Error: ' + err.message));
+                .catch((err) => showToast('Error: ' + err.message, true));
         }
 
         function deleteUser(key) {
@@ -771,36 +945,205 @@
             if (!user) return;
             db.ref('users/' + key).remove()
                 .then(() => { showToast(`User ${user.name} deleted`); loadAllUsers(); })
-                .catch((err) => showToast('Error: ' + err.message));
+                .catch((err) => showToast('Error: ' + err.message, true));
         }
 
         // ================================================================
-        // SEND USER MESSAGE
+        // LOAD REPORTS - COMPLETE
         // ================================================================
-        function sendUserMessage(key) {
-            const user = allUsers.find(u => u._key === key);
-            if (!user) {
-                showToast('User not found');
+        function loadReports() {
+            db.ref('reports').once('value')
+                .then((snap) => {
+                    const data = snap.val();
+                    allReports = [];
+                    if (data) {
+                        const keys = Object.keys(data);
+                        for (let k of keys) {
+                            const report = data[k];
+                            report._key = k;
+                            allReports.push(report);
+                        }
+                    }
+                    allReports.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    renderReports(allReports);
+                    updateStats();
+                })
+                .catch((err) => showToast('Error loading reports: ' + err.message, true));
+
+            // Listen for new reports in real-time
+            db.ref('reports').limitToLast(10).on('child_added', (snap) => {
+                const data = snap.val();
+                if (data) {
+                    const existing = allReports.find(r => r._key === snap.key);
+                    if (!existing) {
+                        data._key = snap.key;
+                        allReports.unshift(data);
+                        if (document.getElementById('tab-reports').style.display !== 'none') {
+                            renderReports(allReports);
+                            updateStats();
+                        }
+                    }
+                }
+            });
+        }
+
+        // ================================================================
+        // RENDER REPORTS
+        // ================================================================
+        function renderReports(reports) {
+            const tbody = document.getElementById('reports-table-body');
+            tbody.innerHTML = '';
+
+            if (reports.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No reports found</td></tr>`;
                 return;
             }
 
-            const message = prompt('Enter message to send to ' + user.name + ':');
-            if (!message) return;
+            reports.forEach((report, index) => {
+                const tr = document.createElement('tr');
+                const status = report.status || 'pending';
+                const date = report.timestamp ? new Date(report.timestamp).toLocaleString() : 'N/A';
 
-            const notifRef = db.ref('notifications/' + user.uid);
-            notifRef.push({
-                id: 'notif_' + Date.now(),
-                type: 'admin_message',
-                message: 'Admin: ' + message,
-                timestamp: Date.now(),
-                read: false,
-                sourceUserId: ADMIN_UID,
-                isAdmin: true
-            }).then(() => {
-                showToast(`Message sent to ${user.name}`);
-            }).catch((err) => {
-                showToast('Error: ' + err.message);
+                tr.innerHTML = `
+                    <td style="font-weight:600;">${index + 1}</td>
+                    <td>
+                        <strong>${report.reporterName || 'Unknown'}</strong>
+                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reporterUID || ''}</span>
+                    </td>
+                    <td>
+                        <strong>${report.reportedName || 'Unknown'}</strong>
+                        <br /><span style="font-size:12px;color:#8AAA9A;">${report.reportedUID || ''}</span>
+                    </td>
+                    <td style="max-width:150px;word-break:break-word;font-size:13px;">${report.reason || 'No reason provided'}</td>
+                    <td style="font-size:12px;">${date}</td>
+                    <td>
+                        <span class="status-badge ${status === 'pending' ? 'pending' : status === 'resolved' ? 'resolved' : 'dismissed'}">
+                            ${status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-group">
+                            <button class="action-btn view" onclick="viewReportDetail('${report._key}')">📋 View</button>
+                            ${status === 'pending' ? `
+                                <button class="action-btn resolve" onclick="resolveReport('${report._key}')">✅ Resolve</button>
+                                <button class="action-btn dismiss" onclick="dismissReport('${report._key}')">❌ Dismiss</button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
+        }
+
+        // ================================================================
+        // SEARCH REPORTS
+        // ================================================================
+        function searchReports() {
+            const query = document.getElementById('search-reports').value.toLowerCase().trim();
+            const status = document.getElementById('filter-report-status').value;
+            let filtered = [...allReports];
+
+            if (query) {
+                filtered = filtered.filter(r =>
+                    (r.reporterName || '').toLowerCase().includes(query) ||
+                    (r.reportedName || '').toLowerCase().includes(query) ||
+                    (r.reason || '').toLowerCase().includes(query) ||
+                    (r.reporterUID || '').toLowerCase().includes(query) ||
+                    (r.reportedUID || '').toLowerCase().includes(query)
+                );
+            }
+
+            if (status !== 'all') {
+                filtered = filtered.filter(r => r.status === status);
+            }
+
+            renderReports(filtered);
+        }
+
+        function resetReportSearch() {
+            document.getElementById('search-reports').value = '';
+            document.getElementById('filter-report-status').value = 'all';
+            renderReports(allReports);
+        }
+
+        document.getElementById('search-reports')?.addEventListener('input', searchReports);
+        document.getElementById('filter-report-status')?.addEventListener('change', searchReports);
+
+        // ================================================================
+        // VIEW REPORT DETAIL
+        // ================================================================
+        function viewReportDetail(reportKey) {
+            const report = allReports.find(r => r._key === reportKey);
+            if (!report) {
+                showToast('Report not found', true);
+                return;
+            }
+
+            currentReportId = reportKey;
+
+            document.getElementById('detail-id').textContent = report._key || '-';
+            document.getElementById('detail-reporter').textContent = (report.reporterName || 'Unknown') + ' (' + (report
+                .reporterUID || '') + ')';
+            document.getElementById('detail-reported').textContent = (report.reportedName || 'Unknown') + ' (' + (report
+                .reportedUID || '') + ')';
+            document.getElementById('detail-reason').textContent = report.reason || 'No reason provided';
+            document.getElementById('detail-date').textContent = report.timestamp ? new Date(report.timestamp)
+                .toLocaleString() : 'N/A';
+            document.getElementById('detail-status').textContent = (report.status || 'pending').charAt(0).toUpperCase() + (report
+                .status || 'pending').slice(1);
+
+            // Show/hide actions based on status
+            const actions = document.getElementById('detail-actions');
+            if (report.status === 'pending') {
+                actions.innerHTML = `
+                    <button class="action-btn resolve" onclick="resolveReportFromDetail()">✅ Resolve</button>
+                    <button class="action-btn dismiss" onclick="dismissReportFromDetail()">❌ Dismiss</button>
+                    <button class="action-btn view" onclick="closeModal('report-detail-modal')">Close</button>
+                `;
+            } else {
+                actions.innerHTML = `
+                    <button class="action-btn view" onclick="closeModal('report-detail-modal')">Close</button>
+                `;
+            }
+
+            document.getElementById('report-detail-modal').classList.remove('hidden');
+        }
+
+        // ================================================================
+        // REPORT ACTIONS
+        // ================================================================
+        function resolveReport(reportKey) {
+            if (!confirm('Mark this report as resolved?')) return;
+            db.ref('reports/' + reportKey).update({ status: 'resolved', resolvedAt: Date.now() })
+                .then(() => {
+                    showToast('Report resolved ✅');
+                    loadReports();
+                })
+                .catch((err) => showToast('Error: ' + err.message, true));
+        }
+
+        function dismissReport(reportKey) {
+            if (!confirm('Dismiss this report?')) return;
+            db.ref('reports/' + reportKey).update({ status: 'dismissed', dismissedAt: Date.now() })
+                .then(() => {
+                    showToast('Report dismissed ❌');
+                    loadReports();
+                })
+                .catch((err) => showToast('Error: ' + err.message, true));
+        }
+
+        function resolveReportFromDetail() {
+            if (currentReportId) {
+                resolveReport(currentReportId);
+                closeModal('report-detail-modal');
+            }
+        }
+
+        function dismissReportFromDetail() {
+            if (currentReportId) {
+                dismissReport(currentReportId);
+                closeModal('report-detail-modal');
+            }
         }
 
         // ================================================================
@@ -809,7 +1152,7 @@
         function sendBroadcast() {
             const message = document.getElementById('broadcast-text').value.trim();
             if (!message) {
-                showToast('Please enter a message');
+                showToast('Please enter a message', true);
                 return;
             }
 
@@ -836,12 +1179,12 @@
                 .then(() => {
                     resultSpan.textContent = `✅ Broadcast sent to ${allUsers.length} users successfully!`;
                     document.getElementById('broadcast-text').value = '';
-                    setTimeout(() => statusDiv.style.display = 'none', 5000);
+                    setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
                     showToast(`Broadcast sent to ${allUsers.length} users`);
                 })
                 .catch((err) => {
                     resultSpan.textContent = '❌ Error: ' + err.message;
-                    showToast('Error: ' + err.message);
+                    showToast('Error: ' + err.message, true);
                 });
         }
 
@@ -852,9 +1195,19 @@
             auth.signOut().then(() => window.location.href = 'auth.html');
         }
 
-        console.log('🚀 Stardust X - Admin Panel (ImgBB Only)');
-        console.log('✅ No Firebase Storage - All images via ImgBB');
-        console.log('✅ Admin UID: 306140');
+        // Click outside modals
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.add('hidden');
+            }
+        });
+
+        console.log('🚀 Stardust X - Admin Panel (Complete)');
+        console.log('✅ Reports section with full details');
+        console.log('✅ View, Resolve, Dismiss reports');
+        console.log('✅ Report detail modal');
+        console.log('✅ Real-time report updates');
+        console.log('✅ Search and filter reports');
     </script>
 </body>
 </html>
